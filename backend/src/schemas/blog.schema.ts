@@ -2,11 +2,11 @@ import { InferSchemaType, Schema, model } from 'mongoose';
 
 const blogSchema = new Schema(
   {
-    id: { type: String, require: true, unique: true },
+    blog_id: { type: String, require: true, unique: true },
     title: { type: String, require: true },
     banner: { type: String },
     des: { type: String, maxLength: 200 },
-    content: { type: String },
+    content: { type: [] },
     tags: { type: [String] },
     author: { type: Schema.Types.ObjectId, require: true, ref: 'users' },
     activity: {
