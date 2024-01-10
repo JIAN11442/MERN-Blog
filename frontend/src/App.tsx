@@ -1,5 +1,7 @@
+import Navbar from './components/navbar.component';
+
 function App() {
-  return <p className="text-blue-500">MERN Blogging</p>;
+  return <Navbar />;
 }
 
 export default App;
