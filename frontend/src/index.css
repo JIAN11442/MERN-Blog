@@ -1,5 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Gelasio&family=Inter:wght@400;500&display=swap");
-@import "@flaticon/flaticon-uicons/css/all/all";
+@import url('https://fonts.googleapis.com/css2?family=Gelasio&family=Inter:wght@400;500&display=swap');
+@import '@flaticon/flaticon-uicons/css/all/all';
 
 @tailwind base;
 @tailwind components;
@@ -34,8 +34,22 @@
     @apply w-full h-full object-cover;
   }
 
+  /* sticky: 是一種混合型的定位方式，它在元素在滾動到某個位置之前表現得像相對定位（relative）；
+  但是一旦元素滾動到該位置，元素就變得像固定定位（fixed）。 */
   .navbar {
-    @apply z-10 sticky top-0 flex items-center gap-12 w-full px-[5vw] py-5 h-[80px] border-b border-grey bg-white;
+    @apply z-10 
+      sticky 
+      top-0 
+      flex 
+      items-center 
+      w-full 
+      h-[80px] 
+      px-[5vw] 
+      gap-12
+      py-5 
+      border-b 
+      border-grey-custom
+      bg-white-custom;
   }
 
   .h-cover {
@@ -55,7 +69,7 @@
   }
 
   .input-box {
-    @apply w-[100%] rounded-md p-4 bg-grey pl-12 border border-grey focus:bg-transparent placeholder:text-black-custom;
+    @apply w-[100%] rounded-md p-4 bg-grey pl-12 border border-grey-custom focus:bg-transparent placeholder:text-black-custom;
   }
 
   input:disabled,
@@ -72,11 +86,11 @@
   }
 
   .hide {
-    @apply opacity-0 pointer-events-none duration-100;
+    @apply hidden pointer-events-none duration-100 transition;
   }
 
   .show {
-    @apply opacity-100 pointer-events-auto;
+    @apply flex pointer-events-auto duration-100 transition;
   }
 
   .sidebar-link {
@@ -125,8 +139,8 @@
   max-width: 900px;
 }
 
-.cdx-settings-button[data-tune="withBorder"],
-.cdx-settings-button[data-tune="withBackground"],
-.cdx-settings-button[data-tune="stretched"] {
+.cdx-settings-button[data-tune='withBorder'],
+.cdx-settings-button[data-tune='withBackground'],
+.cdx-settings-button[data-tune='stretched'] {
   display: none;
 }
