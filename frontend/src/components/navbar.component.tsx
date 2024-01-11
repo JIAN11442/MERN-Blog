@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 
-import { EditIcon, SearchIcon } from '../icons/flaticons';
+import { FlatIcons } from '../icons/flaticons';
 
 import logo from '../imgs/logo.png';
 
@@ -65,7 +65,8 @@ const Navbar = () => {
             "
           />
           {/* SearchIcon */}
-          <SearchIcon
+          <FlatIcons
+            name="fi fi-rr-search"
             className="
               absolute
               right-[10%]
@@ -106,7 +107,7 @@ const Navbar = () => {
               transition
             "
           >
-            <SearchIcon className="text-md" />
+            <FlatIcons name="fi fi-rr-search" className="text-md" />
           </button>
 
           {/* Editor Button */}
@@ -119,7 +120,7 @@ const Navbar = () => {
               md:flex
             "
           >
-            <EditIcon />
+            <FlatIcons name="fi fi-rr-file-edit" />
             <p>Write</p>
           </Link>
 

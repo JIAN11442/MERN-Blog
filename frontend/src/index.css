@@ -5,6 +5,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --navbar-height: 80px;
+}
+
 @layer components {
   * {
     @apply m-0 p-0 box-border text-base outline-purple-custom/30 duration-100;
@@ -43,7 +47,7 @@
       flex 
       items-center 
       w-full 
-      h-[80px] 
+      h-[var(--navbar-height)] 
       px-[5vw] 
       gap-12
       py-5 
@@ -53,7 +57,7 @@
   }
 
   .h-cover {
-    @apply min-h-[calc(100vh-80px)];
+    @apply min-h-[calc(100vh-var(--navbar-height))];
   }
 
   .center {
@@ -80,7 +84,16 @@
   }
 
   .input-box {
-    @apply w-[100%] rounded-md p-4 bg-grey pl-12 border border-grey-custom focus:bg-transparent placeholder:text-black-custom;
+    @apply w-[100%]
+      rounded-md
+      p-4
+      pl-12
+      bg-grey-custom
+      border
+      border-grey-custom
+      focus:bg-transparent
+      placeholder:text-black-custom
+      focus:placeholder:text-transparent;
   }
 
   input:disabled,
@@ -89,7 +102,10 @@
   }
 
   .input-icon {
-    @apply absolute left-4 top-1/2 -translate-y-1/2;
+    @apply absolute
+      left-5
+      top-1/2
+      -translate-y-1/2;
   }
 
   .link {
