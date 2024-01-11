@@ -61,11 +61,22 @@
   }
 
   .btn-dark {
-    @apply whitespace-nowrap bg-black text-white rounded-full py-3 px-6 text-xl capitalize hover:bg-opacity-80;
+    @apply whitespace-nowrap
+      bg-black-custom
+      text-white-custom 
+      rounded-full
+      py-3 
+      px-6 
+      text-base
+      capitalize
+      hover:opacity-80
+      transition;
   }
 
   .btn-light {
-    @apply btn-dark bg-grey-custom text-black-custom;
+    @apply btn-dark
+      bg-grey-custom 
+      text-black-custom;
   }
 
   .input-box {
@@ -82,7 +93,14 @@
   }
 
   .link {
-    @apply text-grey-dark hover:text-black-custom hover:bg-grey-custom p-3 px-4 block opacity-75;
+    @apply text-grey-dark
+      hover:text-black-custom 
+      hover:bg-grey-custom 
+      p-3
+      px-4
+      block
+      opacity-75
+      transition;
   }
 
   .hide {

@@ -17,7 +17,7 @@ export default {
         grey: {
           custom: '#F3F3F3',
           dark: '#6B6B6B',
-          placeholder:'#A9A9AC'
+          placeholder: '#A9A9AC',
         },
         red: {
           custom: '#FF4E4E',
