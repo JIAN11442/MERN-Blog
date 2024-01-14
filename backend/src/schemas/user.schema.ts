@@ -31,7 +31,7 @@ const userSchema = new Schema(
     personal_info: {
       fullname: { type: String, lowercase: true, require: true, minLength: [3, 'fullname must be 3 letters long'] },
       email: { type: String, require: true, lowercase: true, unique: true },
-      password: String,
+      password: { type: String },
       username: { type: String, minLength: [3, 'Username must be 3 letters long'], unique: true },
       bio: { type: String, maxLength: [200, 'Bio should not be more than 200'], default: '' },
       profile_img: {
