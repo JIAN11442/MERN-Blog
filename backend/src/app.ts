@@ -3,10 +3,13 @@
 
 import express, { Request, Response, NextFunction } from 'express';
 import createHttpError, { isHttpError } from 'http-errors';
+import morgan from 'morgan';
 
 import userRoute from './routers/users.route';
 
 const app = express();
+
+app.use(morgan('dev'));
 
 app.use(express.json());
 

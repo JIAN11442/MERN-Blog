@@ -2,5 +2,7 @@ POST  http://localhost:5000/api/users/signup
 Content-Type: application/json
 
 {
-    "fullname": "as"
+    "fullname": "JIAN",
+    "email":"a-a@gmail.com",
+    "password":"yiKj000"
 }
