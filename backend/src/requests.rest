@@ -6,3 +6,5 @@ Content-Type: application/json
     "email":"a-a@gmail.com",
     "password":"yiKj000"
 }
+
+# GET  http://localhost:5000/api/users

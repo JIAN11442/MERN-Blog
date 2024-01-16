@@ -6,6 +6,7 @@ import createHttpError, { isHttpError } from 'http-errors';
 import morgan from 'morgan';
 
 import userRoute from './routers/users.route';
+import ErrorsHandle from './utils/errors.util';
 
 const app = express();
 
@@ -23,9 +24,18 @@ app.use((req, res, next) => {
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   let errMsg = 'An unknown error occurred';
   let statusCode = 500;
+  // isHttpError(error) 是一種特定於 HTTP 錯誤的檢查。
+  // HTTP 錯誤通常是由於 HTTP 請求失敗或服務器返回了錯誤狀態碼。
+  // 這種錯誤通常包含一個 statusCode 屬性和一個 message 屬性。
+
+  // 然而，11000 錯誤通常是 MongoDB 的一種特定錯誤，表示唯一索引約束被違反。
+  // 這種錯誤不是 HTTP 錯誤，而是來自於你的數據庫操作。
+  // 因此如果只使用 isHttpError(error) 並不能偵測到 11000 錯誤。
   if (isHttpError(error)) {
     statusCode = error.statusCode;
     errMsg = error.message;
+  } else if (error instanceof Error) {
+    errMsg = ErrorsHandle(error);
   }
 
   res.status(statusCode).json({ error: errMsg });
