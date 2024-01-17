@@ -1,10 +1,18 @@
-POST  http://localhost:5000/api/users/signup
+# POST  http://localhost:5000/api/users/signup
+# Content-Type: application/json
+
+# {
+#     "fullname": "JIAN",
+#     "email":"f24065026@gmail.com",
+#     "password":"F24065026f"
+# }
+
+# GET  http://localhost:5000/api/users
+
+POST http://localhost:5000/api/users/login
 Content-Type: application/json
 
 {
-    "fullname": "JIAN",
-    "email":"a-a@gmail.com",
-    "password":"yiKj000"
+    "email":"f24065026@email.ncku.edu.tw",
+    "password":"F24065026f"
 }
-
-# GET  http://localhost:5000/api/users

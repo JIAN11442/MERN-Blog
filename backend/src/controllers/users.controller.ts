@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable node/no-unsupported-features/es-syntax */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable camelcase */
@@ -90,8 +91,58 @@ export const signup: RequestHandler<unknown, unknown, SignupBody, unknown> = asy
     const newUserWithId = { ...newUser.toObject(), _id: newUser._id.toString() };
 
     // 控制回傳的資料架構，以防資料外洩
-    res.status(200).json(formatDatatoSend(newUserWithId));
+    res.status(201).json(formatDatatoSend(newUserWithId));
   } catch (error) {
+    next(error);
+  }
+};
+
+interface LoginBody {
+  email: string;
+  password: string;
+}
+
+export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async (req, res, next) => {
+  const { email, password } = req.body;
+  try {
+    // 如果 req.body 沒有 email 或 password，就會拋出"參數不足"的錯誤
+    if (!email || !password) {
+      throw createHttpError(400, 'Parameters missing');
+    }
+
+    // 如果 email 不符合 email 的正規表達式，就會拋出"郵件格式無效"的錯誤
+    if (!emailRegex.test(email)) {
+      throw createHttpError(403, 'Email is invalid');
+    }
+
+    // 如果 password 不符合 password 的正規表達式，就會拋出"密碼格式無效"的錯誤
+    if (!passwordRegex.test(password)) {
+      throw createHttpError(
+        403,
+        'Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase letters',
+      );
+    }
+
+    // 確認有抓到資料且格式都正確後，再去資料庫確認是否有此使用者
+    const isEmailValid = await UserSchema.findOne({ 'personal_info.email': email }).exec();
+
+    // 如果沒有此使用者，就會拋出"無效的憑證"的錯誤
+    if (!isEmailValid) {
+      throw createHttpError(401, 'Invalid credentials');
+    }
+
+    // 接著再去確認密碼是否正確(這裡是用 bcrypt 來比對密碼)
+    const isPasswordValid = await bcrypt.compare(password, isEmailValid.personal_info?.password!);
+
+    // 如果密碼不正確，就會拋出"無效的憑證"的錯誤
+    if (!isPasswordValid) {
+      throw createHttpError(401, 'Invalid credentials');
+    }
+
+    // 如果郵件與密碼都正確，就回傳使用者資料
+    res.status(200).json(formatDatatoSend(isEmailValid.toObject()));
+  } catch (error) {
+    console.log(error);
     next(error);
   }
 };
