@@ -1,15 +1,89 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
-import googleIcon from "../imgs/google.png";
+import googleIcon from '../imgs/google.png';
 
-import InputBox from "../components/inputbox.component";
-import AniamationWrapper from "../commons/page-animation.common";
+import InputBox from '../components/inputbox.component';
+import AniamationWrapper from '../commons/page-animation.common';
 
 interface UserAuthFormProps {
   type: string;
 }
 
+interface FormDataType {
+  fullname?: string;
+  email: string;
+  password: string;
+}
+
 const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
+  const userAuthThroughServer = async (
+    serverRoute: string,
+    formData: FormDataType
+  ) => {
+    axios
+      .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData)
+      .then(({ data }) => {
+        console.log(data);
+      })
+      .catch(({ response }) => {
+        toast.error(response.data.error);
+      });
+  };
+
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const serverRoute = location.pathname;
+
+    // 預防表單送出
+    e.preventDefault();
+
+    // 取得表單資料
+    const form = new FormData(
+      document.getElementById('authForm') as HTMLFormElement
+    );
+    const formData = {} as FormDataType;
+
+    for (const [key, value] of form.entries()) {
+      if (typeof value === 'string') {
+        formData[key as keyof FormDataType] = value;
+      }
+    }
+
+    const { fullname, email, password } = formData;
+    const emailRegex =
+      /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*(\.[A-Za-z]+)+$/;
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+
+    // validate fullname, email, password
+    if (fullname) {
+      if (!fullname || !email || !password) {
+        return toast.error('Parameters missing');
+      }
+    } else {
+      if (!email || !password) {
+        return toast.error('Parameters missing');
+      }
+    }
+
+    if (fullname && fullname.length < 3) {
+      return toast.error('Fullname must be at least 3 letters long');
+    }
+
+    if (!emailRegex.test(email)) {
+      return toast.error('Email is invalid');
+    }
+
+    if (!passwordRegex.test(password)) {
+      return toast.error(
+        'Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase letters'
+      );
+    }
+
+    // send request to server
+    userAuthThroughServer(serverRoute, formData);
+  };
+
   return (
     <AniamationWrapper
       keyValue={type}
@@ -25,7 +99,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
           justify-center
         "
       >
-        <form className="w-[80%] max-w-[400px]">
+        <form id="authForm" className="w-[80%] max-w-[400px]">
           {/* Title */}
           <h1
             className="
@@ -37,17 +111,17 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
               mb-24
             "
           >
-            {type === "sign-in" ? "Welcome back" : "Join us today"}
+            {type === 'sign-in' ? 'Welcome back' : 'Join us today'}
           </h1>
 
           {/* Username InputBox */}
           <InputBox
-            id="username"
+            id="fullname"
             type="text"
-            name="username"
-            placeholder="Username"
+            name="fullname"
+            placeholder="Fullname"
             icon="fi fi-rr-user"
-            className={`${type !== "sign-in" ? "flex" : "hidden"}`}
+            className={`${type !== 'sign-in' ? 'flex' : 'hidden'}`}
           />
 
           {/* Email InputBox */}
@@ -70,6 +144,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
 
           {/* Submit Button */}
           <button
+            onClick={(e) => handleSubmit(e)}
             type="submit"
             className="
               btn-dark
@@ -77,7 +152,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
               mt-14
             "
           >
-            {type.replace("-", " ")}
+            {type.replace('-', ' ')}
           </button>
 
           {/* Separate Line */}
@@ -118,7 +193,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
 
           {/* Navigation */}
           <div>
-            {type === "sign-in" ? (
+            {type === 'sign-in' ? (
               <p
                 className="
                   mt-6

@@ -4,6 +4,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import createHttpError, { isHttpError } from 'http-errors';
 import morgan from 'morgan';
+import cors from 'cors';
 
 import userRoute from './routers/users.route';
 import ErrorsHandle from './utils/errors.util';
@@ -13,6 +14,8 @@ const app = express();
 app.use(morgan('dev'));
 
 app.use(express.json());
+
+app.use(cors());
 
 app.use('/api/users', userRoute);
 

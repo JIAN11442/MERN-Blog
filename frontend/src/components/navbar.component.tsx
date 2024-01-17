@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { useState } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 
-import { FlatIcons } from "../icons/flaticons";
+import { FlatIcons } from '../icons/flaticons';
 
-import logo from "../imgs/logo.png";
+import logo from '../imgs/logo.png';
 
 const Navbar = () => {
   const [searchBarVisibility, setSearchBarVisibility] =
@@ -46,7 +46,7 @@ const Navbar = () => {
             md:p-0
             md:w-auto
             md:show
-            ${searchBarVisibility ? "show" : "hide"}
+            ${searchBarVisibility ? 'show' : 'hide'}
           `}
         >
           {/* Input */}
@@ -114,7 +114,7 @@ const Navbar = () => {
 
           {/* Editor Button */}
           <Link
-            to={"/editor"}
+            to={'/editor'}
             className={`
               link
               hidden
@@ -129,12 +129,14 @@ const Navbar = () => {
 
           {/* Login Button */}
           <Link
-            to={"/signin"}
+            to={'/signin'}
             className={`
               ${
-                currPath === "/signin"
-                  ? "hidden md:block md:btn-dark md:py-2"
-                  : "btn-dark py-2 md:btn-light md:py-2"
+                currPath === '/signin'
+                  ? 'hidden md:block md:btn-dark md:py-2'
+                  : currPath === '/signup'
+                  ? 'btn-dark py-2 md:btn-light md:py-2'
+                  : 'btn-dark py-2'
               }
             `}
           >
@@ -143,12 +145,14 @@ const Navbar = () => {
 
           {/* Signup Button */}
           <Link
-            to={"/signup"}
+            to={'/signup'}
             className={`
             ${
-              currPath === "/signup"
-                ? "hidden md:block md:btn-dark md:py-2 "
-                : "btn-dark py-2 md:btn-light md:py-2"
+              currPath === '/signup'
+                ? 'hidden md:block md:btn-dark md:py-2 '
+                : currPath === '/signin'
+                ? 'btn-dark py-2 md:btn-light md:py-2'
+                : 'hidden'
             }
             `}
           >
