@@ -102,7 +102,7 @@ interface LoginBody {
   password: string;
 }
 
-export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async (req, res, next) => {
+export const signin: RequestHandler<unknown, unknown, LoginBody, unknown> = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     // 如果 req.body 沒有 email 或 password，就會拋出"參數不足"的錯誤

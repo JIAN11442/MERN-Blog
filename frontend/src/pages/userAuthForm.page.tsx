@@ -22,14 +22,21 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
     serverRoute: string,
     formData: FormDataType
   ) => {
-    axios
-      .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData)
-      .then(({ data }) => {
-        console.log(data);
-      })
-      .catch(({ response }) => {
-        toast.error(response.data.error);
-      });
+    try {
+      const res = await axios.post(
+        import.meta.env.VITE_SERVER_DOMAIN + serverRoute,
+        formData
+      );
+
+      if (res) {
+        console.log(res.data);
+        toast.success('Success');
+      }
+    } catch (error) {
+      const errResponse = error as Error;
+      console.log(errResponse);
+      toast.error(`${errResponse.name}: ${errResponse.message}`);
+    }
   };
 
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {

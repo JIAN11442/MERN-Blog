@@ -5,7 +5,7 @@ import app from './app';
 import groupConsole from './utils/console.util';
 import env from './utils/validateEnv.util';
 
-const port = env.PORT;
+const port = env.BACKEND_PORT;
 const mongodbConnection = env.MONGODB_CONNECTION;
 
 // Mongoose connection
