@@ -1,11 +1,11 @@
 import express from 'express';
 
-import * as userController from '../controllers/users.controller';
+import { protectedRoute, authenticated, signin, signup } from '../controllers/users.controller';
 
 const userRoute = express.Router();
 
-userRoute.get('/', userController.getUsers);
-userRoute.post('/signup', userController.signup);
-userRoute.post('/signin', userController.signin);
+userRoute.get('/', protectedRoute, authenticated);
+userRoute.post('/signup', signup);
+userRoute.post('/signin', signin);
 
 export default userRoute;

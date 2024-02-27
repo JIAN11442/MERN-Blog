@@ -5,9 +5,12 @@ import express, { Request, Response, NextFunction } from 'express';
 import createHttpError, { isHttpError } from 'http-errors';
 import morgan from 'morgan';
 import cors from 'cors';
+import session from 'express-session';
 
+import MongoStore from 'connect-mongo';
 import userRoute from './routers/users.route';
 import ErrorsHandle from './utils/errors.util';
+import env from './utils/validateEnv.util';
 
 const app = express();
 
@@ -15,9 +18,22 @@ app.use(morgan('dev'));
 
 app.use(express.json());
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 
-app.use('/api/users', userRoute);
+// app.use(
+//   session({
+//     secret: env.SECRET_SESSION_KEY,
+//     name: 'jian.uid',
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       maxAge: 1000 * 60 * 30, // 30 minutes
+//     },
+//     store: new MongoStore({ mongoUrl: env.MONGODB_CONNECTION_STRING }),
+//   }),
+// );
+
+app.use('/api/auth', userRoute);
 
 // Error handling
 app.use((req, res, next) => {
@@ -41,7 +57,7 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
     errMsg = ErrorsHandle(error);
   }
 
-  res.status(statusCode).json({ error: errMsg });
+  res.status(statusCode).json({ errorMessage: errMsg });
 });
 
 export default app;

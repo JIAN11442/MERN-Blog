@@ -11,6 +11,7 @@ interface InputBoxProps {
   placeholder: string;
   icon: string;
   className?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const InputBox: React.FC<InputBoxProps> = ({
@@ -21,6 +22,7 @@ const InputBox: React.FC<InputBoxProps> = ({
   placeholder,
   icon,
   className,
+  onChange,
 }) => {
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
   const [passwordValue, setPasswordValue] = useState<string>('');
@@ -44,7 +46,10 @@ const InputBox: React.FC<InputBoxProps> = ({
           name={name}
           defaultValue={value}
           placeholder={placeholder}
-          onChange={(e) => setPasswordValue(e.target.value)}
+          onChange={(e) => {
+            setPasswordValue(e.target.value);
+            onChange && onChange(e);
+          }}
           className="input-box"
         />
       </div>

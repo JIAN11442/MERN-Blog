@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -6,92 +7,70 @@ import googleIcon from '../imgs/google.png';
 
 import InputBox from '../components/inputbox.component';
 import AniamationWrapper from '../commons/page-animation.common';
+import useAuthStore from '../states/auth.state';
 
 interface UserAuthFormProps {
   type: string;
 }
 
-interface FormDataType {
-  fullname?: string;
-  email: string;
-  password: string;
-}
-
 const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
-  const userAuthThroughServer = async (
-    serverRoute: string,
-    formData: FormDataType
-  ) => {
-    try {
-      const res = await axios.post(
-        import.meta.env.VITE_SERVER_DOMAIN + serverRoute,
-        formData
-      );
-
-      if (res) {
-        console.log(res.data);
-        toast.success('Success');
-      }
-    } catch (error) {
-      const errResponse = error as Error;
-      console.log(errResponse);
-      toast.error(`${errResponse.name}: ${errResponse.message}`);
-    }
+  const [formData, setFormData] = useState({
+    fullname: '',
+    email: '',
+    password: '',
+  });
+  const { authUser, setAuthUser } = useAuthStore();
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  axios.defaults.withCredentials = true;
+  axios.defaults.headers.common[
+    'Authorization'
+  ] = `Bearer ${sessionStorage.getItem('access_token')}`;
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // 取得表單送出的路由
     const serverRoute = location.pathname;
+    const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
 
     // 預防表單送出
     e.preventDefault();
 
-    // 取得表單資料
-    const form = new FormData(
-      document.getElementById('authForm') as HTMLFormElement
-    );
-    const formData = {} as FormDataType;
-
-    for (const [key, value] of form.entries()) {
-      if (typeof value === 'string') {
-        formData[key as keyof FormDataType] = value;
-      }
-    }
-
-    const { fullname, email, password } = formData;
-    const emailRegex =
-      /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*(\.[A-Za-z]+)+$/;
-    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
-
-    // validate fullname, email, password
-    if (fullname) {
-      if (!fullname || !email || !password) {
-        return toast.error('Parameters missing');
-      }
-    } else {
-      if (!email || !password) {
-        return toast.error('Parameters missing');
-      }
-    }
-
-    if (fullname && fullname.length < 3) {
-      return toast.error('Fullname must be at least 3 letters long');
-    }
-
-    if (!emailRegex.test(email)) {
-      return toast.error('Email is invalid');
-    }
-
-    if (!passwordRegex.test(password)) {
-      return toast.error(
-        'Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase letters'
-      );
-    }
-
-    // send request to server
-    userAuthThroughServer(serverRoute, formData);
+    // 透過 axios 送出表單資料
+    axios
+      .post(requestUrl, formData)
+      .then(({ data }) => {
+        if (data.message && data.user) {
+          console.log(data);
+          sessionStorage.setItem('access_token', data.user.access_token);
+          setAuthUser(data.user);
+          toast.success(data.message);
+        }
+      })
+      .catch((error) => {
+        if (error.response) {
+          // 伺服器端返回了錯誤狀態碼
+          toast.error(error.response.data.errorMessage);
+        } else if (error.request) {
+          // 請求發出但沒有收到回應
+          console.log(error.request);
+          toast.error('Request made but no response received');
+        } else {
+          // 在設定請求時出現錯誤
+          console.log(error.message);
+          toast.error('Request setup error: ', error.message);
+        }
+      });
   };
 
-  return (
+  useEffect(() => {
+    console.log(authUser);
+  }, [authUser]);
+
+  return authUser ? (
+    <Navigate to="/" />
+  ) : (
     <AniamationWrapper
       keyValue={type}
       initial={{ opacity: 0 }}
@@ -106,7 +85,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
           justify-center
         "
       >
-        <form id="authForm" className="w-[80%] max-w-[400px]">
+        <form onSubmit={handleSubmit} className="w-[80%] max-w-[400px]">
           {/* Title */}
           <h1
             className="
@@ -123,35 +102,37 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
 
           {/* Username InputBox */}
           <InputBox
-            id="fullname"
             type="text"
+            id="fullname"
             name="fullname"
             placeholder="Fullname"
+            onChange={(e) => handleInput(e)}
             icon="fi fi-rr-user"
             className={`${type !== 'sign-in' ? 'flex' : 'hidden'}`}
           />
 
           {/* Email InputBox */}
           <InputBox
-            id="email"
             type="email"
+            id="email"
             name="email"
             placeholder="Email"
+            onChange={(e) => handleInput(e)}
             icon="fi fi-rr-at"
           />
 
           {/* Password InputBox */}
           <InputBox
-            id="password"
             type="password"
+            id="password"
             name="password"
             placeholder="Password"
+            onChange={(e) => handleInput(e)}
             icon="fi fi-rr-key"
           />
 
           {/* Submit Button */}
           <button
-            onClick={(e) => handleSubmit(e)}
             type="submit"
             className="
               btn-dark
