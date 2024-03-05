@@ -4,12 +4,15 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { FlatIcons } from '../icons/flaticons';
 
 import logo from '../imgs/logo.png';
+import useAuthStore from '../states/auth.state';
+import UserNavigationPanel from './user-navigation.component';
 
 const Navbar = () => {
   const [searchBarVisibility, setSearchBarVisibility] =
     useState<boolean>(false);
 
   const currPath = useLocation().pathname;
+  const { authUser } = useAuthStore();
 
   return (
     <>
@@ -25,7 +28,6 @@ const Navbar = () => {
             "
           />
         </Link>
-
         {/* Search Bar */}
         <div
           className={`
@@ -89,7 +91,7 @@ const Navbar = () => {
             items-center
             gap-3
             ml-auto
-            md:gap-5
+            md:gap-4
             transition
           "
         >
@@ -97,11 +99,10 @@ const Navbar = () => {
           <button
             onClick={() => setSearchBarVisibility(!searchBarVisibility)}
             className="
-              flex
               md:hidden
               bg-grey-custom
-              w-11
-              h-11
+              w-12
+              h-12
               rounded-full
               items-center
               justify-center
@@ -109,7 +110,10 @@ const Navbar = () => {
               transition
             "
           >
-            <FlatIcons name="fi fi-rr-search" className="text-md" />
+            <FlatIcons
+              name="fi fi-rr-search"
+              className="scale-[1.25] pt-0.5 block"
+            />
           </button>
 
           {/* Editor Button */}
@@ -127,37 +131,77 @@ const Navbar = () => {
             <p>Write</p>
           </Link>
 
-          {/* Login Button */}
-          <Link
-            to={'/signin'}
-            className={`
-              ${
-                currPath === '/signin'
-                  ? 'hidden md:block md:btn-dark md:py-2'
-                  : currPath === '/signup'
-                  ? 'btn-dark py-2 md:btn-light md:py-2'
-                  : 'btn-dark py-2'
-              }
-            `}
-          >
-            Sign In
-          </Link>
+          {authUser ? (
+            <>
+              <Link to="/dashboard/notification">
+                <button
+                  className="
+                    w-12
+                    h-12
+                    relative
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-grey-custom
+                    hover:bg-black-custom/10
+                  "
+                >
+                  <FlatIcons
+                    name="fi fi-rr-bell"
+                    className="scale-[1.25] pt-0.5 block"
+                  />
+                </button>
+              </Link>
+              <div className="relative">
+                <button className="w-12 h-12 mt-1">
+                  <img
+                    src={authUser.profile_img}
+                    className="
+                      w-full
+                      h-full
+                      object-cover
+                      rounded-full
+                    "
+                  />
+                </button>
+                <UserNavigationPanel />
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Login Button */}
+              <Link
+                to={'/signin'}
+                className={`
+                    ${
+                      currPath === '/signin'
+                        ? 'hidden md:block md:btn-dark'
+                        : currPath === '/signup'
+                        ? 'btn-dark md:btn-light'
+                        : 'btn-dark'
+                    }
+                `}
+              >
+                Sign In
+              </Link>
 
-          {/* Signup Button */}
-          <Link
-            to={'/signup'}
-            className={`
-            ${
-              currPath === '/signup'
-                ? 'hidden md:block md:btn-dark md:py-2 '
-                : currPath === '/signin'
-                ? 'btn-dark py-2 md:btn-light md:py-2'
-                : 'hidden'
-            }
-            `}
-          >
-            Sign up
-          </Link>
+              {/* Signup Button */}
+              <Link
+                to={'/signup'}
+                className={`
+                  ${
+                    currPath === '/signup'
+                      ? 'hidden md:block md:btn-dark'
+                      : currPath === '/signin'
+                      ? 'btn-dark md:btn-light'
+                      : 'hidden'
+                  }
+                `}
+              >
+                Sign up
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 

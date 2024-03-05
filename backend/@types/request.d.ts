@@ -1,8 +1,8 @@
-import type { UserSchemaType } from '../src/schemas/user.schema';
+import type { GenarateDataType } from '../src/types';
 
 declare module 'express-serve-static-core' {
   interface Request {
-    user?: UserSchemaType;
+    user?: GenarateDataType;
   }
 }
 

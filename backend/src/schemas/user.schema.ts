@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
-import { InferSchemaType, Schema, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
+import type { UserSchemaType } from '../types';
 
 const profile_imgs_name_list = [
   'Garfield',
@@ -26,7 +27,7 @@ const profile_imgs_name_list = [
 
 const profile_imgs_collections_list = ['notionists-neutral', 'adventurer-neutral', 'fun-emoji'];
 
-const userSchema = new Schema(
+export const userSchema = new Schema(
   {
     personal_info: {
       fullname: { type: String, lowercase: true, require: true, minLength: [3, 'fullname must be 3 letters long'] },
@@ -60,6 +61,6 @@ const userSchema = new Schema(
   { timestamps: true },
 );
 
-export type UserSchemaType = InferSchemaType<typeof userSchema>;
+// export type UserSchemaType = InferSchemaType<typeof userSchema>;
 
 export default model<UserSchemaType>('User', userSchema);

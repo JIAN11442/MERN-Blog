@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 import googleIcon from '../imgs/google.png';
 
-import InputBox from '../components/inputbox.component';
+import InputBox from '../components/input-box.component';
 import AniamationWrapper from '../commons/page-animation.common';
 import useAuthStore from '../states/auth.state';
 
@@ -59,10 +59,6 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
         }
       });
   };
-
-  useEffect(() => {
-    console.log(authUser);
-  }, []);
 
   return authUser ? (
     <Navigate to="/" />
@@ -180,8 +176,8 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
             {type === 'sign-in' ? (
               <p
                 className="
-                  mt-6
-                  text-xl
+                  mt-10
+                  text-lg
                   text-grey-dark
                   text-center
                 "
@@ -192,7 +188,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
                   className="
                     underline
                     text-grey-dark
-                    text-xl
+                    text-lg
                     ml-2
                   "
                 >
@@ -202,8 +198,8 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
             ) : (
               <p
                 className="
-                  mt-6
-                  text-xl
+                  mt-10
+                  text-lg
                   text-grey-dark
                   text-center
                 "
@@ -214,7 +210,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
                   className="
                     underline
                     text-grey-dark
-                    text-xl
+                    text-lg
                     ml-2
                   "
                 >

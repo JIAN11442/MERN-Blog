@@ -4,9 +4,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
-import type mongoose from 'mongoose';
 
-import UserSchema, { UserSchemaType } from '../schemas/user.schema';
+import UserSchema from '../schemas/user.schema';
+import type { UserRequestType } from '../types';
 
 // genarate username when user is exist in database
 export const genarateUsername = async (email: string) => {
@@ -17,10 +17,6 @@ export const genarateUsername = async (email: string) => {
 
   return newUsername;
 };
-
-export interface UserRequestType extends UserSchemaType {
-  _id: mongoose.Types.ObjectId;
-}
 
 // format user data to send to client
 export const formatDatatoSend = (user: UserRequestType & { userId: string }) => {

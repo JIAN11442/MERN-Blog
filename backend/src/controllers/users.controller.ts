@@ -13,6 +13,7 @@ import UserSchema from '../schemas/user.schema';
 import { ValidateForSignIn, ValidateForSignUp } from '../utils/validateController.util';
 import { genarateUsername, formatDatatoSend } from '../utils/generate.util';
 import { SignUpBody, SignInBody } from '../utils/types.util';
+import type { GenarateDataType } from '../types';
 
 export const protectedRoute: RequestHandler = async (req, res, next) => {
   let access_token;
@@ -34,7 +35,7 @@ export const protectedRoute: RequestHandler = async (req, res, next) => {
       }
 
       // 將使用者資料存入 req.user
-      req.user = user;
+      req.user = formatDatatoSend(user.toObject()) as GenarateDataType;
 
       next();
     } catch (error) {
