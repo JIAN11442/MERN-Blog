@@ -23,10 +23,10 @@ export const protectedRoute: RequestHandler = async (req, res, next) => {
       access_token = req.headers.authorization.split(' ')[1];
 
       // 驗證 token
-      const decoded = jwt.verify(access_token, process.env.SECRET_ACCESS_KEY as string) as jwt.JwtPayload;
+      const verifyToken = jwt.verify(access_token, process.env.SECRET_ACCESS_KEY as string) as jwt.JwtPayload;
 
       // 根據解碼後的 decoded.id 從數據庫找尋使用者資料
-      const user = await UserSchema.findById(decoded.userId).exec();
+      const user = await UserSchema.findById(verifyToken.userId).exec();
 
       // 如果使用者資料不存在，就會拋出"使用者未找到"的錯誤
       if (!user) {
@@ -38,6 +38,7 @@ export const protectedRoute: RequestHandler = async (req, res, next) => {
 
       next();
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -47,7 +48,24 @@ export const protectedRoute: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const authenticated: RequestHandler = async (req, res, next) => {
+export const sessionAuthentication: RequestHandler = async (req, res, next) => {
+  if (req.session.userId) {
+    try {
+      const user = await UserSchema.findById(req.session.userId).exec();
+
+      if (!user) {
+        throw createHttpError(404, 'User not found with this token');
+      }
+
+      res.json({ message: 'You are authenticated!', user: formatDatatoSend(user.toObject()) });
+    } catch (error) {
+      next(error);
+    }
+  } else {
+    res.json({ message: 'You are not authenticated!' });
+  }
+};
+export const jwtAuthentication: RequestHandler = async (req, res, next) => {
   try {
     res.json({ message: 'You are authenticated!', user: req.user });
   } catch (error) {
@@ -111,6 +129,8 @@ export const signin: RequestHandler<unknown, unknown, SignInBody, unknown> = asy
     if (!isPasswordValid) {
       throw createHttpError(401, 'Invalid  email or password');
     }
+
+    req.session.userId = isEmailValid.id;
 
     res.status(200).json({ message: 'Login successfully!', user: formatDatatoSend(isEmailValid.toObject()) });
   } catch (error) {

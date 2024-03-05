@@ -24,18 +24,14 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  axios.defaults.withCredentials = true;
-  axios.defaults.headers.common[
-    'Authorization'
-  ] = `Bearer ${sessionStorage.getItem('access_token')}`;
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     // 取得表單送出的路由
     const serverRoute = location.pathname;
-    const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
 
     // 預防表單送出
-    e.preventDefault();
+    const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
 
     // 透過 axios 送出表單資料
     axios
@@ -66,7 +62,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
 
   useEffect(() => {
     console.log(authUser);
-  }, [authUser]);
+  }, []);
 
   return authUser ? (
     <Navigate to="/" />

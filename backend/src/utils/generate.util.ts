@@ -24,11 +24,9 @@ export interface UserRequestType extends UserSchemaType {
 
 // format user data to send to client
 export const formatDatatoSend = (user: UserRequestType & { userId: string }) => {
-  console.log(user);
-
   // access_token 用來驗證使用者身份
   const access_token = jwt.sign({ userId: user._id }, process.env.SECRET_ACCESS_KEY as string, {
-    expiresIn: 1000 * 60 * 60,
+    expiresIn: 1000 * 60 * 10,
   });
 
   return {
