@@ -103,6 +103,7 @@ export const signup: RequestHandler<unknown, unknown, SignUpBody, unknown> = asy
     // // 控制回傳的資料架構，以防資料外洩
     res.status(201).json({ message: 'Registered successfully!', user: formatDatatoSend(newUserWithId) });
   } catch (error) {
+    console.log(error);
     next(error);
   }
 };

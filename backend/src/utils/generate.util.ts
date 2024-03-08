@@ -2,8 +2,8 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable import/prefer-default-export */
 
-import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
+import { nanoid } from 'nanoid/non-secure';
 
 import UserSchema from '../schemas/user.schema';
 import type { UserRequestType } from '../types';
@@ -13,7 +13,7 @@ export const genarateUsername = async (email: string) => {
   const username = email.split('@')[0];
   const isUsernameExist = await UserSchema.exists({ 'personal_info.username': username }).then((result) => result);
 
-  const newUsername = isUsernameExist ? `${username}-${uuidv4()}` : username;
+  const newUsername = isUsernameExist ? `${username}-${nanoid(5)}` : username;
 
   return newUsername;
 };
