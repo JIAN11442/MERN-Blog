@@ -1,11 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
 
 interface AniamationWrapperProps {
-  children?: React.ReactNode;
+  children: React.ReactNode;
   keyValue?: string;
-  initial?: { opacity: number };
-  animate?: { opacity: number };
-  transition?: { duration: number };
+  initial: { opacity: number };
+  animate: { opacity: number };
+  transition: { duration: number };
   className?: string;
 }
 

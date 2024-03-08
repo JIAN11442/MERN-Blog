@@ -20,15 +20,20 @@ export const genarateUsername = async (email: string) => {
 
 // format user data to send to client
 export const formatDatatoSend = (user: UserRequestType & { userId: string }) => {
-  // access_token 用來驗證使用者身份
-  const access_token = jwt.sign({ userId: user._id }, process.env.SECRET_ACCESS_KEY as string, {
-    expiresIn: 1000 * 60 * 10,
-  });
+  try {
+    // access_token 用來驗證使用者身份
+    const access_token = jwt.sign({ userId: user._id }, process.env.SECRET_ACCESS_KEY as string, {
+      expiresIn: 1000 * 60 * 10, // 10 分鐘
+    });
 
-  return {
-    access_token,
-    profile_img: user.personal_info?.profile_img,
-    username: user.personal_info?.username,
-    fullname: user.personal_info?.fullname,
-  };
+    return {
+      access_token,
+      profile_img: user.personal_info?.profile_img,
+      username: user.personal_info?.username,
+      fullname: user.personal_info?.fullname,
+    };
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
 };

@@ -17,6 +17,8 @@ const UserNavigationPanel = () => {
 
   return (
     <AniamationWrapper
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
       className="
         absolute
@@ -30,6 +32,7 @@ const UserNavigationPanel = () => {
           border
           bg-white-custom
           border-grey-custom
+          rounded-md
           duration-200
         "
       >
@@ -42,7 +45,6 @@ const UserNavigationPanel = () => {
             link
             md:hidden
             pl-8
-            py-4
           "
         >
           <FlatIcons name="fi fi-rr-file-edit" />
@@ -55,7 +57,6 @@ const UserNavigationPanel = () => {
           className="
             link
             pl-8
-            py-4
           "
         >
           Profile
@@ -67,7 +68,6 @@ const UserNavigationPanel = () => {
           className="
             link
             pl-8
-            py-4
           "
         >
           Dashboard
@@ -79,7 +79,6 @@ const UserNavigationPanel = () => {
           className="
             link
             pl-8
-            py-4
           "
         >
           Settings
@@ -94,11 +93,13 @@ const UserNavigationPanel = () => {
         "
         ></span>
 
+        {/* Sign out */}
         <button
           onClick={handleSignOut}
           className="
             w-full
-            p-4
+            p-3
+            px-4
             pl-8
             text-left
             hover:bg-grey-custom
@@ -106,14 +107,21 @@ const UserNavigationPanel = () => {
         >
           <h1
             className="
+              text-lg
               font-bold
-              text-xl
-              mb-1
             "
           >
             Sign Out
           </h1>
-          <p className="text-grey-dark">@{authUser?.username}</p>
+          <p
+            className="
+              text-sm
+            text-grey-dark
+              opacity-75
+          "
+          >
+            @{authUser?.username}
+          </p>
         </button>
       </div>
     </AniamationWrapper>

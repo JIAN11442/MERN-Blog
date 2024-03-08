@@ -96,7 +96,7 @@ export const signup: RequestHandler<unknown, unknown, SignUpBody, unknown> = asy
       },
     });
 
-    req.session.userId = newUser.id;
+    // req.session.userId = newUser.id;
 
     const newUserWithId = { ...newUser.toObject(), userId: newUser.id.toString() };
 
@@ -131,7 +131,7 @@ export const signin: RequestHandler<unknown, unknown, SignInBody, unknown> = asy
       throw createHttpError(401, 'Invalid  email or password');
     }
 
-    req.session.userId = isEmailValid.id;
+    // req.session.userId = isEmailValid.id;
 
     res.status(200).json({ message: 'Login successfully!', user: formatDatatoSend(isEmailValid.toObject()) });
   } catch (error) {
