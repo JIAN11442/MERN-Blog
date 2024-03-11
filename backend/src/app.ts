@@ -6,11 +6,16 @@ import createHttpError, { isHttpError } from 'http-errors';
 import morgan from 'morgan';
 import cors from 'cors';
 import session from 'express-session';
-
 import MongoStore from 'connect-mongo';
+import admin from 'firebase-admin';
+
 import userRoute from './routers/users.route';
 import ErrorsHandle from './utils/errors.util';
 import env from './utils/validateEnv.util';
+import serviceAccount from './firebase/mern-blogging-ts-firebase-adminsdk-l5srr-14255d77e6.json';
+
+// Initialize Firebase Admin SDK
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount as admin.ServiceAccount) });
 
 const app = express();
 
@@ -20,18 +25,19 @@ app.use(express.json());
 
 app.use(cors({ origin: true, credentials: true }));
 
-// app.use(
-//   session({
-//     secret: env.SECRET_SESSION_KEY,
-//     name: 'jian.uid',
-//     resave: false,
-//     saveUninitialized: false,
-//     cookie: {
-//       maxAge: 1000 * 60 * 10, // 1 minute
-//     },
-//     store: new MongoStore({ mongoUrl: env.MONGODB_CONNECTION_STRING }),
-//   }),
-// );
+// Session Configuration
+app.use(
+  session({
+    secret: env.SECRET_SESSION_KEY,
+    name: 'jian.uid',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 60 * 10, // 1 minute
+    },
+    store: new MongoStore({ mongoUrl: env.MONGODB_CONNECTION_STRING }),
+  }),
+);
 
 app.use('/api/auth', userRoute);
 

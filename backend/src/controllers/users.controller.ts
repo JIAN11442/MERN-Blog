@@ -8,6 +8,7 @@ import { RequestHandler } from 'express';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import * as admin from 'firebase-admin';
 
 import UserSchema from '../schemas/user.schema';
 import { ValidateForSignIn, ValidateForSignUp } from '../utils/validateController.util';
@@ -100,7 +101,7 @@ export const signup: RequestHandler<unknown, unknown, SignUpBody, unknown> = asy
 
     const newUserWithId = { ...newUser.toObject(), userId: newUser.id.toString() };
 
-    // // 控制回傳的資料架構，以防資料外洩
+    // 控制回傳的資料架構，以防資料外洩
     res.status(201).json({ message: 'Registered successfully!', user: formatDatatoSend(newUserWithId) });
   } catch (error) {
     console.log(error);
@@ -135,6 +136,53 @@ export const signin: RequestHandler<unknown, unknown, SignInBody, unknown> = asy
     // req.session.userId = isEmailValid.id;
 
     res.status(200).json({ message: 'Login successfully!', user: formatDatatoSend(isEmailValid.toObject()) });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const googleAuth: RequestHandler = async (req, res, next) => {
+  const { access_token } = req.body;
+
+  try {
+    // 驗證通過 Google 登入後給的 access_token 來驗證解碼使用者資料
+    const decodedUser = await admin.auth().verifyIdToken(access_token);
+
+    // 從中取得使用者的 email, name, picture
+    const { email, name } = decodedUser;
+
+    // picture 是使用者的頭像，這裡將頭像的尺寸從 96x96 改成 384x384
+    const picture = decodedUser.picture?.replace('s96-c', 's384-c');
+
+    // 從數據庫中尋找是否有此 email 的使用者
+    const user = await UserSchema.findOne({ 'personal_info.email': email }).select(
+      'personal_info.fullname personal_info.username personal_info.profile_img google_auth',
+    );
+
+    // 如果有此使用者
+    if (user) {
+      // 但不是通過 google 註冊的，就會拋出"請以密碼登入"的錯誤
+      if (!user.google_auth) {
+        throw createHttpError(
+          403,
+          'This email was signed up without google. Please log in with password to access the account.',
+        );
+      }
+    } else {
+      // 如果沒有此使用者，就會幫他註冊一個新的帳號
+
+      const username = await genarateUsername(email!);
+
+      const newUser = await UserSchema.create({
+        personal_info: { fullname: name, email, profile_img: picture, username },
+        google_auth: true,
+      });
+
+      const newUserWithId = { ...newUser.toObject(), userId: newUser.id.toString() };
+
+      // 控制回傳的資料架構，以防資料外洩
+      res.status(201).json({ message: 'Registered successfully!', user: formatDatatoSend(newUserWithId) });
+    }
   } catch (error) {
     next(error);
   }

@@ -6,8 +6,11 @@ import toast from 'react-hot-toast';
 import googleIcon from '../imgs/google.png';
 
 import InputBox from '../components/input-box.component';
-import AniamationWrapper from '../commons/page-animation.common';
+
 import useAuthStore from '../states/auth.state';
+
+import AniamationWrapper from '../commons/page-animation.common';
+import { authWithGoogle } from '../commons/firebase';
 
 interface UserAuthFormProps {
   type: string;
@@ -24,6 +27,21 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle Google Auth
+  const handleGoogleAuth = (e: React.FormEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    authWithGoogle()
+      .then((user) => {
+        console.log(user);
+      })
+      .catch((error) => {
+        toast.error('trouble login through google');
+        return console.log(error);
+      });
+  };
+
+  // Handle login or signup with input values
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -157,6 +175,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
 
           {/* Other Options */}
           <button
+            onClick={handleGoogleAuth}
             className="
               btn-dark
               flex
