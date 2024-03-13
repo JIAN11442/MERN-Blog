@@ -7,7 +7,7 @@
 import { RequestHandler } from 'express';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { type JsonWebTokenError } from 'jsonwebtoken';
 import * as admin from 'firebase-admin';
 
 import UserSchema from '../schemas/user.schema';
@@ -15,6 +15,7 @@ import { ValidateForSignIn, ValidateForSignUp } from '../utils/validateControlle
 import { genarateUsername, formatDatatoSend } from '../utils/generate.util';
 import { SignUpBody, SignInBody } from '../utils/types.util';
 import type { GenarateDataType } from '../types';
+import ErrorsHandle from '../utils/errors.util';
 
 export const protectedRoute: RequestHandler = async (req, res, next) => {
   let access_token;
@@ -40,13 +41,13 @@ export const protectedRoute: RequestHandler = async (req, res, next) => {
 
       next();
     } catch (error) {
-      console.log(error);
+      console.log(ErrorsHandle(error as JsonWebTokenError));
       next(error);
     }
   }
 
   if (!access_token) {
-    next(createHttpError(401, 'You are not authenticated and token is invalid.'));
+    throw createHttpError(401, 'You are not authenticated and token is invalid.');
   }
 };
 
@@ -125,17 +126,29 @@ export const signin: RequestHandler<unknown, unknown, SignInBody, unknown> = asy
       throw createHttpError(401, 'Invalid email or password');
     }
 
-    // 接著再去確認密碼是否正確(這裡是用 bcrypt 來比對密碼)
-    const isPasswordValid = await bcrypt.compare(password, isEmailValid.personal_info?.password!);
+    // 如果有此使用者，就要看是不是通過 google 註冊的
+    if (isEmailValid) {
+      // 如果不是通過 google 註冊的，就會按正常流程驗證密碼
+      if (!isEmailValid.google_auth) {
+        // 接著再去確認密碼是否正確(這裡是用 bcrypt 來比對密碼)
+        const isPasswordValid = await bcrypt.compare(password, isEmailValid.personal_info?.password!);
 
-    // 如果密碼不正確，就會拋出"無效的憑證"的錯誤
-    if (!isPasswordValid) {
-      throw createHttpError(401, 'Invalid  email or password');
+        // 如果密碼不正確，就會拋出"無效的憑證"的錯誤
+        if (!isPasswordValid) {
+          throw createHttpError(401, 'Invalid  email or password');
+        }
+
+        // req.session.userId = isEmailValid.id;
+
+        res.status(200).json({ message: 'Login successfully!', user: formatDatatoSend(isEmailValid.toObject()) });
+      } else {
+        // 如果是通過 google 註冊的，就會拋出"請以 google 登入"的錯誤
+        throw createHttpError(
+          403,
+          'Account was created using google. Please logging in  with google to access the account.',
+        );
+      }
     }
-
-    // req.session.userId = isEmailValid.id;
-
-    res.status(200).json({ message: 'Login successfully!', user: formatDatatoSend(isEmailValid.toObject()) });
   } catch (error) {
     next(error);
   }
@@ -148,40 +161,48 @@ export const googleAuth: RequestHandler = async (req, res, next) => {
     // 驗證通過 Google 登入後給的 access_token 來驗證解碼使用者資料
     const decodedUser = await admin.auth().verifyIdToken(access_token);
 
-    // 從中取得使用者的 email, name, picture
-    const { email, name } = decodedUser;
+    if (decodedUser) {
+      // 從中取得使用者的 email, name, picture
+      const { email, name } = decodedUser;
 
-    // picture 是使用者的頭像，這裡將頭像的尺寸從 96x96 改成 384x384
-    const picture = decodedUser.picture?.replace('s96-c', 's384-c');
+      // picture 是使用者的頭像，這裡將頭像的尺寸從 96x96 改成 384x384
+      const picture = decodedUser.picture?.replace('s96-c', 's384-c');
 
-    // 從數據庫中尋找是否有此 email 的使用者
-    const user = await UserSchema.findOne({ 'personal_info.email': email }).select(
-      'personal_info.fullname personal_info.username personal_info.profile_img google_auth',
-    );
+      // 從數據庫中尋找是否有此 email 的使用者
+      const user = await UserSchema.findOne({ 'personal_info.email': email }).select(
+        'personal_info.fullname personal_info.username personal_info.profile_img google_auth',
+      );
 
-    // 如果有此使用者
-    if (user) {
-      // 但不是通過 google 註冊的，就會拋出"請以密碼登入"的錯誤
-      if (!user.google_auth) {
-        throw createHttpError(
-          403,
-          'This email was signed up without google. Please log in with password to access the account.',
-        );
+      // 如果有此使用者，就要看是不是通過 google 註冊的
+      if (user) {
+        // 如果不是通過 google 註冊的，就會拋出"請以密碼登入"的錯誤
+        if (!user.google_auth) {
+          throw createHttpError(
+            403,
+            'This email was signed up without google. Please log in with password to access the account.',
+          );
+        } else {
+          // 如果是通過 google 註冊的，就會回傳使用者資料
+          const userWithId = { ...user.toObject(), userId: user.id.toString() };
+
+          res.status(200).json({ message: 'Login successfully!', user: formatDatatoSend(userWithId) });
+        }
+      } else {
+        // 如果沒有此使用者，就會幫他註冊一個新的帳號
+        const username = await genarateUsername(email!);
+
+        const newUser = await UserSchema.create({
+          personal_info: { fullname: name, email, profile_img: picture, username },
+          google_auth: true,
+        });
+
+        const newUserWithId = { ...newUser.toObject(), userId: newUser.id.toString() };
+
+        // 將新註冊的使用者資料回傳
+        res.status(201).json({ message: 'Login successfully!', user: formatDatatoSend(newUserWithId) });
       }
     } else {
-      // 如果沒有此使用者，就會幫他註冊一個新的帳號
-
-      const username = await genarateUsername(email!);
-
-      const newUser = await UserSchema.create({
-        personal_info: { fullname: name, email, profile_img: picture, username },
-        google_auth: true,
-      });
-
-      const newUserWithId = { ...newUser.toObject(), userId: newUser.id.toString() };
-
-      // 控制回傳的資料架構，以防資料外洩
-      res.status(201).json({ message: 'Registered successfully!', user: formatDatatoSend(newUserWithId) });
+      throw createHttpError(500, 'Failed to authenticate you with google. Try with some other google account.');
     }
   } catch (error) {
     next(error);

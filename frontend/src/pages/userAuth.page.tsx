@@ -10,7 +10,7 @@ import InputBox from '../components/input-box.component';
 import useAuthStore from '../states/auth.state';
 
 import AniamationWrapper from '../commons/page-animation.common';
-import { authWithGoogle } from '../commons/firebase';
+import { authWithGoogleUsingPopUp } from '../commons/firebase.common';
 
 interface UserAuthFormProps {
   type: string;
@@ -27,36 +27,12 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle Google Auth
-  const handleGoogleAuth = (e: React.FormEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-
-    authWithGoogle()
-      .then((user) => {
-        console.log(user);
-      })
-      .catch((error) => {
-        toast.error('trouble login through google');
-        return console.log(error);
-      });
-  };
-
-  // Handle login or signup with input values
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    // 取得表單送出的路由
-    const serverRoute = location.pathname;
-
-    // 預防表單送出
-    const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
-
-    // 透過 axios 送出表單資料
+  // Through server to authenticate user
+  const userAuthThroughServer = (requestUrl: string, formData: object) => {
     axios
       .post(requestUrl, formData)
       .then(({ data }) => {
         if (data.message && data.user) {
-          console.log(data);
           sessionStorage.setItem('access_token', data.user.access_token);
           setAuthUser(data.user);
           toast.success(data.message);
@@ -76,6 +52,41 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
           toast.error('Request setup error: ', error.message);
         }
       });
+  };
+
+  // Handle Google Auth
+  const handleGoogleAuth = async (e: React.FormEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    authWithGoogleUsingPopUp()
+      .then((user) => {
+        if (user) {
+          const serverRoute = '/google-auth';
+          const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
+          const formData = {
+            access_token: (user as { accessToken?: string })?.accessToken,
+          };
+          userAuthThroughServer(requestUrl, formData);
+        }
+      })
+      .catch((error) => {
+        toast.error('trouble login through google');
+        return console.log(error);
+      });
+  };
+
+  // Handle login or signup with input values
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // 取得表單送出的路由
+    const serverRoute = location.pathname;
+
+    // 預防表單送出
+    const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
+
+    // 透過 axios 送出表單資料
+    userAuthThroughServer(requestUrl, formData);
   };
 
   return authUser ? (

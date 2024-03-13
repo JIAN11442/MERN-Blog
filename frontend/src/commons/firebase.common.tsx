@@ -2,10 +2,10 @@
 
 import { initializeApp } from 'firebase/app';
 import {
-  GithubAuthProvider,
   GoogleAuthProvider,
   getAuth,
   signInWithPopup,
+  signInWithRedirect,
 } from 'firebase/auth';
 
 // Your web app's Firebase configuration
@@ -21,15 +21,16 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-const provider = new GoogleAuthProvider();
-// const provider = new GithubAuthProvider();
+export const auth = getAuth();
 
-const auth = getAuth();
+const googleProvider = new GoogleAuthProvider();
 
-export const authWithGoogle = async () => {
-  let user = null;
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-  await signInWithPopup(auth, provider)
+export const authWithGoogleUsingPopUp = async () => {
+  let user;
+
+  await signInWithPopup(auth, googleProvider)
     .then((result) => {
       user = result.user;
     })
@@ -38,4 +39,8 @@ export const authWithGoogle = async () => {
     });
 
   return user;
+};
+
+export const authWithGoogleUsingRedirect = async () => {
+  await signInWithRedirect(auth, googleProvider);
 };

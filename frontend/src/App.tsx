@@ -3,8 +3,11 @@ import { Route, Routes } from 'react-router-dom';
 import axios from 'axios';
 
 import Navbar from './components/navbar.component';
-import UserAuthForm from './pages/userAuthForm.page';
+
 import useAuthStore from './states/auth.state';
+
+import UserAuth from './pages/userAuth.page';
+import Editor from './pages/editor.page';
 
 function App() {
   const { setAuthUser } = useAuthStore();
@@ -21,20 +24,21 @@ function App() {
       .get(requestUrl)
       .then(({ data }) => {
         if (data.user) {
+          console.log(data.user);
           setAuthUser(data.user);
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.log(error.response.data);
       });
-  }, []);
+  }, [setAuthUser]);
 
   return (
     <Routes>
+      <Route path="/editor" element={<Editor />} />
       <Route path="/" element={<Navbar />}>
-        <Route path="/editor" element={<h1>Editor page</h1>} />
-        <Route path="/signin" element={<UserAuthForm type="sign-in" />} />
-        <Route path="/signup" element={<UserAuthForm type="sign-up" />} />
+        <Route path="/signin" element={<UserAuth type="sign-in" />} />
+        <Route path="/signup" element={<UserAuth type="sign-up" />} />
       </Route>
     </Routes>
   );

@@ -113,7 +113,6 @@ const Navbar = () => {
             items-center
             gap-3
             ml-auto
-            md:gap-4
             transition
           "
         >
@@ -196,7 +195,7 @@ const Navbar = () => {
                 </button>
 
                 {/* NavigationPanel */}
-                {panelCollapsed ? <UserNavigationPanel /> : ''}
+                {panelCollapsed && <UserNavigationPanel />}
               </div>
             </>
           ) : (
