@@ -24,7 +24,6 @@ function App() {
       .get(requestUrl)
       .then(({ data }) => {
         if (data.user) {
-          console.log(data.user);
           setAuthUser(data.user);
         }
       })
