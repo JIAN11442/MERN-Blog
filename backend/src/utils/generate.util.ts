@@ -4,9 +4,11 @@
 
 import jwt from 'jsonwebtoken';
 import { nanoid } from 'nanoid/non-secure';
+import aws from 'aws-sdk';
 
 import UserSchema from '../schemas/user.schema';
 import type { UserRequestType } from '../types';
+import env from './validateEnv.util';
 
 // genarate username when user is exist in database
 export const genarateUsername = async (email: string) => {
@@ -36,4 +38,27 @@ export const formatDatatoSend = (user: UserRequestType & { userId: string }) => 
     console.log(error);
     return null;
   }
+};
+
+// generate upload url for s3
+const s3 = new aws.S3({
+  region: env.AWS_REGION,
+  accessKeyId: env.AWS_ACCESS_KEY,
+  secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+  signatureVersion: 'v4',
+});
+
+export const generateUploadUrl = async () => {
+  const date = new Date();
+  const imageName = `${nanoid()}-${date.getTime()}.jpeg`;
+
+  const params = {
+    Bucket: env.AWS_BUCKET_NAME,
+    Key: imageName,
+    Expires: 1000, // 1 分鐘
+  };
+
+  const uploadUrl = await s3.getSignedUrlPromise('putObject', params);
+
+  return uploadUrl;
 };

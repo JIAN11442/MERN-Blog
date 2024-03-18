@@ -13,6 +13,7 @@ import userRoute from './routers/users.route';
 import ErrorsHandle from './utils/errors.util';
 import env from './utils/validateEnv.util';
 import serviceAccount from './firebase/mern-blogging-ts-firebase-adminsdk-l5srr-14255d77e6.json';
+import awsRoute from './routers/aws.route';
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount as admin.ServiceAccount) });
@@ -39,6 +40,7 @@ app.use(
   }),
 );
 
+app.use('/api/aws', awsRoute);
 app.use('/api/auth', userRoute);
 
 // Error handling

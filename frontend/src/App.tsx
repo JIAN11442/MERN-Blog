@@ -18,7 +18,8 @@ function App() {
   ] = `Bearer ${sessionStorage.getItem('access_token')}`;
 
   useEffect(() => {
-    const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + '/authentication';
+    const requestUrl =
+      import.meta.env.VITE_SERVER_DOMAIN + '/auth/authentication';
 
     axios
       .get(requestUrl)

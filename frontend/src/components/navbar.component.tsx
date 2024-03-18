@@ -6,7 +6,7 @@ import logo from '../imgs/logo.png';
 import useAuthStore from '../states/auth.state';
 import useCollapseStore from '../states/collapse.state';
 import UserNavigationPanel from './user-navigation.component';
-import AniamationWrapper from '../commons/page-animation.common';
+import AniamationWrapper from './page-animation.component';
 
 const Navbar = () => {
   const currPath = useLocation().pathname;

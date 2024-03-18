@@ -9,7 +9,7 @@ import InputBox from '../components/input-box.component';
 
 import useAuthStore from '../states/auth.state';
 
-import AniamationWrapper from '../commons/page-animation.common';
+import AniamationWrapper from '../components/page-animation.component';
 import { authWithGoogleUsingPopUp } from '../commons/firebase.common';
 
 interface UserAuthFormProps {
@@ -61,7 +61,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
     authWithGoogleUsingPopUp()
       .then((user) => {
         if (user) {
-          const serverRoute = '/google-auth';
+          const serverRoute = '/auth/google-auth';
           const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
           const formData = {
             access_token: (user as { accessToken?: string })?.accessToken,
@@ -80,7 +80,7 @@ const UserAuthForm: React.FC<UserAuthFormProps> = ({ type }) => {
     e.preventDefault();
 
     // 取得表單送出的路由
-    const serverRoute = location.pathname;
+    const serverRoute = `/auth/${location.pathname}`;
 
     // 預防表單送出
     const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;

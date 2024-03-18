@@ -1,17 +1,42 @@
-import { Link } from "react-router-dom";
+import { useRef } from 'react';
+import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
-import logo from "../imgs/logo.png";
-import defaultBanner from "../imgs/blog banner.png";
+import logo from '../imgs/logo.png';
+import defaultBanner from '../imgs/blog banner.png';
 
-import AniamationWrapper from "../commons/page-animation.common";
+import AniamationWrapper from './page-animation.component';
+import { uploadImage } from '../commons/aws.common';
 
 const BlogEditor = () => {
+  const blogBannerRef = useRef<HTMLImageElement | null>(null);
+
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return null;
+    if (e.target.files) {
+      // Get the image file
+      const img = e.target.files[0];
 
-    let img = e.target.files[0];
+      // Show loading toast
+      const loadingToast = toast.loading('Uploading...');
 
-    console.log(img);
+      if (img) {
+        uploadImage(img)
+          .then((url) => {
+            if (url && blogBannerRef.current) {
+              // Dismiss the loading toast and show success toast
+              toast.dismiss(loadingToast);
+              toast.success('Uploaded successfully');
+
+              // Set the image url to the blog banner
+              blogBannerRef.current.src = url;
+            }
+          })
+          .catch((err) => {
+            toast.dismiss(loadingToast);
+            toast.error(err);
+          });
+      }
+    }
   };
   return (
     <>
@@ -78,7 +103,7 @@ const BlogEditor = () => {
                     點擊 <img> 也能觸發與 <label> 建立關係的 <input>,
                     因此這裡的 <img> 就是一個隱藏的 <input> 按鈕
                 */}
-                <img src={defaultBanner} className="z-10" />
+                <img ref={blogBannerRef} src={defaultBanner} className="z-10" />
                 <input
                   id="uploadBanner"
                   type="file"

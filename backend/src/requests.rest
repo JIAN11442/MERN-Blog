@@ -1,18 +1,1 @@
-POST  http://localhost:5000/api/auth/signup
-Content-Type: application/json
-
-{
-    "fullname": "JIAN",
-    "email":"f24065026@gmail.com",
-    "password":"F24065026f"
-}
-
-# GET  http://localhost:5000/api/users
-
-# POST http://localhost:5000/api/users/login
-# Content-Type: application/json
-
-# {
-#     "email":"f24065026@email.ncku.edu.tw",
-#     "password":"F24065026f"
-# }
+GET http://localhost:5000/api/aws/get-upload-url

@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 import { FlatIcons } from '../icons/flaticons';
 import useAuthStore from '../states/auth.state';
-import AniamationWrapper from '../commons/page-animation.common';
+import AniamationWrapper from './page-animation.component';
 
 const UserNavigationPanel = () => {
   const { authUser, setAuthUser } = useAuthStore();
