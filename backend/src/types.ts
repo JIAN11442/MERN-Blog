@@ -14,3 +14,21 @@ export interface GenarateDataType {
 export interface UserRequestType extends UserSchemaType {
   _id: mongoose.Types.ObjectId;
 }
+
+export interface BlogStructureType {
+  title?: string;
+  banner?: string;
+  content?: string[];
+  tags?: string[];
+  des?: string;
+  author?: {
+    personal_info: {
+      fullname?: string;
+      email?: string;
+      password?: string;
+      username?: string;
+      bio?: string;
+      personal_img?: string;
+    };
+  };
+}

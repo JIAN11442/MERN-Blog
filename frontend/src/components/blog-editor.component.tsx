@@ -7,9 +7,12 @@ import defaultBanner from '../imgs/blog banner.png';
 
 import AniamationWrapper from './page-animation.component';
 import { uploadImage } from '../commons/aws.common';
+import useBlogStore from '../states/blog.state';
 
 const BlogEditor = () => {
   const blogBannerRef = useRef<HTMLImageElement | null>(null);
+
+  const { blog, setBlog } = useBlogStore();
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -38,25 +41,47 @@ const BlogEditor = () => {
       }
     }
   };
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
+  const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const input = e.target;
+
+    // Set the navbar blog title
+    const generatedTitle =
+      input.value.charAt(0).toUpperCase() + input.value.slice(1);
+
+    setBlog({ ...blog, title: generatedTitle });
+
+    // Auto resize the textarea with the content
+    input.style.height = 'auto';
+    input.style.height = `${input.scrollHeight}px`;
+  };
+
   return (
     <>
       {/* Navbar */}
       <nav className="navbar">
         {/* Logo */}
-        <Link to="/">
-          <img src={logo} alt="Blogging" className=" flex-none w-10" />
+        <Link to="/" className=" flex-none w-10">
+          <img src={logo} alt="Blogging" />
         </Link>
 
         {/* Navbar Title */}
         <p
           className="
-            max-md:hidden
-            text-black-custom
-            line-clamp-1
             w-full
+            max-md:hidden
+            text-xl
+            text-black-custom
+            font-medium
+            line-clamp-1
+            normal-case
           "
         >
-          New Blog
+          {blog.title || 'New Blog'}
         </p>
 
         {/* Publish and save draft button */}
@@ -80,6 +105,7 @@ const BlogEditor = () => {
         transition={{ duration: 1 }}
       >
         <section>
+          {/* Banner */}
           <div
             className="
               mx-auto
@@ -103,7 +129,14 @@ const BlogEditor = () => {
                     點擊 <img> 也能觸發與 <label> 建立關係的 <input>,
                     因此這裡的 <img> 就是一個隱藏的 <input> 按鈕
                 */}
-                <img ref={blogBannerRef} src={defaultBanner} className="z-10" />
+                <img
+                  ref={blogBannerRef}
+                  src={defaultBanner}
+                  className="
+                    z-10
+                    object-cover
+                  "
+                />
                 <input
                   id="uploadBanner"
                   type="file"
@@ -114,6 +147,26 @@ const BlogEditor = () => {
               </label>
             </div>
           </div>
+
+          {/* Blog Title */}
+          <textarea
+            placeholder="Blog Title"
+            onKeyDown={(e) => handleTitleKeyDown(e)}
+            onChange={(e) => handleTitleChange(e)}
+            className="
+              mt-10
+              w-full
+              h-20
+              text-3xl
+              md:text-4xl
+              font-medium
+              outline-none
+              resize-none
+              leading-tight
+              placeholder:opacity-40
+              overflow-hidden
+            "
+          ></textarea>
         </section>
       </AniamationWrapper>
     </>
