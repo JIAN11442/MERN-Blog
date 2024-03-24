@@ -18,7 +18,7 @@ export interface UserRequestType extends UserSchemaType {
 export interface BlogStructureType {
   title?: string;
   banner?: string;
-  content?: string[];
+  content?: object;
   tags?: string[];
   des?: string;
   author?: {

@@ -1,5 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Gelasio&family=Inter:wght@400;500&display=swap");
-@import "@flaticon/flaticon-uicons/css/all/all";
+@import url('https://fonts.googleapis.com/css2?family=Gelasio&family=Inter:wght@400;500&display=swap');
+@import '@flaticon/flaticon-uicons/css/all/all';
 
 @tailwind base;
 @tailwind components;
@@ -137,17 +137,26 @@
 
   #textEditor h2,
   h2 {
-    @apply font-inter text-4xl leading-normal font-bold max-md:text-3xl max-md:leading-snug !important;
+    @apply font-inter
+    text-4xl
+    leading-normal
+    font-semibold
+    max-md:text-3xl
+    max-md:leading-snug !important;
   }
 
   #textEditor h3,
   h3 {
-    @apply font-inter text-3xl leading-loose max-md:text-2xl max-md:leading-normal !important;
+    @apply font-inter
+    text-3xl
+    leading-loose
+    max-md:text-2xl
+    max-md:leading-normal !important;
   }
 
   #textEditor *,
   .blog-page-content * {
-    @apply font-gelasio text-xl leading-10 md:text-2xl;
+    @apply font-mono text-xl leading-10 md:text-[18px] lg:text-2xl;
   }
 
   #textEditor a,
@@ -173,8 +182,8 @@
   max-width: 900px;
 }
 
-.cdx-settings-button[data-tune="withBorder"],
-.cdx-settings-button[data-tune="withBackground"],
-.cdx-settings-button[data-tune="stretched"] {
+.cdx-settings-button[data-tune='withBorder'],
+.cdx-settings-button[data-tune='withBackground'],
+.cdx-settings-button[data-tune='stretched'] {
   display: none;
 }

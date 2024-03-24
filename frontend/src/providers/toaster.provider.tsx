@@ -1,4 +1,4 @@
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 
 interface ToasterProviderProps {
   children: React.ReactNode;
@@ -8,9 +8,10 @@ const ToasterProvider: React.FC<ToasterProviderProps> = ({ children }) => {
   return (
     <>
       <Toaster
-        containerStyle={{ top: '100px' }}
+        containerStyle={{ top: "100px" }}
         toastOptions={{
-          position: 'top-center',
+          position: "top-center",
+          duration: 2000,
         }}
       />
       {children}
