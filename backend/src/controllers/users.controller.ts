@@ -11,13 +11,15 @@ import jwt, { type JsonWebTokenError } from 'jsonwebtoken';
 import * as admin from 'firebase-admin';
 
 import UserSchema from '../schemas/user.schema';
+
 import { ValidateForSignIn, ValidateForSignUp } from '../utils/validateController.util';
 import { genarateUsername, formatDatatoSend } from '../utils/generate.util';
 import { SignUpBody, SignInBody } from '../utils/types.util';
-import type { GenarateDataType } from '../types';
 import ErrorsHandle from '../utils/errors.util';
 
-export const protectedRoute: RequestHandler = async (req, res, next) => {
+import type { GenarateDataType } from '../types';
+
+export const jwtVerify: RequestHandler = async (req, res, next) => {
   let access_token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -27,6 +29,10 @@ export const protectedRoute: RequestHandler = async (req, res, next) => {
 
       // 驗證 token
       const verifyToken = jwt.verify(access_token, process.env.SECRET_ACCESS_KEY as string) as jwt.JwtPayload;
+
+      if (!verifyToken) {
+        throw createHttpError(403, 'Access token is invalid.');
+      }
 
       // 根據解碼後的 decoded.id 從數據庫找尋使用者資料
       const user = await UserSchema.findById(verifyToken.userId).exec();

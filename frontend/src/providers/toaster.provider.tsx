@@ -1,16 +1,20 @@
-import { Toaster } from "react-hot-toast";
+import { Toaster } from 'react-hot-toast';
+// import useBlogStore from '../states/blog.state';
 
 interface ToasterProviderProps {
   children: React.ReactNode;
 }
 
 const ToasterProvider: React.FC<ToasterProviderProps> = ({ children }) => {
+  // const { editorState } = useBlogStore();
   return (
     <>
       <Toaster
-        containerStyle={{ top: "100px" }}
+        // containerStyle={{
+        //   top: `${editorState === 'publish' ? '20px' : '100px'}`,
+        // }}
         toastOptions={{
-          position: "top-center",
+          position: 'top-center',
           duration: 2000,
         }}
       />

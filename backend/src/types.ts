@@ -1,5 +1,6 @@
 import type mongoose from 'mongoose';
 import type { InferSchemaType } from 'mongoose';
+import type { OutputData } from '@editorjs/editorjs';
 import { userSchema } from './schemas/user.schema';
 
 export type UserSchemaType = InferSchemaType<typeof userSchema>;
@@ -18,7 +19,7 @@ export interface UserRequestType extends UserSchemaType {
 export interface BlogStructureType {
   title?: string;
   banner?: string;
-  content?: object;
+  content?: OutputData;
   tags?: string[];
   des?: string;
   author?: {

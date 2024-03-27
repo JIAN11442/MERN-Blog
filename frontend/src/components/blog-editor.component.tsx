@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -60,14 +62,19 @@ const BlogEditor = () => {
       e.preventDefault();
     }
   };
+  const handleTitleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    let value = e.currentTarget.value;
+
+    // Capitalize the first letter
+    if (value.length > 0) {
+      value = value.charAt(0).toUpperCase() + value.slice(1);
+      e.currentTarget.value = value;
+    }
+  };
   const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const input = e.target;
 
-    // Set the navbar blog title
-    const generatedTitle =
-      input.value.charAt(0).toUpperCase() + input.value.slice(1);
-
-    setBlog({ ...blog, title: generatedTitle });
+    setBlog({ ...blog, title: input.value });
 
     // Auto resize the textarea with the content
     input.style.height = 'auto';
@@ -111,7 +118,7 @@ const BlogEditor = () => {
       const editor = new EditorJS({
         holder: 'textEditor',
         tools: tools,
-        data: { blocks: [] },
+        data: blog.content, // { blocks: [] } or { time:? , blocks: [?] version: ?}
         placeholder: "Let's write an awesome story",
       });
 
@@ -127,7 +134,7 @@ const BlogEditor = () => {
         editorRef.current.destroy();
       }
     };
-  }, [editorRef, setTextEditor]);
+  }, []);
 
   return (
     <>
@@ -221,9 +228,11 @@ const BlogEditor = () => {
 
             {/* Blog Title */}
             <textarea
+              defaultValue={blog.title}
               placeholder="Blog Title"
-              onKeyDown={(e) => handleTitleKeyDown(e)}
+              onInput={(e) => handleTitleInput(e)}
               onChange={(e) => handleTitleChange(e)}
+              onKeyDown={(e) => handleTitleKeyDown(e)}
               className="
                 mt-10
                 w-full
@@ -237,13 +246,13 @@ const BlogEditor = () => {
                 placeholder:opacity-40
                 overflow-hidden
               "
-            ></textarea>
+            />
 
             {/* Separate Line */}
             <hr className="w-full my-2 md:my-5" />
 
             {/* EditorJs */}
-            <div id="textEditor"></div>
+            <div id="textEditor" />
           </div>
         </section>
       </AniamationWrapper>

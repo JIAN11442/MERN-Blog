@@ -137,7 +137,7 @@
 
   #textEditor h2,
   h2 {
-    @apply font-inter
+    @apply font-gelasio
     text-4xl
     leading-normal
     font-semibold
@@ -147,7 +147,7 @@
 
   #textEditor h3,
   h3 {
-    @apply font-inter
+    @apply font-gelasio
     text-3xl
     leading-loose
     max-md:text-2xl
@@ -156,7 +156,7 @@
 
   #textEditor *,
   .blog-page-content * {
-    @apply font-mono text-xl leading-10 md:text-[18px] lg:text-2xl;
+    @apply font-gelasio text-xl leading-10 md:text-[18px] lg:text-2xl;
   }
 
   #textEditor a,
