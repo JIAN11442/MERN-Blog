@@ -7,7 +7,8 @@ import { nanoid } from 'nanoid/non-secure';
 import aws from 'aws-sdk';
 
 import UserSchema from '../schemas/user.schema';
-import type { UserRequestType } from '../types';
+
+import type { UserRequestType } from './types.util';
 import env from './validateEnv.util';
 
 // genarate username when user is exist in database
@@ -61,4 +62,13 @@ export const generateUploadUrl = async () => {
   const uploadUrl = await s3.getSignedUrlPromise('putObject', params);
 
   return uploadUrl;
+};
+
+export const generateBlogID = (title: string) => {
+  const blogId = `${title
+    .trim()
+    .replace(/[^a-zA-Z0-9]/g, ' ')
+    .replace(/\s+/g, '-')}-${nanoid()}`;
+
+  return blogId;
 };

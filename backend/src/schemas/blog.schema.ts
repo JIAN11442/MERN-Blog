@@ -1,11 +1,12 @@
 import { InferSchemaType, Schema, model } from 'mongoose';
+import env from '../utils/validateEnv.util';
 
 const blogSchema = new Schema(
   {
     blog_id: { type: String, require: true, unique: true },
     title: { type: String, require: true },
     banner: { type: String },
-    des: { type: String, maxLength: 200 },
+    des: { type: String, maxLength: env.BLOG_DES_CHAR_LIMIT },
     content: { type: [] },
     tags: { type: [String] },
     author: { type: Schema.Types.ObjectId, require: true, ref: 'users' },

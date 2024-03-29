@@ -1,4 +1,4 @@
-import { cleanEnv, port, str } from 'envalid';
+import { cleanEnv, port, str, num } from 'envalid';
 
 export default cleanEnv(process.env, {
   MONGODB_CONNECTION_STRING: str(),
@@ -10,4 +10,6 @@ export default cleanEnv(process.env, {
   AWS_ACCESS_KEY: str(),
   AWS_SECRET_ACCESS_KEY: str(),
   AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE: str(),
+  BLOG_DES_CHAR_LIMIT: num(),
+  BLOG_TAGS_LIMIT: num(),
 });

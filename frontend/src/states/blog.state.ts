@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import EditorJS from '@editorjs/editorjs';
 
-import type { BlogStructureType } from '../../../backend/src/types';
+import type { BlogStructureType } from '../../../backend/src/utils/types.util';
 
 interface BlogProps {
   editorState: string;

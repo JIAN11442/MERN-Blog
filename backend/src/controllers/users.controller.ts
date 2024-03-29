@@ -16,44 +16,34 @@ import { ValidateForSignIn, ValidateForSignUp } from '../utils/validateControlle
 import { genarateUsername, formatDatatoSend } from '../utils/generate.util';
 import { SignUpBody, SignInBody } from '../utils/types.util';
 import ErrorsHandle from '../utils/errors.util';
-
-import type { GenarateDataType } from '../types';
+import env from '../utils/validateEnv.util';
 
 export const jwtVerify: RequestHandler = async (req, res, next) => {
-  let access_token;
+  try {
+    // 從 headers 中取得 access token
+    const authHeader = req.headers.authorization;
+    const accessToken = authHeader && authHeader.split(' ')[1];
 
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    try {
-      // 從 headers 取得 token
-      access_token = req.headers.authorization.split(' ')[1];
-
-      // 驗證 token
-      const verifyToken = jwt.verify(access_token, process.env.SECRET_ACCESS_KEY as string) as jwt.JwtPayload;
-
-      if (!verifyToken) {
-        throw createHttpError(403, 'Access token is invalid.');
-      }
-
-      // 根據解碼後的 decoded.id 從數據庫找尋使用者資料
-      const user = await UserSchema.findById(verifyToken.userId).exec();
-
-      // 如果使用者資料不存在，就會拋出"使用者未找到"的錯誤
-      if (!user) {
-        throw createHttpError(404, 'User not found with this token');
-      }
-
-      // 將使用者資料存入 req.user
-      req.user = formatDatatoSend(user.toObject()) as GenarateDataType;
-
-      next();
-    } catch (error) {
-      console.log(ErrorsHandle(error as JsonWebTokenError));
-      next(error);
+    // 如果沒有取得 access token，代表沒有登入，會拋出"沒有 access token"的錯誤
+    if (!accessToken) {
+      throw createHttpError(401, 'No access token.');
     }
-  }
 
-  if (!access_token) {
-    throw createHttpError(401, 'You are not authenticated and token is invalid.');
+    // 如果有成功取得，那就驗證並解碼 access token，取得簽證資料
+    const decoded = jwt.verify(accessToken, env.SECRET_ACCESS_KEY) as jwt.JwtPayload;
+
+    // 如果解碼失敗，就代表 access token 是無效的，會拋出"無效的 access token"的錯誤
+    if (!decoded) {
+      throw createHttpError(403, 'Invalid access token.');
+    }
+
+    // 將使用者的 id 放入 req.userId 中，，並繼續執行下一個 middleware
+    req.userId = decoded.userId;
+
+    next();
+  } catch (error) {
+    console.log(ErrorsHandle(error as JsonWebTokenError));
+    next(error);
   }
 };
 
@@ -76,7 +66,17 @@ export const sessionAuthentication: RequestHandler = async (req, res, next) => {
 };
 export const jwtAuthentication: RequestHandler = async (req, res, next) => {
   try {
-    res.json({ message: 'You are authenticated!', user: req.user });
+    const userId = req.userId;
+
+    // 如果解碼成功，那就代表已取得使用者ID資料，接下來根據使用者ID資料去尋找使用者
+    const user = await UserSchema.findById(userId).exec();
+
+    // 如果找不到使用者，就會拋出"使用者不存在"的錯誤
+    if (!user) {
+      throw createHttpError(404, 'User not found with this token');
+    }
+
+    res.json({ message: 'You are authenticated!', user: formatDatatoSend(user.toObject()) });
   } catch (error) {
     next(error);
   }
@@ -117,10 +117,10 @@ export const signup: RequestHandler<unknown, unknown, SignUpBody, unknown> = asy
 };
 
 export const signin: RequestHandler<unknown, unknown, SignInBody, unknown> = async (req, res, next) => {
-  const validateResult = ValidateForSignIn(req.body);
-  const { email, password } = req.body;
-
   try {
+    const validateResult = ValidateForSignIn(req.body);
+    const { email, password } = req.body;
+
     if (validateResult !== true) {
       throw createHttpError(validateResult.statusCode, validateResult.message);
     }
@@ -161,9 +161,9 @@ export const signin: RequestHandler<unknown, unknown, SignInBody, unknown> = asy
 };
 
 export const googleAuth: RequestHandler = async (req, res, next) => {
-  const { access_token } = req.body;
-
   try {
+    const { access_token } = req.body;
+
     // 驗證通過 Google 登入後給的 access_token 來驗證解碼使用者資料
     const decodedUser = await admin.auth().verifyIdToken(access_token);
 

@@ -1,9 +1,12 @@
 /* eslint-disable import/prefer-default-export */
 
-import { SignUpBody, SignInBody } from './types.util';
+import { SignUpBody, SignInBody, type BlogStructureType } from './types.util';
+import env from './validateEnv.util';
 
 const emailRegex = /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*(\.[A-Za-z]+)+$/;
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+const characterLimit = env.BLOG_DES_CHAR_LIMIT;
+const tagsLimit = env.BLOG_TAGS_LIMIT;
 
 export const ValidateForSignUp = (RequestBody: SignUpBody) => {
   const { fullname, email, password } = RequestBody;
@@ -42,6 +45,32 @@ export const ValidateForSignIn = (RequestBody: SignInBody) => {
       statusCode: 403,
       message: 'Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase letters',
     };
+  }
+
+  return true;
+};
+
+export const ValidateForPublishBlog = (RequestBody: BlogStructureType) => {
+  const { banner, title, content, des, tags } = RequestBody;
+
+  if (!banner?.length) {
+    return { statusCode: 403, message: 'You must provide blog banner to publish it.' };
+  }
+
+  if (!title?.length) {
+    return { statusCode: 403, message: 'You must provide title to publish the blog.' };
+  }
+
+  if (!content?.blocks?.length) {
+    return { statusCode: 403, message: 'There must be some blog content to publish it.' };
+  }
+
+  if (!des?.length || des?.length > characterLimit) {
+    return { statusCode: 403, message: `You must provide blog description under ${characterLimit} characters.` };
+  }
+
+  if (!tags?.length || tags.length > tagsLimit) {
+    return { statusCode: 403, message: `Provide tags in order to publish the blog, Maximum ${tagsLimit}.` };
   }
 
   return true;

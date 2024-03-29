@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { jwtVerify } from '../controllers/users.controller';
-import { createBlog } from '../controllers/blog.controller';
+import { createBlog } from '../controllers/blogs.controller';
 
 const blogRoute = express.Router();
 

@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { Schema, model } from 'mongoose';
-import type { UserSchemaType } from '../types';
+import type { UserSchemaType } from '../utils/types.util';
 
 const profile_imgs_name_list = [
   'Garfield',

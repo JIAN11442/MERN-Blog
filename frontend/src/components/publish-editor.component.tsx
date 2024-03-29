@@ -51,6 +51,9 @@ const PublishEditor = () => {
       (e.target as HTMLInputElement).value = '';
     }
   };
+  const handleBlogPublish = () => {
+    console.log(blog);
+  };
   return (
     <AniamationWrapper
       keyValue="publish-editor"
@@ -221,6 +224,7 @@ const PublishEditor = () => {
 
           {/* Submit Button */}
           <button
+            onClick={handleBlogPublish}
             className="
               btn-dark
               px-8

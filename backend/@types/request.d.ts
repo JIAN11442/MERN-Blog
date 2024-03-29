@@ -1,8 +1,8 @@
-import type { GenarateDataType } from '../src/types';
+import mongoose from 'mongoose';
 
 declare module 'express-serve-static-core' {
   interface Request {
-    user?: GenarateDataType;
+    userId: mongoose.Types.ObjectId;
   }
 }
 
