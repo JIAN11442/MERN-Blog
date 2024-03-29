@@ -33,6 +33,7 @@ export interface BlogStructureType {
   content?: OutputData;
   tags?: string[];
   des?: string;
+  draft?: boolean;
   author?: {
     personal_info: {
       fullname?: string;

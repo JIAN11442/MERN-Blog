@@ -51,26 +51,28 @@ export const ValidateForSignIn = (RequestBody: SignInBody) => {
 };
 
 export const ValidateForPublishBlog = (RequestBody: BlogStructureType) => {
-  const { banner, title, content, des, tags } = RequestBody;
-
-  if (!banner?.length) {
-    return { statusCode: 403, message: 'You must provide blog banner to publish it.' };
-  }
+  const { banner, title, content, des, tags, draft } = RequestBody;
 
   if (!title?.length) {
     return { statusCode: 403, message: 'You must provide title to publish the blog.' };
   }
 
-  if (!content?.blocks?.length) {
-    return { statusCode: 403, message: 'There must be some blog content to publish it.' };
-  }
+  if (!draft) {
+    if (!banner?.length) {
+      return { statusCode: 403, message: 'You must provide blog banner to publish it.' };
+    }
 
-  if (!des?.length || des?.length > characterLimit) {
-    return { statusCode: 403, message: `You must provide blog description under ${characterLimit} characters.` };
-  }
+    if (!content?.blocks?.length) {
+      return { statusCode: 403, message: 'There must be some blog content to publish it.' };
+    }
 
-  if (!tags?.length || tags.length > tagsLimit) {
-    return { statusCode: 403, message: `Provide tags in order to publish the blog, Maximum ${tagsLimit}.` };
+    if (!des?.length || des?.length > characterLimit) {
+      return { statusCode: 403, message: `You must provide blog description under ${characterLimit} characters.` };
+    }
+
+    if (!tags?.length || tags.length > tagsLimit) {
+      return { statusCode: 403, message: `Provide tags in order to publish the blog, Maximum ${tagsLimit}.` };
+    }
   }
 
   return true;

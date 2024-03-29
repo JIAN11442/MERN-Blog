@@ -1,25 +1,30 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import EditorJS from '@editorjs/editorjs';
+import { useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import EditorJS from "@editorjs/editorjs";
+import axios from "axios";
 
-import logo from '../imgs/logo.png';
-import defaultBanner from '../imgs/banner.png';
+import logo from "../imgs/logo.png";
+import defaultBanner from "../imgs/banner.png";
 
-import AniamationWrapper from './page-animation.component';
-import tools from './tools.component';
+import AniamationWrapper from "./page-animation.component";
+import tools from "./tools.component";
 
-import { uploadImage } from '../commons/aws.common';
-import useBlogStore from '../states/blog.state';
+import { uploadImage } from "../commons/aws.common";
+import useBlogStore from "../states/blog.state";
+import useAuthStore from "../states/auth.state";
 
 const BlogEditor = () => {
+  const navigate = useNavigate();
+
   const blogBannerRef = useRef<HTMLImageElement | null>(null);
   const editorRef = useRef<EditorJS | null>(null);
 
   const { blog, setBlog, setTextEditor, textEditor, setEditorState } =
     useBlogStore();
+  const { authUser } = useAuthStore();
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -27,13 +32,13 @@ const BlogEditor = () => {
       const img = e.target.files[0];
 
       // Check the file type
-      if (!img.type.startsWith('image/')) {
-        return toast.error('Please upload an image type file.');
+      if (!img.type.startsWith("image/")) {
+        return toast.error("Please upload an image type file.");
       }
 
       if (img) {
         // Show loading toast
-        const loadingToast = toast.loading('Uploading...');
+        const loadingToast = toast.loading("Uploading...");
 
         // Upload the image to S3
         uploadImage(img)
@@ -46,7 +51,7 @@ const BlogEditor = () => {
               blogBannerRef.current.onload = () => {
                 // Dismiss the loading toast and show success toast
                 toast.dismiss(loadingToast);
-                toast.success('Uploaded successfully');
+                toast.success("Uploaded successfully");
               };
             }
           })
@@ -58,7 +63,7 @@ const BlogEditor = () => {
     }
   };
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
     }
   };
@@ -77,7 +82,7 @@ const BlogEditor = () => {
     setBlog({ ...blog, title: input.value });
 
     // Auto resize the textarea with the content
-    input.style.height = 'auto';
+    input.style.height = "auto";
     input.style.height = `${input.scrollHeight}px`;
   };
   const handleImageError = (
@@ -89,10 +94,10 @@ const BlogEditor = () => {
 
   const handlePublishEvent = () => {
     if (!blog.banner?.length) {
-      return toast.error('Please upload a blog banner.');
+      return toast.error("Please upload a blog banner.");
     }
     if (!blog.title?.length) {
-      return toast.error('Please enter a blog title.');
+      return toast.error("Please enter a blog title.");
     }
     if (textEditor?.isReady) {
       textEditor
@@ -100,9 +105,9 @@ const BlogEditor = () => {
         .then((data) => {
           if (data.blocks.length) {
             setBlog({ ...blog, content: data });
-            setEditorState('publish');
+            setEditorState("publish");
           } else {
-            return toast.error('Write something in your blog to publish it.');
+            return toast.error("Write something in your blog to publish it.");
           }
         })
         .catch((error) => {
@@ -111,12 +116,78 @@ const BlogEditor = () => {
     }
   };
 
+  const handleSaveDraftEvent = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e.target as HTMLElement;
+
+    // 如果按鈕已經被 disable，則不執行任何動作
+    if (target.className.includes("disable")) {
+      return;
+    }
+
+    const { title, banner, des, tags } = blog;
+
+    // 如果標題為空，則顯示警告訊息並停止下一步操作
+
+    if (!title?.length) {
+      return toast.error("Write blog title before saving it as a draft.");
+    }
+
+    // 反之，顯示 loading toast 表示開始保存草稿
+    const loadingToast = toast.loading("Saving Draft....");
+
+    // 同時，將按鈕設置為 disable 狀態，避免重複點擊
+    (e.target as HTMLButtonElement).classList.add("disable");
+
+    // 如果 textEditor 已經初始化了，則代表有內容可以保存(即使是空內容)
+    if (textEditor?.isReady) {
+      // 保存內容並...保存草稿
+      textEditor.save().then((content) => {
+        // 訪問後端 API 路徑
+        const requestUrl =
+          import.meta.env.VITE_SERVER_DOMAIN + "/blog/create-blog";
+
+        // 要上傳到資料庫的數據
+        const blogData = { title, banner, des, content, tags, draft: true };
+
+        // 開始訪問後端 API
+        axios
+          .post(requestUrl, blogData, {
+            headers: { Authorization: `Bearer ${authUser?.access_token}` },
+          })
+          .then(({ data }) => {
+            if (data) {
+              // 如果成功訪問並返回數據，移除 disable 狀態
+              (target as HTMLButtonElement).classList.remove("disable");
+
+              // 關閉 loading toast 並顯示成功訊息
+              toast.dismiss(loadingToast);
+              toast.success("Draft saved successfully.");
+
+              // 0.5秒后移動到首頁
+              setTimeout(() => {
+                navigate("/");
+              }, 500);
+            }
+          })
+          .catch((error) => {
+            // 如果訪問過程中出現錯誤，也要移除 disable 狀態
+            (e.target as HTMLButtonElement).classList.remove("disable");
+
+            // 關閉 loading toast
+            toast.dismiss(loadingToast);
+
+            return toast.error(error.response.data.errorMessage);
+          });
+      });
+    }
+  };
+
   // Initialize the EditorJs
   useEffect(() => {
     // Initialize the EditorJs for once(because useEffect cause rending twice)
     if (!editorRef.current) {
       const editor = new EditorJS({
-        holder: 'textEditor',
+        holder: "textEditor",
         tools: tools,
         data: blog.content, // { blocks: [] } or { time:? , blocks: [?] version: ?}
         placeholder: "Let's write an awesome story",
@@ -157,7 +228,7 @@ const BlogEditor = () => {
             normal-case
           "
         >
-          {blog.title || 'New Blog'}
+          {blog.title || "New Blog"}
         </p>
 
         {/* Publish and save draft button */}
@@ -171,7 +242,12 @@ const BlogEditor = () => {
           <button onClick={handlePublishEvent} className="btn-dark">
             Publish
           </button>
-          <button className="btn-light">Save Draft</button>
+          <button
+            onClick={(e) => handleSaveDraftEvent(e)}
+            className="btn-light"
+          >
+            Save Draft
+          </button>
         </div>
       </nav>
 
