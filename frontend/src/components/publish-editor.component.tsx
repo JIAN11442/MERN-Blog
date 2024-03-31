@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 import Tag from "./tag.component";
 import AniamationWrapper from "./page-animation.component";
 
-import useBlogStore from "../states/blog.state";
+import useBlogStore from "../states/editor-blog.state";
 
 import { FlatIcons } from "../icons/flaticons";
-import useAuthStore from "../states/auth.state";
+import useAuthStore from "../states/user-auth.state";
 
 const PublishEditor = () => {
   const navigate = useNavigate();

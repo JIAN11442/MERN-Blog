@@ -1,12 +1,12 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from "react-router-dom";
 
-import { FlatIcons } from '../icons/flaticons';
+import { FlatIcons } from "../icons/flaticons";
 
-import logo from '../imgs/logo.png';
-import useAuthStore from '../states/auth.state';
-import useCollapseStore from '../states/collapse.state';
-import UserNavigationPanel from './user-navigation.component';
-import AniamationWrapper from './page-animation.component';
+import logo from "../imgs/logo.png";
+import useAuthStore from "../states/user-auth.state";
+import useCollapseStore from "../states/collapse.state";
+import UserNavigationPanel from "./user-navigation.component";
+import AniamationWrapper from "./page-animation.component";
 
 const Navbar = () => {
   const currPath = useLocation().pathname;
@@ -132,7 +132,7 @@ const Navbar = () => {
 
           {/* Editor Button */}
           <Link
-            to={'/editor'}
+            to={"/editor"}
             className={`
               link
               hidden
@@ -195,14 +195,14 @@ const Navbar = () => {
             <>
               {/* Login Button */}
               <Link
-                to={'/signin'}
+                to={"/signin"}
                 className={`
                     ${
-                      currPath === '/signin'
-                        ? 'hidden md:block md:btn-dark'
-                        : currPath === '/signup'
-                        ? 'btn-dark md:btn-light'
-                        : 'btn-dark'
+                      currPath === "/signin"
+                        ? "hidden md:block md:btn-dark"
+                        : currPath === "/signup"
+                        ? "btn-dark md:btn-light"
+                        : "btn-dark"
                     }
                 `}
               >
@@ -211,14 +211,14 @@ const Navbar = () => {
 
               {/* Signup Button */}
               <Link
-                to={'/signup'}
+                to={"/signup"}
                 className={`
                   ${
-                    currPath === '/signup'
-                      ? 'hidden md:block md:btn-dark'
-                      : currPath === '/signin'
-                      ? 'btn-dark md:btn-light'
-                      : 'hidden'
+                    currPath === "/signup"
+                      ? "hidden md:block md:btn-dark"
+                      : currPath === "/signin"
+                      ? "btn-dark md:btn-light"
+                      : "hidden"
                   }
                 `}
               >
