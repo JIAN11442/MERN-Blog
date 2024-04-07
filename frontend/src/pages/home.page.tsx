@@ -1,5 +1,5 @@
-import InpageNavigation from '../components/inpage-navigation.component';
-import AniamationWrapper from '../components/page-animation.component';
+import InpageNavigation from "../components/inpage-navigation.component";
+import AniamationWrapper from "../components/page-animation.component";
 
 const Homepage = () => {
   return (
@@ -20,7 +20,7 @@ const Homepage = () => {
         {/* latest blogs */}
         <div className="w-full">
           <InpageNavigation
-            routes={['home', 'trending blogs']}
+            routes={["home", "trending blogs"]}
             defaultHiddenIndex={1}
           >
             <h1>Latest Blogs Here</h1>

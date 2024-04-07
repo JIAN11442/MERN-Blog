@@ -11,7 +11,7 @@
 
 @layer components {
   * {
-    @apply m-0 p-0 box-border text-base outline-purple-custom/30 duration-100;
+    @apply m-0 p-0 box-border outline-purple-custom/30 duration-100;
   }
 
   html {
@@ -155,11 +155,6 @@
     max-md:leading-normal !important;
   }
 
-  #textEditor *,
-  .blog-page-content * {
-    @apply font-gelasio text-[18px] md:text-2xl md:leading-10;
-  }
-
   #textEditor a,
   .blog-page-content a {
     @apply text-purple-custom underline hover:opacity-50;
@@ -176,15 +171,4 @@
   .blog-index {
     @apply text-4xl sm:text-3xl lg:text-5xl font-bold text-grey leading-none;
   }
-}
-
-.ce-block__content,
-.ce-toolbar__content {
-  max-width: 900px;
-}
-
-.cdx-settings-button[data-tune="withBorder"],
-.cdx-settings-button[data-tune="withBackground"],
-.cdx-settings-button[data-tune="stretched"] {
-  display: none;
 }

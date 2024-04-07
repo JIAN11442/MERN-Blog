@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "@flaticon/flaticon-uicons/css/all/all";
+
+.ProseMirror.ProseMirror-focused {
+  outline: none;
+}
+
+.tiptap {
+  > * + * {
+    margin-top: 0.75em;
+  }
+
+  pre {
+    background: #f9f8f8;
+    border-radius: 0.5rem;
+    tab-size: 2;
+    color: rgb(55, 53, 47);
+    padding: 0.75rem 1rem;
+    @apply overflow-y-hidden font-serif text-base;
+
+    code {
+      background: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    .hljs-comment,
+    .hljs-quote {
+      @apply text-gray-400;
+    }
+
+    .hljs-variable,
+    .hljs-template-variable,
+    .hljs-attribute,
+    .hljs-tag,
+    .hljs-name,
+    .hljs-regexp,
+    .hljs-link,
+    .hljs-name,
+    .hljs-selector-id,
+    .hljs-selector-class {
+      color: #fb5656;
+    }
+
+    .hljs-number,
+    .hljs-meta,
+    .hljs-built_in,
+    .hljs-builtin-name,
+    .hljs-literal,
+    .hljs-type,
+    .hljs-params {
+      color: #f79442;
+    }
+
+    .hljs-string,
+    .hljs-symbol,
+    .hljs-bullet {
+      color: #87af38;
+    }
+
+    .hljs-title,
+    .hljs-section {
+      color: #e05e79;
+    }
+
+    .hljs-keyword,
+    .hljs-selector-tag {
+      color: #278bb5;
+    }
+
+    .hljs-emphasis {
+      font-style: italic;
+    }
+
+    .hljs-strong {
+      font-weight: 700;
+    }
+  }
+}
+
+.languages-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 10px;
+}
+
+.languages-scrollbar::-webkit-scrollbar-track {
+  background: #edece9;
+}
+
+.languages-scrollbar::-webkit-scrollbar-thumb {
+  background: #d3d1cb;
+}
+
+.languages-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #aeaca6;
+}
