@@ -22,9 +22,9 @@ const BlogEditor = () => {
   const blogBannerRef = useRef<HTMLImageElement | null>(null);
   const editorRef = useRef<EditorJS | null>(null);
 
+  const { authUser } = useAuthStore();
   const { blog, setBlog, setTextEditor, textEditor, setEditorState } =
     useBlogStore();
-  const { authUser } = useAuthStore();
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -190,7 +190,7 @@ const BlogEditor = () => {
         holder: 'textEditor',
         tools: tools,
         data: blog.content, // { blocks: [] } or { time:? , blocks: [?] version: ?}
-        placeholder: "Let's write an awesome story",
+        placeholder: 'Enter text or type tab key to start writing...',
       });
 
       editorRef.current = editor;
@@ -204,6 +204,53 @@ const BlogEditor = () => {
       if (editorRef.current && editorRef.current.destroy) {
         editorRef.current.destroy();
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    // 創建一個帶有回調函數的觀察器(observer)
+    const observer = new MutationObserver((mutation) => {
+      // 監聽 textEditor 的變化
+      mutation.forEach((mut) => {
+        // 取得 textEditor 新增的節點
+        mut.addedNodes.forEach((node) => {
+          // 如果節點是元素節點
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            // 根據已知的目標 class 取得目標元素節點
+            const textarea = (node as HTMLElement).querySelector(
+              '.ce-code__textarea'
+            ) as HTMLTextAreaElement;
+            // 如果目標元素存在，監聽 input 事件並自動調整高度
+            if (textarea) {
+              textarea.addEventListener('input', () => {
+                textarea.style.height = 'auto';
+                textarea.style.height = `${textarea.scrollHeight}px`;
+              });
+            }
+          }
+        });
+      });
+    });
+
+    // 因為上一個 useEffect 會在組件渲染前會初始化 EditorJS
+    // 所以這裡可以確保 textEditor 一定會存在
+    // 而我們的目標是要監聽 textEditor 內的其他元素（codeblock）
+    const initialNode = document.getElementById('textEditor');
+
+    //  如果 textEditor 存在
+    if (initialNode) {
+      // 則使用剛創建的觀察器開始觀察 textEditor，
+      // 每次 textEditor 內的元素有變化時，就會觸發回調函數
+      // 也就是檢查是否有新增的 codeblock，並自動調整高度
+      observer.observe(initialNode, {
+        childList: true, // 觀察子節點的變化
+        subtree: true, // 觀察所有後代節點
+      });
+    }
+
+    // 返回一個清理函數，用於在組件卸載時關閉觀察器
+    return () => {
+      observer.disconnect();
     };
   }, []);
 

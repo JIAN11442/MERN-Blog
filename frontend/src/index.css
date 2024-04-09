@@ -1,5 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Gelasio&family=Inter:wght@400;500&display=swap");
-@import "@flaticon/flaticon-uicons/css/all/all";
+@import url('https://fonts.googleapis.com/css2?family=Gelasio&family=Inter:wght@400;500&display=swap');
+@import '@flaticon/flaticon-uicons/css/all/all';
 
 @tailwind base;
 @tailwind components;
@@ -135,11 +135,20 @@
     @apply text-black-custom border-r-2 border-black-custom pl-6 bg-grey-custom/50 -ml-6 md:rounded-tl-lg md:rounded-bl-lg max-md:border-none;
   }
 
+  #textEditor h1 {
+    @apply font-inter
+    text-4xl
+    md:text-[40px]
+    leading-normal
+    font-bold
+    max-md:leading-snug !important;
+  }
+
   #textEditor h2,
   h2 {
     @apply font-inter
-    text-2xl
-    md:text-[25px]
+    text-3xl
+    md:text-[30px]
     leading-normal
     font-semibold
     max-md:leading-snug !important;
@@ -148,16 +157,26 @@
   #textEditor h3,
   h3 {
     @apply font-inter
-    text-[18px]
-    md:text-2xl
-    font-semibold
+    text-2xl
+    md:text-[25px]
+    font-medium
+    leading-loose
+    max-md:leading-normal !important;
+  }
+
+  #textEditor h4,
+  h4 {
+    @apply font-inter
+    text-xl
+    md:text-[20px]
+    font-medium
     leading-loose
     max-md:leading-normal !important;
   }
 
   #textEditor *,
   .blog-page-content * {
-    @apply font-gelasio text-[18px] md:text-2xl md:leading-10;
+    @apply font-mono text-[16px] md:text-[17px] leading-4 md:leading-5;
   }
 
   #textEditor a,
@@ -183,8 +202,83 @@
   max-width: 900px;
 }
 
-.cdx-settings-button[data-tune="withBorder"],
-.cdx-settings-button[data-tune="withBackground"],
-.cdx-settings-button[data-tune="stretched"] {
+.cdx-settings-button[data-tune='withBorder'],
+.cdx-settings-button[data-tune='withBackground'],
+.cdx-settings-button[data-tune='stretched'] {
   display: none;
+}
+
+/* ------------ 關於 @editorjs/code -------------- */
+
+.ce-code__textarea {
+  @apply border-0
+    p-5
+    rounded-md
+    resize-none
+    font-mono
+    text-lg
+    text-gray-600
+    leading-6
+    max-h-[500px]
+    bg-gray-50
+    !important;
+}
+
+/* 定义滚动条的宽度 */
+/* .ce-code__textarea::-webkit-scrollbar {
+  @apply w-0 h-0;
+} */
+
+/* ------------ 關於 @bomdi/codebox -------------- */
+
+/* 調整 plus 和 setting 的位置 */
+.ce-toolbar__actions {
+  @apply absolute top-[calc(100%-5px)];
+}
+
+/* 調整 plus 和 setting svg icon 的顏色*/
+.ce-toolbar__actions .ce-toolbar__plus,
+.ce-toolbar__settings-btn svg {
+  @apply text-grey-dark/50;
+}
+
+/* 調整 editorjs 的 placeholder */
+.ce-paragraph[data-placeholder]:empty::before {
+  @apply text-grey-dark/50;
+}
+
+/* 調整 Heading placeholder */
+.ce-header[contentEditable='true'][data-placeholder]:before {
+  @apply text-grey-dark/30;
+}
+
+/* 調整選項單每個 item 的空間 */
+.ce-popover-item__title {
+  @apply p-1;
+}
+
+/* 調整 codeblock 框*/
+.hljs {
+  @apply p-6 rounded-md overflow-hidden !important;
+}
+
+/* 調整 codeblock 內容的上下距離
+   實際 text 內容無法全部調整，比如大小等，因為 editorjs 解析的 element 分類有問題 */
+.codeBoxTextArea span {
+  @apply leading-7 !important;
+}
+
+/* 調整包裹 codeblock 語言選單的 div 外框 */
+.codeBoxSelectDiv {
+  @apply w-full justify-end items-end;
+}
+
+/* 隱藏 codeblock 語言選單中不必要的 icon */
+.codeBoxSelectDropIcon {
+  @apply hidden;
+}
+
+/* 調整 codeblock 選單 */
+.codeBoxSelectInput {
+  @apply rounded-md bg-opacity-0 text-end p-2 text-grey-dark/30 absolute;
 }
