@@ -12,4 +12,5 @@ export default cleanEnv(process.env, {
   AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE: str(),
   BLOG_DES_CHAR_LIMIT: num(),
   BLOG_TAGS_LIMIT: num(),
+  GET_LATEST_BLOGS_LIMIT: num(),
 });

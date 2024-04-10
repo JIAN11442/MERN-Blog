@@ -176,7 +176,7 @@
 
   #textEditor *,
   .blog-page-content * {
-    @apply font-mono text-[16px] md:text-[17px] leading-4 md:leading-5;
+    @apply font-mono text-[16px] md:text-[17px] leading-6 md:leading-8;
   }
 
   #textEditor a,

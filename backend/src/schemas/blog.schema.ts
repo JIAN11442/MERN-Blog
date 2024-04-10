@@ -19,9 +19,13 @@ const blogSchema = new Schema(
     comments: { type: [Schema.Types.ObjectId], ref: 'comments' },
     draft: { type: Boolean, default: false },
   },
-  { timestamps: true },
+  {
+    timestamps: {
+      createdAt: 'publishedAt',
+    },
+  },
 );
 
 type BlogSchemaType = InferSchemaType<typeof blogSchema>;
 
-export default model<BlogSchemaType>('Blog', blogSchema);
+export default model<BlogSchemaType>('blogs', blogSchema);

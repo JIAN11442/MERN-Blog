@@ -1,1 +1,1 @@
-GET http://localhost:5000/api/aws/get-upload-url
+GET http://localhost:5000/api/blog/latest-blogs

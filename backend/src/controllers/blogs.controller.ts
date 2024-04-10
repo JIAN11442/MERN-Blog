@@ -6,9 +6,12 @@ import createHttpError from 'http-errors';
 
 import { ValidateForPublishBlog } from '../utils/validateController.util';
 import { generateBlogID } from '../utils/generate.util';
+import env from '../utils/validateEnv.util';
 
 import BlogSchema from '../schemas/blog.schema';
 import UserSchema from '../schemas/user.schema';
+
+const getLatestBlogLimit = env.GET_LATEST_BLOGS_LIMIT;
 
 export const createBlog: RequestHandler = async (req, res, next) => {
   try {
@@ -63,6 +66,25 @@ export const createBlog: RequestHandler = async (req, res, next) => {
 
     // 反之，回傳成功訊息
     res.status(200).json({ message: 'Blog created successfully', blogId: newBlog.blog_id });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+export const getLatestBlogs: RequestHandler = async (req, res, next) => {
+  try {
+    const latestBlogs = await BlogSchema.find({ draft: true })
+      .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+      .sort({ publishedAt: -1 })
+      .select('blog_id title')
+      .limit(getLatestBlogLimit);
+
+    if (!latestBlogs) {
+      throw createHttpError(404, 'No latest blogs found.');
+    }
+
+    res.status(200).json({ latestBlogs });
   } catch (error) {
     console.log(error);
     next(error);
