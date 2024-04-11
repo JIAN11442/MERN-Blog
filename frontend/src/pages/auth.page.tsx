@@ -1,16 +1,16 @@
-import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
-import axios from "axios";
-import toast from "react-hot-toast";
+import { useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
-import googleIcon from "../imgs/google.png";
+import googleIcon from '../imgs/google.png';
 
-import InputBox from "../components/input-box.component";
+import InputBox from '../components/input-box.component';
 
-import useAuthStore from "../states/user-auth.state";
+import useAuthStore from '../states/user-auth.state';
 
-import AniamationWrapper from "../components/page-animation.component";
-import { authWithGoogleUsingPopUp } from "../commons/firebase.common";
+import AniamationWrapper from '../components/page-animation.component';
+import { authWithGoogleUsingPopUp } from '../commons/firebase.common';
 
 interface UserAuthFormProps {
   type: string;
@@ -18,9 +18,9 @@ interface UserAuthFormProps {
 
 const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
   const [formData, setFormData] = useState({
-    fullname: "",
-    email: "",
-    password: "",
+    fullname: '',
+    email: '',
+    password: '',
   });
   const { authUser, setAuthUser } = useAuthStore();
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +33,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
       .post(requestUrl, formData)
       .then(({ data }) => {
         if (data.message && data.user) {
-          sessionStorage.setItem("access_token", data.user.access_token);
+          sessionStorage.setItem('access_token', data.user.access_token);
           setAuthUser(data.user);
           toast.success(data.message);
         }
@@ -45,11 +45,11 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
         } else if (error.request) {
           // 請求發出但沒有收到回應
           console.log(error.request);
-          toast.error("Request made but no response received");
+          toast.error('Request made but no response received');
         } else {
           // 在設定請求時出現錯誤
           console.log(error.message);
-          toast.error("Request setup error: ", error.message);
+          toast.error('Request setup error: ', error.message);
         }
       });
   };
@@ -61,7 +61,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
     authWithGoogleUsingPopUp()
       .then((user) => {
         if (user) {
-          const serverRoute = "/auth/google-auth";
+          const serverRoute = '/auth/google-auth';
           const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
           const formData = {
             access_token: (user as { accessToken?: string })?.accessToken,
@@ -70,7 +70,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
         }
       })
       .catch((error) => {
-        toast.error("trouble login through google");
+        toast.error('trouble login through google');
         return console.log(error);
       });
   };
@@ -118,7 +118,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
               mb-24
             "
           >
-            {type === "sign-in" ? "Welcome back" : "Join us today"}
+            {type === 'sign-in' ? 'Welcome back' : 'Join us today'}
           </h1>
 
           {/* Username InputBox */}
@@ -129,7 +129,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
             placeholder="Fullname"
             onChange={(e) => handleInput(e)}
             icon="fi fi-rr-user"
-            className={`${type !== "sign-in" ? "flex" : "hidden"}`}
+            className={`${type !== 'sign-in' ? 'flex' : 'hidden'}`}
           />
 
           {/* Email InputBox */}
@@ -161,7 +161,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
               mt-14
             "
           >
-            {type.replace("-", " ")}
+            {type.replace('-', ' ')}
           </button>
 
           {/* Separate Line */}
@@ -203,7 +203,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
 
           {/* Navigation */}
           <div>
-            {type === "sign-in" ? (
+            {type === 'sign-in' ? (
               <p
                 className="
                   mt-10

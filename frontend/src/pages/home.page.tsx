@@ -7,9 +7,11 @@ import AniamationWrapper from '../components/page-animation.component';
 import useHomeBlogStore from '../states/home-blog.state';
 import Loader from '../components/loader.component';
 import BlogPostCard from '../components/blog-card.component';
+import useCollapseStore from '../states/collapse.state';
 
 const Homepage = () => {
   const { latestBlogs, setLatestBlogs } = useHomeBlogStore();
+  const { searchBarVisibility } = useCollapseStore();
 
   // fetch latest blogs
   useEffect(() => {
@@ -36,12 +38,13 @@ const Homepage = () => {
       transition={{ duration: 1 }}
     >
       <section
-        className="
+        className={`
           flex
           h-cover
-          justify-center
           gap-10
-        "
+          justify-center
+          ${searchBarVisibility ? 'translate-y-[80px]' : ''}
+        `}
       >
         {/* latest blogs */}
         <div className="w-full">

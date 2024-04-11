@@ -29,7 +29,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ author, content }) => {
       to={`/blog/${id}`}
       className="
         flex
-        gap-8
+        gap-10
         items-center
         border-b
         border-grey-custom
@@ -38,7 +38,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ author, content }) => {
       "
     >
       {/* Left side blog information */}
-      <div className="w-full">
+      <div className="w-full min-w-[200px]">
         {/* Blog Author */}
         <div className="flex items-center gap-3 mb-7">
           {/* author image */}
@@ -65,12 +65,11 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ author, content }) => {
           {/* Description */}
           <p
             className="
-              text-[18px]
-              font-serif
-              leading-7
+              text-[17px]
+              font-gelasio
+              leading-8
               line-clamp-2
               max-sm:hidden
-              md:max-[1100px]:hidden
               transition
             "
           >
@@ -80,7 +79,9 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ author, content }) => {
 
         {/* Tags && Like*/}
         <div className="flex gap-4 mt-7">
-          <span className="btn-light py-1.5 px-4">{tags && tags[0]}</span>
+          <span className="btn-light py-1.5 px-4 truncate">
+            {tags && tags[0]}
+          </span>
           <span className="flex ml-2 items-center gap-2 text-grey-dark">
             <FlatIcons name="fi fi-rr-heart" className="text-xl" />
             {total_likes}

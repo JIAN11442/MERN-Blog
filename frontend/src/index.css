@@ -27,7 +27,7 @@
   }
 
   section {
-    @apply py-4 px-[5vw] md:px-[7vw] lg:px-[10vw];
+    @apply py-4 px-[5vw] mx-5 md:mx-0 md:px-[7vw] lg:px-[10vw];
   }
 
   ::selection {
@@ -189,7 +189,7 @@
   }
 
   .blog-title {
-    @apply text-[18px] md:text-[19px] xl:text-2xl font-semibold line-clamp-3 sm:line-clamp-2;
+    @apply text-[18px] sm:text-[20px] md:text-[22px] font-semibold line-clamp-3 sm:line-clamp-2;
   }
 
   .blog-index {

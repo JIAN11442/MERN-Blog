@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 
 interface AniamationWrapperProps {
+  ref?: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
   keyValue?: string;
   initial: { opacity: number };
@@ -10,6 +11,7 @@ interface AniamationWrapperProps {
 }
 
 const AniamationWrapper: React.FC<AniamationWrapperProps> = ({
+  ref,
   children,
   keyValue,
   initial,
@@ -20,6 +22,7 @@ const AniamationWrapper: React.FC<AniamationWrapperProps> = ({
   return (
     <AnimatePresence>
       <motion.div
+        ref={ref}
         key={keyValue}
         initial={initial}
         animate={animate}
