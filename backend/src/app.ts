@@ -45,7 +45,7 @@ app.use(
 
 app.use('/api/aws', awsRoute);
 app.use('/api/auth', userRoute);
-app.use('/api/blog', blogRoute);
+app.use('/api/blogs', blogRoute);
 
 // Error handling
 app.use((req, res, next) => {

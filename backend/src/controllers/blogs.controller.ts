@@ -74,14 +74,19 @@ export const createBlog: RequestHandler = async (req, res, next) => {
 
 export const getLatestBlogs: RequestHandler = async (req, res, next) => {
   try {
-    const latestBlogs = await BlogSchema.find({ draft: true })
-      .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+    // 1. 取得 draft 為 false，也就是不是草稿的那些 blogs
+    // 2. 依照 publishedAt 降冪排序(大到小)，也就是最新的 blog 會在最前面
+    // 3. 只選取 blog_id, title, banner, des, activity, tags, publishedAt 這些資料(還有 author 資料，也就是第 4 點)
+    // 4. 並根據 author 的 id，移植或填充(populate)該 id 對應 schema 中 ref 對象(users)的數據，也就是作者資料到 author 中
+    // 5. 限制回傳的數量
+    const latestBlogs = await BlogSchema.find({ draft: false })
       .sort({ publishedAt: -1 })
-      .select('blog_id title')
+      .select('blog_id title banner des activity tags publishedAt -_id')
+      .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
       .limit(getLatestBlogLimit);
 
     if (!latestBlogs) {
-      throw createHttpError(404, 'No latest blogs found.');
+      throw createHttpError(500, 'No latest blogs found.');
     }
 
     res.status(200).json({ latestBlogs });
