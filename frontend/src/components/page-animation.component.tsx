@@ -5,7 +5,7 @@ interface AniamationWrapperProps {
   keyValue?: string;
   initial: { opacity: number };
   animate: { opacity: number };
-  transition: { duration: number };
+  transition: { duration: number; delay?: number };
   className?: string;
 }
 

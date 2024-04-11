@@ -6,6 +6,7 @@ import AniamationWrapper from '../components/page-animation.component';
 
 import useHomeBlogStore from '../states/home-blog.state';
 import Loader from '../components/loader.component';
+import BlogPostCard from '../components/blog-card.component';
 
 const Homepage = () => {
   const { latestBlogs, setLatestBlogs } = useHomeBlogStore();
@@ -13,7 +14,7 @@ const Homepage = () => {
   // fetch latest blogs
   useEffect(() => {
     const requestURL =
-      import.meta.env.VITE_SERVER_DOMAIN + '/blogs/latest-blogs';
+      import.meta.env.VITE_SERVER_DOMAIN + '/blog/latest-blogs';
 
     axios
       .get(requestURL)
@@ -54,7 +55,18 @@ const Homepage = () => {
               ) : (
                 <div>
                   {latestBlogs.map((blog, i) => (
-                    <h1 key={i}>{blog.title}</h1>
+                    // delay: i * 0.1 可以讓每個 blog card 依次延遲出現
+                    <AniamationWrapper
+                      key={blog.title}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 1, delay: i * 0.1 }}
+                    >
+                      <BlogPostCard
+                        author={blog.author?.personal_info ?? {}}
+                        content={blog}
+                      />
+                    </AniamationWrapper>
                   ))}
                 </div>
               )}

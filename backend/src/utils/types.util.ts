@@ -2,6 +2,10 @@ import type mongoose from 'mongoose';
 import type { InferSchemaType } from 'mongoose';
 import type { OutputData } from '@editorjs/editorjs';
 import { userSchema } from '../schemas/user.schema';
+import { blogSchema } from '../schemas/blog.schema';
+
+export type UserSchemaType = InferSchemaType<typeof userSchema>;
+export type BlogSchemaType = InferSchemaType<typeof blogSchema>;
 
 export interface SignUpBody {
   fullname: string;
@@ -14,8 +18,6 @@ export interface SignInBody {
   password: string;
 }
 
-export type UserSchemaType = InferSchemaType<typeof userSchema>;
-
 export interface GenarateDataType {
   access_token: string;
   profile_img: string;
@@ -27,7 +29,24 @@ export interface UserRequestType extends UserSchemaType {
   _id: mongoose.Types.ObjectId;
 }
 
+export interface AuthorStructureType {
+  fullname?: string;
+  email?: string;
+  password?: string;
+  username?: string;
+  bio?: string;
+  profile_img?: string;
+}
+
+export interface ActivityStructureType {
+  total_likes: number;
+  total_comments: number;
+  total_reads: number;
+  total_parent_comments: number;
+}
+
 export interface BlogStructureType {
+  blog_id?: string;
   title?: string;
   banner?: string;
   content?: OutputData;
@@ -35,13 +54,8 @@ export interface BlogStructureType {
   des?: string;
   draft?: boolean;
   author?: {
-    personal_info: {
-      fullname?: string;
-      email?: string;
-      password?: string;
-      username?: string;
-      bio?: string;
-      personal_img?: string;
-    };
+    personal_info: AuthorStructureType;
   };
+  activity: ActivityStructureType;
+  publishedAt?: string;
 }

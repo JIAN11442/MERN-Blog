@@ -1,7 +1,8 @@
-import { InferSchemaType, Schema, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import env from '../utils/validateEnv.util';
+import type { BlogSchemaType } from '../utils/types.util';
 
-const blogSchema = new Schema(
+export const blogSchema = new Schema(
   {
     blog_id: { type: String, require: true, unique: true },
     title: { type: String, require: true },
@@ -26,6 +27,6 @@ const blogSchema = new Schema(
   },
 );
 
-type BlogSchemaType = InferSchemaType<typeof blogSchema>;
+// type BlogSchemaType = InferSchemaType<typeof blogSchema>;
 
 export default model<BlogSchemaType>('blogs', blogSchema);
