@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { useEffect, useRef } from 'react';
@@ -10,14 +11,17 @@ interface InpageNavigationProps {
   children: React.ReactNode;
 }
 
+export let activeButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
+export let activeTabLineRef: React.MutableRefObject<HTMLHRElement | null>;
+
 const InpageNavigation: React.FC<InpageNavigationProps> = ({
   routes,
   defaultHiddenIndex,
   initialActiveIndex = 0,
   children,
 }) => {
-  const activeButtonRef = useRef<HTMLButtonElement>(null);
-  const activeTabLineRef = useRef<HTMLHRElement>(null);
+  activeButtonRef = useRef<HTMLButtonElement>(null);
+  activeTabLineRef = useRef<HTMLHRElement>(null);
 
   const { inPageNavIndex, setInPageNavIndex } = useHomeBlogStore();
 

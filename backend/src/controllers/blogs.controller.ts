@@ -13,6 +13,7 @@ import UserSchema from '../schemas/user.schema';
 
 const getLatestBlogLimit = env.GET_LATEST_BLOGS_LIMIT;
 
+// 創建文章
 export const createBlog: RequestHandler = async (req, res, next) => {
   try {
     // 因為在執行 createBlog 前已執行 jwtVerify controller,
@@ -72,6 +73,7 @@ export const createBlog: RequestHandler = async (req, res, next) => {
   }
 };
 
+// 取得最新的文章
 export const getLatestBlogs: RequestHandler = async (req, res, next) => {
   try {
     // 1. 取得 draft 為 false，也就是不是草稿的那些 blogs
@@ -90,6 +92,26 @@ export const getLatestBlogs: RequestHandler = async (req, res, next) => {
     }
 
     res.status(200).json({ latestBlogs });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得熱門文章
+export const getTrendingBlogs: RequestHandler = async (req, res, next) => {
+  try {
+    const trendingBlogs = await BlogSchema.find({ draft: false })
+      .select('blog_id title tags publishedAt -_id')
+      .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+      .sort({ 'activity.total_read': -1, 'activity.total_likes': -1, publishedAt: -1 })
+      .limit(env.GET_TRENDING_BLOGS_LIMIT);
+
+    if (!trendingBlogs) {
+      throw createHttpError(500, 'No trending blogs found.');
+    }
+
+    res.status(200).json({ trendingBlogs });
   } catch (error) {
     console.log(error);
     next(error);

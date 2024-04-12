@@ -1,24 +1,36 @@
 import { useEffect } from 'react';
 import axios from 'axios';
 
-import InpageNavigation from '../components/inpage-navigation.component';
+import InpageNavigation, {
+  activeButtonRef,
+} from '../components/inpage-navigation.component';
 import AniamationWrapper from '../components/page-animation.component';
-
-import useHomeBlogStore from '../states/home-blog.state';
 import Loader from '../components/loader.component';
-import BlogPostCard from '../components/blog-card.component';
+import BlogPostCard from '../components/blog-card-banner.component';
+import MinimalBlogPostCard from '../components/blog-card-nobanner.component';
+
 import useCollapseStore from '../states/collapse.state';
+import useHomeBlogStore from '../states/home-blog.state';
+import { FlatIcons } from '../icons/flaticons';
 
 const Homepage = () => {
-  const { latestBlogs, setLatestBlogs } = useHomeBlogStore();
   const { searchBarVisibility } = useCollapseStore();
+  const {
+    latestBlogs,
+    setLatestBlogs,
+    trendingBlogs,
+    setTrendingBlogs,
+    inPageNavState,
+    setInPageNavState,
+    categories,
+    setCategories,
+  } = useHomeBlogStore();
 
-  // fetch latest blogs
-  useEffect(() => {
+  const fetchLatestBlogs = async () => {
     const requestURL =
       import.meta.env.VITE_SERVER_DOMAIN + '/blog/latest-blogs';
 
-    axios
+    await axios
       .get(requestURL)
       .then(({ data }) => {
         if (data.latestBlogs.length) {
@@ -28,7 +40,86 @@ const Homepage = () => {
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  };
+  const fetchTrendingBlogs = async () => {
+    const requestURL =
+      import.meta.env.VITE_SERVER_DOMAIN + '/blog/trending-blogs';
+
+    await axios
+      .get(requestURL)
+      .then(({ data }) => {
+        if (data.trendingBlogs.length) {
+          setTrendingBlogs(data.trendingBlogs);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // const categories = [
+  //   'programming',
+  //   'hollywood',
+  //   'film making',
+  //   'social media',
+  //   'cooking',
+  //   'tech',
+  //   'finance',
+  //   'travel',
+  // ];
+
+  const loadBlogByCategory = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // 取得 Button 的文字內容
+    const category = e.currentTarget.textContent?.toLowerCase();
+
+    //  點擊後立馬清空 latestBlogs，讓它為 null，觸發 loading 狀態
+    setLatestBlogs(null);
+
+    // 接著防止重複點擊，或是點擊相同的分類，直接返回 home
+    // 如果 inPageNavState 已經是 category，則設定為 home
+    if (inPageNavState === category) {
+      setInPageNavState('home');
+      return;
+    }
+
+    // 反之如果 inPageNavState 與 category 不一樣，
+    // 則將 inPageNavState 設定為 category，改變分類名稱及內容
+    setInPageNavState(category!);
+  };
+
+  // fetch latest blogs
+  useEffect(() => {
+    // 為了讓 InpageNavigation 的 hr 長度在變更 inpageNavState 後可以與內容吻合，
+    // 我們需要在這裡特別點擊 activeButtonRef 促使 changePageState() 中的 btn 改變
+    // 使得 hr 的 left 和 width 屬性可以正確設定
+    activeButtonRef.current?.click();
+
+    // 如果 inPageNavState 是 home，則 fetch 最新的 blog
+    if (inPageNavState === 'home') {
+      fetchLatestBlogs();
+    }
+
+    // 如果 inPageNavState 是 trending blogs，則 fetch 熱門的 blog
+    if (!trendingBlogs) {
+      fetchTrendingBlogs();
+    }
+  }, [inPageNavState]);
+
+  useEffect(() => {
+    if (trendingBlogs) {
+      const tags = Array.from(
+        new Set(
+          trendingBlogs
+            .flatMap((blog) => (blog.tags ? blog.tags : []))
+            .filter(Boolean)
+        )
+      );
+
+      if (tags.length) {
+        setCategories(tags);
+      }
+    }
+  }, [trendingBlogs]);
 
   return (
     <AniamationWrapper
@@ -43,18 +134,19 @@ const Homepage = () => {
           h-cover
           gap-10
           justify-center
-          ${searchBarVisibility ? 'translate-y-[80px]' : ''}
+          ${searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''}
         `}
       >
-        {/* latest blogs */}
         <div className="w-full">
+          {/* homepage */}
           <InpageNavigation
-            routes={['home', 'trending blogs']}
+            routes={[inPageNavState, 'trending blogs']}
             defaultHiddenIndex={1}
           >
+            {/* Latest blogs */}
             <>
               {latestBlogs === null ? (
-                <Loader loader={{ speed: 1, size: 30 }} />
+                <Loader loader={{ speed: 1, size: 50 }} />
               ) : (
                 <div>
                   {latestBlogs.map((blog, i) => (
@@ -74,12 +166,97 @@ const Homepage = () => {
                 </div>
               )}
             </>
-            <h1>Trending Blogs Here</h1>
+            {/* Trending blogs */}
+            <>
+              {trendingBlogs === null ? (
+                <Loader loader={{ speed: 1, size: 50 }} />
+              ) : (
+                <div>
+                  {trendingBlogs.map((blog, i) => (
+                    <AniamationWrapper
+                      key={blog.title}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 1, delay: i * 0.1 }}
+                    >
+                      <MinimalBlogPostCard blog={blog} index={i} />
+                    </AniamationWrapper>
+                  ))}
+                </div>
+              )}
+            </>
           </InpageNavigation>
         </div>
 
         {/* filters and trending blogs */}
-        <div></div>
+        <div
+          className="
+            min-w-[40%]
+            lg:min-w-[400px]
+            max-w-min
+            border-l
+            border-grey-custom
+            pl-8
+            pt-3
+            max-md:hidden
+          "
+        >
+          <div className="flex flex-col gap-10">
+            {/* Trending tags */}
+            <div>
+              {/* Title */}
+              <h1 className="text-xl font-medium mb-8">
+                Stories from all interests
+              </h1>
+              {/* Tags */}
+              <div className="flex flex-wrap gap-3">
+                {categories !== null &&
+                  categories.map((category, i) => (
+                    <button
+                      key={i}
+                      className={`
+                      text-nowrap
+                      ${
+                        category === inPageNavState
+                          ? 'btn-dark text-white'
+                          : 'tag'
+                      }`}
+                      onClick={(e) => loadBlogByCategory(e)}
+                    >
+                      {category}
+                    </button>
+                  ))}
+              </div>
+            </div>
+
+            {/* Trending blogs */}
+            <div>
+              {/* Title */}
+              <h1 className="text-xl font-medium mb-8">
+                Trending <FlatIcons name="fi fi-rr-arrow-trend-up" />
+              </h1>
+              {/* Blogs */}
+              <div>
+                {trendingBlogs === null ? (
+                  <Loader loader={{ speed: 1, size: 30 }} />
+                ) : (
+                  <div>
+                    {trendingBlogs.map((blog, i) => (
+                      <AniamationWrapper
+                        key={blog.title}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1, delay: i * 0.1 }}
+                      >
+                        <MinimalBlogPostCard blog={blog} index={i} />
+                      </AniamationWrapper>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </AniamationWrapper>
   );

@@ -46,15 +46,13 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ author, content }) => {
           {/* author fullname && username*/}
           <p className="flex gap-x-1">
             <span>{fullname}</span>
-            <span className="hidden md:flex gap-x-1">
-              <span>·</span>
+            <span>·</span>
+            <span className="hidden md:flex gap-x-1 text-blue-500">
               <span>@{username}</span>
             </span>
           </p>
           {/* blog post date */}
-          <p className="min-w-fit text-grey-dark/60 ml-2">
-            {getDate(publishedAt!)}
-          </p>
+          <p className="min-w-fit text-grey-dark/60">{getDate(publishedAt!)}</p>
         </div>
 
         {/* Blog Title && Description */}
