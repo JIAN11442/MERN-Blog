@@ -22,7 +22,7 @@ const useBlogFetch = () => {
     await axios
       .post(requestURL, { tag: category })
       .then(({ data }) => {
-        if (data.tagBlogs.length) {
+        if (data.tagBlogs) {
           setLatestBlogs(data.tagBlogs);
         }
       })
@@ -38,8 +38,9 @@ const useBlogFetch = () => {
     await axios
       .get(requestURL)
       .then(({ data }) => {
-        if (data.trendingTags.length) {
-          setCategories(data.trendingTags);
+        if (data.trendingTags) {
+          const newCategories = [...data.trendingTags, 'nothing test'];
+          setCategories(newCategories);
         }
       })
       .catch((error) => {
@@ -55,7 +56,7 @@ const useBlogFetch = () => {
     await axios
       .get(requestURL)
       .then(({ data }) => {
-        if (data.trendingBlogs.length) {
+        if (data.trendingBlogs) {
           setTrendingBlogs(data.trendingBlogs);
         }
       })
@@ -72,7 +73,7 @@ const useBlogFetch = () => {
     await axios
       .get(requestURL)
       .then(({ data }) => {
-        if (data.latestBlogs.length) {
+        if (data.latestBlogs) {
           setLatestBlogs(data.latestBlogs);
         }
       })

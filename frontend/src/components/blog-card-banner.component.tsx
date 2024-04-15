@@ -1,11 +1,11 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import type {
   AuthorStructureType,
   BlogStructureType,
-} from '../../../backend/src/utils/types.util';
+} from "../../../backend/src/utils/types.util";
 
-import { getDate } from '../commons/date.common';
-import { FlatIcons } from '../icons/flaticons';
+import { getDate } from "../commons/date.common";
+import { FlatIcons } from "../icons/flaticons";
 
 interface BlogPostCardProps {
   author: AuthorStructureType;
@@ -20,7 +20,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ author, content }) => {
     title,
     des,
     banner,
-    activity: { total_likes },
+    activity,
     blog_id: id,
   } = content;
 
@@ -44,7 +44,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ author, content }) => {
           {/* author image */}
           <img src={profile_img} className="w-8 h-8 rounded-full" />
           {/* author fullname && username*/}
-          <p className="flex gap-x-1">
+          <p className="flex gap-x-1 text-nowrap">
             <span>{fullname}</span>
             <span>·</span>
             <span className="hidden md:flex gap-x-1 text-blue-500">
@@ -82,7 +82,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ author, content }) => {
           </span>
           <span className="flex ml-2 items-center gap-2 text-grey-dark">
             <FlatIcons name="fi fi-rr-heart" className="text-xl" />
-            {total_likes}
+            {activity?.total_likes}
           </span>
         </div>
       </div>

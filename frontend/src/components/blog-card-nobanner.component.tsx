@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import type { BlogStructureType } from '../../../backend/src/utils/types.util';
-import { getDate } from '../commons/date.common';
+import { Link } from "react-router-dom";
+import type { BlogStructureType } from "../../../backend/src/utils/types.util";
+import { getDate } from "../commons/date.common";
 
 interface MinimalBlogPostCardProps {
   blog: BlogStructureType;
@@ -12,7 +12,7 @@ const MinimalBlogPostCard: React.FC<MinimalBlogPostCardProps> = ({
   index,
 }) => {
   const { title, publishedAt, blog_id: id, author } = blog;
-  const { fullname, username, profile_img } = author?.personal_info || {};
+  const { fullname, profile_img } = author?.personal_info || {};
 
   return (
     <Link
@@ -25,7 +25,7 @@ const MinimalBlogPostCard: React.FC<MinimalBlogPostCardProps> = ({
     >
       {/* Index */}
       <h1 className="blog-index">
-        {index < 10 ? '0' + (index + 1) : index + 1}
+        {index < 10 ? "0" + (index + 1) : index + 1}
       </h1>
 
       <div>
@@ -34,7 +34,7 @@ const MinimalBlogPostCard: React.FC<MinimalBlogPostCardProps> = ({
           {/* author image */}
           <img src={profile_img} className="w-8 h-8 rounded-full" />
           {/* author fullname && username*/}
-          <p className="flex gap-x-1">
+          <p className="flex gap-x-1 text-nowrap">
             <span>{fullname}</span>
             {/* <span>·</span> */}
             {/* <span className="hidden xl:flex gap-x-1 text-blue-500">
