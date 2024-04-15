@@ -5,4 +5,4 @@
 #     "tag": "swot",
 # }
 
-GET http://localhost:5000/api/auth/authentication
+GET http://localhost:5000/api/blog/trending-tags

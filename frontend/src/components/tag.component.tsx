@@ -1,6 +1,7 @@
-import toast from "react-hot-toast";
-import { FlatIcons } from "../icons/flaticons";
-import useBlogStore from "../states/editor-blog.state";
+import toast from 'react-hot-toast';
+import { FlatIcons } from '../icons/flaticons';
+
+import useEditorBlogStore from '../states/editor-blog.state';
 
 interface TagProps {
   tag: string;
@@ -8,14 +9,14 @@ interface TagProps {
 }
 
 const Tag: React.FC<TagProps> = ({ tag, index }) => {
-  const { isTagEdit, setIsTagEdit, blog, setBlog } = useBlogStore();
+  const { isTagEdit, setIsTagEdit, blog, setBlog } = useEditorBlogStore();
 
   const handleTagDelete = () => {
     const tags = blog.tags?.filter((t) => t !== tag);
     setBlog({ ...blog, tags });
   };
   const handleTagOnKeyDown = (e: React.KeyboardEvent<HTMLParagraphElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
+    if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       e.currentTarget.blur();
     }
@@ -33,7 +34,7 @@ const Tag: React.FC<TagProps> = ({ tag, index }) => {
       setIsTagEdit({ state: true, index: index });
       e.currentTarget.focus();
 
-      return toast.error("Tag cannot be empty!");
+      return toast.error('Tag cannot be empty!');
     }
     setIsTagEdit({ state: false, index: null });
   };
@@ -83,7 +84,7 @@ const Tag: React.FC<TagProps> = ({ tag, index }) => {
           -top-2
           right-0
           hidden
-          ${!isTagEdit.state && "group-hover:block"}
+          ${!isTagEdit.state && 'group-hover:block'}
         `}
       >
         <FlatIcons

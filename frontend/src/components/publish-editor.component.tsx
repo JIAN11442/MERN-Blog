@@ -3,13 +3,13 @@ import toast from 'react-hot-toast';
 import Tag from './tag.component';
 import AniamationWrapper from './page-animation.component';
 
-import useBlogStore from '../states/editor-blog.state';
+import useEditorBlogStore from '../states/editor-blog.state';
 import { FlatIcons } from '../icons/flaticons';
 import useBlogFetch from '../fetchs/blog.fetch';
 
 const PublishEditor = () => {
   const { setEditorState, blog, setBlog, characterLimit, tagsLimit } =
-    useBlogStore();
+    useEditorBlogStore();
   const { PublishCompleteBlog } = useBlogFetch();
 
   const handleCloseEvent = () => {

@@ -5,7 +5,7 @@ import type { RequestHandler } from 'express';
 import createHttpError from 'http-errors';
 
 import { ValidateForPublishBlog } from '../utils/validateController.util';
-import { generateBlogID } from '../utils/generate.util';
+import { generateBlogID, generateTagsWithLimitNum } from '../utils/generate.util';
 import env from '../utils/validateEnv.util';
 
 import BlogSchema from '../schemas/blog.schema';
@@ -128,7 +128,7 @@ export const getLatestBlogsByTag: RequestHandler = async (req, res, next) => {
 export const getTrendingBlogs: RequestHandler = async (req, res, next) => {
   try {
     const trendingBlogs = await BlogSchema.find({ draft: false })
-      .select('blog_id title tags publishedAt -_id')
+      .select('blog_id title publishedAt -_id')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
       .sort({ 'activity.total_read': -1, 'activity.total_likes': -1, publishedAt: -1 })
       .limit(env.GET_TRENDING_BLOGS_LIMIT);
@@ -138,6 +138,27 @@ export const getTrendingBlogs: RequestHandler = async (req, res, next) => {
     }
 
     res.status(200).json({ trendingBlogs });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得熱門 tag
+export const getTrendingTags: RequestHandler = async (req, res, next) => {
+  try {
+    const trendingTags = await BlogSchema.find()
+      .select('tags -_id')
+      .distinct('tags')
+      .sort({ 'activity.total_read': -1, 'activity.total_liked': -1, publishedAt: -1 });
+
+    if (!trendingTags) {
+      throw createHttpError(500, 'No trending tags found.');
+    }
+
+    const randomLimitTags = generateTagsWithLimitNum(trendingTags, env.GET_TRENDING_TAGS_LIMIT);
+
+    res.status(200).json({ trendingTags: randomLimitTags });
   } catch (error) {
     console.log(error);
     next(error);

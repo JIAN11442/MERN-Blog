@@ -14,4 +14,5 @@ export default cleanEnv(process.env, {
   BLOG_TAGS_LIMIT: num(),
   GET_LATEST_BLOGS_LIMIT: num(),
   GET_TRENDING_BLOGS_LIMIT: num(),
+  GET_TRENDING_TAGS_LIMIT: num(),
 });

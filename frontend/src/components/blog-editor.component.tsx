@@ -11,7 +11,7 @@ import defaultBanner from '../imgs/banner.png';
 import AniamationWrapper from './page-animation.component';
 import tools from './tools.component';
 
-import useBlogStore from '../states/editor-blog.state';
+import useEditorBlogStore from '../states/editor-blog.state';
 import useBlogFetch from '../fetchs/blog.fetch';
 import useAwsFetch from '../fetchs/aws.fetch';
 
@@ -20,7 +20,7 @@ const BlogEditor = () => {
   const editorRef = useRef<EditorJS | null>(null);
 
   const { blog, setBlog, setTextEditor, textEditor, setEditorState } =
-    useBlogStore();
+    useEditorBlogStore();
   const { UploadImageToAWS } = useAwsFetch();
   const { UploadSaveDraftBlog } = useBlogFetch();
 

@@ -3,7 +3,7 @@ import EditorJS from '@editorjs/editorjs';
 
 import type { BlogStructureType } from '../../../backend/src/utils/types.util';
 
-interface BlogProps {
+interface EditorBlogProps {
   editorState: string;
   blog: BlogStructureType;
   textEditor: EditorJS | null;
@@ -17,7 +17,7 @@ interface BlogProps {
   setIsTagEdit: (status: { state: boolean; index: number | null }) => void;
 }
 
-const useBlogStore = create<BlogProps>((set) => ({
+const useEditorBlogStore = create<EditorBlogProps>((set) => ({
   editorState: 'editor',
   blog: {
     title: '',
@@ -38,4 +38,4 @@ const useBlogStore = create<BlogProps>((set) => ({
   setIsTagEdit: (status) => set({ isTagEdit: status }),
 }));
 
-export default useBlogStore;
+export default useEditorBlogStore;

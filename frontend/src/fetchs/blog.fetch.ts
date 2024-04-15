@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import useHomeBlogStore from '../states/home-blog.state';
-import useBlogStore from '../states/editor-blog.state';
+import useEditorBlogStore from '../states/editor-blog.state';
 import useAuthStore from '../states/user-auth.state';
 
 const useBlogFetch = () => {
@@ -12,8 +12,9 @@ const useBlogFetch = () => {
   const navigate = useNavigate();
 
   const { authUser } = useAuthStore();
-  const { blog, textEditor, characterLimit } = useBlogStore();
-  const { setLatestBlogs, setTrendingBlogs } = useHomeBlogStore();
+  const { blog, textEditor, characterLimit } = useEditorBlogStore();
+  const { setLatestBlogs, setTrendingBlogs, setCategories } =
+    useHomeBlogStore();
 
   // Fetch latest blogs by category
   const GetLatestBlogsByCategory = async (category: string) => {
@@ -23,6 +24,22 @@ const useBlogFetch = () => {
       .then(({ data }) => {
         if (data.tagBlogs.length) {
           setLatestBlogs(data.tagBlogs);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // Fetch trending tags
+  const GetTrendingTags = async () => {
+    const requestURL = BLOG_SERVER_ROUTE + '/trending-tags';
+
+    await axios
+      .get(requestURL)
+      .then(({ data }) => {
+        if (data.trendingTags.length) {
+          setCategories(data.trendingTags);
         }
       })
       .catch((error) => {
@@ -200,6 +217,7 @@ const useBlogFetch = () => {
     PublishCompleteBlog,
     GetLatestBlogs,
     GetTrendingBlogs,
+    GetTrendingTags,
     GetLatestBlogsByCategory,
   };
 };

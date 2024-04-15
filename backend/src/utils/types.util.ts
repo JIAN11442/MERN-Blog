@@ -56,6 +56,6 @@ export interface BlogStructureType {
   author?: {
     personal_info: AuthorStructureType;
   };
-  activity: ActivityStructureType;
+  activity?: ActivityStructureType;
   publishedAt?: string;
 }
