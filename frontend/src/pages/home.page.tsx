@@ -56,6 +56,24 @@ const Homepage = () => {
         console.log(error);
       });
   };
+  const generateTagsWithLimit = (tags: string[], limitNum: number) => {
+    // 隨機排序 tags，然後取得前 limitNum 個 tags
+    // Array.prototype.sort() 可以接受一個比較函數，比較函數會接受兩個參數(姑且稱為 a 和 b)
+    // 當比較函數的返回值為負數(即小於0)時，a 會被排列到 b 之前；反之，當比較函數的返回值為正數(即大於0)時，a 會被排列到 b 之後
+
+    // 至於為什麼要用 0.5 - Math.random()，而不是 0.1 - Math.random()
+    // 原因是因為 0.5 - Math.random() 會得到一個介於 -0.5 到 0.5 之間的數字
+    // 這樣可以讓每一個 a 和 b 都有大約一半的概率可以換位
+
+    // 而 a.length - b.length 則是根據 tag 的長度排序(一樣是按正負排列)
+    // 比如有一個數組，[a, b]，假設 a 比 b 長
+    // 則 a.length - b.length 會返回正數，a 會被排列到 b 之後 =》 [b, a]
+    const randomLimitTags = tags
+      .sort(() => 0.5 - Math.random())
+      .slice(0, limitNum)
+      .sort((a, b) => a.length - b.length);
+    return randomLimitTags;
+  };
 
   // const categories = [
   //   'programming',
@@ -105,6 +123,7 @@ const Homepage = () => {
     }
   }, [inPageNavState]);
 
+  // get tags categories from trending blogs
   useEffect(() => {
     if (trendingBlogs) {
       const tags = Array.from(
@@ -116,7 +135,8 @@ const Homepage = () => {
       );
 
       if (tags.length) {
-        setCategories(tags);
+        const generateTags = generateTagsWithLimit(tags, 8);
+        setCategories(generateTags);
       }
     }
   }, [trendingBlogs]);

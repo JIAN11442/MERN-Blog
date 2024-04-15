@@ -73,7 +73,7 @@ export const createBlog: RequestHandler = async (req, res, next) => {
   }
 };
 
-// 取得最新的文章
+// 取得最新的幾篇文章
 export const getLatestBlogs: RequestHandler = async (req, res, next) => {
   try {
     // 1. 取得 draft 為 false，也就是不是草稿的那些 blogs
@@ -92,6 +92,32 @@ export const getLatestBlogs: RequestHandler = async (req, res, next) => {
     }
 
     res.status(200).json({ latestBlogs });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得特定 tag 最新的幾篇文章
+export const getLatestBlogsByTag: RequestHandler = async (req, res, next) => {
+  try {
+    const { tag } = req.body;
+
+    if (!tag) {
+      throw createHttpError(400, 'Please provide a tag from client.');
+    }
+
+    const tagBlogs = await BlogSchema.find({ tags: tag, draft: false })
+      .sort({ publishedAt: -1 })
+      .select('blod_id title banner des activity tags publishedAt -_id')
+      .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+      .limit(getLatestBlogLimit);
+
+    if (!tagBlogs) {
+      throw createHttpError(500, 'No blogs found with this tag.');
+    }
+
+    res.status(200).json({ tagBlogs });
   } catch (error) {
     console.log(error);
     next(error);

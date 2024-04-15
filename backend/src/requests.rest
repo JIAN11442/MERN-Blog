@@ -1,1 +1,7 @@
-GET http://localhost:5000/api/blog/latest-blogs
+POST http://localhost:5000/api/blog/tag-latest-blogs
+Content-Type: application/json
+
+{
+    "tag": "swot",
+    "limit": 5
+}
