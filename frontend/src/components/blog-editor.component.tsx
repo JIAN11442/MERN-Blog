@@ -1,10 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import EditorJS from '@editorjs/editorjs';
-import axios from 'axios';
 
 import logo from '../imgs/logo.png';
 import defaultBanner from '../imgs/banner.png';
@@ -12,19 +11,18 @@ import defaultBanner from '../imgs/banner.png';
 import AniamationWrapper from './page-animation.component';
 import tools from './tools.component';
 
-import { uploadImage } from '../commons/aws.common';
 import useBlogStore from '../states/editor-blog.state';
-import useAuthStore from '../states/user-auth.state';
+import useBlogFetch from '../fetchs/blog.fetch';
+import useAwsFetch from '../fetchs/aws.fetch';
 
 const BlogEditor = () => {
-  const navigate = useNavigate();
-
   const blogBannerRef = useRef<HTMLImageElement | null>(null);
   const editorRef = useRef<EditorJS | null>(null);
 
-  const { authUser } = useAuthStore();
   const { blog, setBlog, setTextEditor, textEditor, setEditorState } =
     useBlogStore();
+  const { UploadImageToAWS } = useAwsFetch();
+  const { UploadSaveDraftBlog } = useBlogFetch();
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -41,7 +39,7 @@ const BlogEditor = () => {
         const loadingToast = toast.loading('Uploading...');
 
         // Upload the image to S3
-        uploadImage(img)
+        UploadImageToAWS(img)
           .then((url) => {
             if (url && blogBannerRef.current) {
               // Set the image url to the blog banner
@@ -91,7 +89,6 @@ const BlogEditor = () => {
     const img = e.target as HTMLImageElement;
     img.src = defaultBanner;
   };
-
   const handlePublishEvent = () => {
     if (!blog.banner?.length) {
       return toast.error('Please upload a blog banner.');
@@ -113,72 +110,6 @@ const BlogEditor = () => {
         .catch((error) => {
           console.log(error);
         });
-    }
-  };
-
-  const handleSaveDraftEvent = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const target = e.target as HTMLElement;
-
-    // 如果按鈕已經被 disable，則不執行任何動作
-    if (target.className.includes('disable')) {
-      return;
-    }
-
-    const { title, banner, des, tags } = blog;
-
-    // 如果標題為空，則顯示警告訊息並停止下一步操作
-
-    if (!title?.length) {
-      return toast.error('Write blog title before saving it as a draft.');
-    }
-
-    // 反之，顯示 loading toast 表示開始保存草稿
-    const loadingToast = toast.loading('Saving Draft....');
-
-    // 同時，將按鈕設置為 disable 狀態，避免重複點擊
-    (e.target as HTMLButtonElement).classList.add('disable');
-
-    // 如果 textEditor 已經初始化了，則代表有內容可以保存(即使是空內容)
-    if (textEditor?.isReady) {
-      // 保存內容並...保存草稿
-      textEditor.save().then((content) => {
-        // 訪問後端 API 路徑
-        const requestUrl =
-          import.meta.env.VITE_SERVER_DOMAIN + '/blog/create-blog';
-
-        // 要上傳到資料庫的數據
-        const blogData = { title, banner, des, content, tags, draft: true };
-
-        // 開始訪問後端 API
-        axios
-          .post(requestUrl, blogData, {
-            headers: { Authorization: `Bearer ${authUser?.access_token}` },
-          })
-          .then(({ data }) => {
-            if (data) {
-              // 如果成功訪問並返回數據，移除 disable 狀態
-              (target as HTMLButtonElement).classList.remove('disable');
-
-              // 關閉 loading toast 並顯示成功訊息
-              toast.dismiss(loadingToast);
-              toast.success('Draft saved successfully.');
-
-              // 0.5秒后移動到首頁
-              setTimeout(() => {
-                navigate('/');
-              }, 500);
-            }
-          })
-          .catch((error) => {
-            // 如果訪問過程中出現錯誤，也要移除 disable 狀態
-            (e.target as HTMLButtonElement).classList.remove('disable');
-
-            // 關閉 loading toast
-            toast.dismiss(loadingToast);
-
-            return toast.error(error.response.data.errorMessage);
-          });
-      });
     }
   };
 
@@ -207,6 +138,7 @@ const BlogEditor = () => {
     };
   }, []);
 
+  // Change Code Box Style and Auto Resize
   useEffect(() => {
     // 創建一個帶有回調函數的觀察器(observer)
     const observer = new MutationObserver((mutation) => {
@@ -289,10 +221,7 @@ const BlogEditor = () => {
           <button onClick={handlePublishEvent} className="btn-dark">
             Publish
           </button>
-          <button
-            onClick={(e) => handleSaveDraftEvent(e)}
-            className="btn-light"
-          >
+          <button onClick={(e) => UploadSaveDraftBlog(e)} className="btn-light">
             Save Draft
           </button>
         </div>

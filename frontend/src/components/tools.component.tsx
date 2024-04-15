@@ -11,7 +11,7 @@ import Code from '@editorjs/code';
 
 import CodeBox from '@bomdi/codebox';
 
-import { uploadImage } from '../commons/aws.common';
+import useAwsFetch from '../fetchs/aws.fetch';
 
 // import CodeMirror from 'editorjs-codemirror';
 // import 'codemirror/mode/shell/shell';
@@ -22,7 +22,7 @@ import { uploadImage } from '../commons/aws.common';
 
 // import 'codemirror/theme/idea.css';
 
-const uploadImageByURL = (e: string) => {
+export const UploadImageByURL = async (e: string) => {
   const link = new Promise((resolve, reject) => {
     try {
       resolve(e);
@@ -31,15 +31,17 @@ const uploadImageByURL = (e: string) => {
     }
   });
 
-  return link.then((url) => {
-    return {
-      success: 1,
-      file: { url },
-    };
-  });
+  const url = await link;
+  return {
+    success: 1,
+    file: { url },
+  };
 };
-const uploadImageByFile = (e: File) => {
-  return uploadImage(e).then((url) => {
+
+export const UploadImageByFile = async (e: File) => {
+  const { UploadImageToAWS } = useAwsFetch();
+
+  return UploadImageToAWS(e).then((url) => {
     if (url) {
       return {
         success: 1,
@@ -59,8 +61,8 @@ const tools = {
     class: Image,
     config: {
       uploader: {
-        uploadByUrl: uploadImageByURL,
-        uploadByFile: uploadImageByFile,
+        uploadByUrl: UploadImageByURL,
+        uploadByFile: UploadImageByFile,
       },
     },
   },

@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useEffect } from 'react';
-import axios from 'axios';
 
 import InpageNavigation, {
   activeButtonRef,
@@ -12,50 +13,34 @@ import MinimalBlogPostCard from '../components/blog-card-nobanner.component';
 import useCollapseStore from '../states/collapse.state';
 import useHomeBlogStore from '../states/home-blog.state';
 import { FlatIcons } from '../icons/flaticons';
+import useBlogFetch from '../fetchs/blog.fetch';
 
 const Homepage = () => {
   const { searchBarVisibility } = useCollapseStore();
   const {
     latestBlogs,
-    setLatestBlogs,
     trendingBlogs,
-    setTrendingBlogs,
     inPageNavState,
-    setInPageNavState,
     categories,
+    setLatestBlogs,
+    setInPageNavState,
     setCategories,
   } = useHomeBlogStore();
 
-  const fetchLatestBlogs = async () => {
-    const requestURL =
-      import.meta.env.VITE_SERVER_DOMAIN + '/blog/latest-blogs';
+  const { GetLatestBlogs, GetTrendingBlogs, GetLatestBlogsByCategory } =
+    useBlogFetch();
 
-    await axios
-      .get(requestURL)
-      .then(({ data }) => {
-        if (data.latestBlogs.length) {
-          setLatestBlogs(data.latestBlogs);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-  const fetchTrendingBlogs = async () => {
-    const requestURL =
-      import.meta.env.VITE_SERVER_DOMAIN + '/blog/trending-blogs';
+  // const categories = [
+  //   'programming',
+  //   'hollywood',
+  //   'film making',
+  //   'social media',
+  //   'cooking',
+  //   'tech',
+  //   'finance',
+  //   'travel',
+  // ];
 
-    await axios
-      .get(requestURL)
-      .then(({ data }) => {
-        if (data.trendingBlogs.length) {
-          setTrendingBlogs(data.trendingBlogs);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
   const generateTagsWithLimit = (tags: string[], limitNum: number) => {
     // 隨機排序 tags，然後取得前 limitNum 個 tags
     // Array.prototype.sort() 可以接受一個比較函數，比較函數會接受兩個參數(姑且稱為 a 和 b)
@@ -74,17 +59,6 @@ const Homepage = () => {
       .sort((a, b) => a.length - b.length);
     return randomLimitTags;
   };
-
-  // const categories = [
-  //   'programming',
-  //   'hollywood',
-  //   'film making',
-  //   'social media',
-  //   'cooking',
-  //   'tech',
-  //   'finance',
-  //   'travel',
-  // ];
 
   const loadBlogByCategory = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 取得 Button 的文字內容
@@ -114,12 +88,14 @@ const Homepage = () => {
 
     // 如果 inPageNavState 是 home，則 fetch 最新的 blog
     if (inPageNavState === 'home') {
-      fetchLatestBlogs();
+      GetLatestBlogs();
+    } else {
+      GetLatestBlogsByCategory(inPageNavState);
     }
 
     // 如果 inPageNavState 是 trending blogs，則 fetch 熱門的 blog
     if (!trendingBlogs) {
-      fetchTrendingBlogs();
+      GetTrendingBlogs();
     }
   }, [inPageNavState]);
 

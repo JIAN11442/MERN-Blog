@@ -162,10 +162,11 @@ export const signin: RequestHandler<unknown, unknown, SignInBody, unknown> = asy
 
 export const googleAuth: RequestHandler = async (req, res, next) => {
   try {
-    const { access_token } = req.body;
+    // 從 body 中取得 google 給的 user access token
+    const { google_access_token } = req.body;
 
-    // 驗證通過 Google 登入後給的 access_token 來驗證解碼使用者資料
-    const decodedUser = await admin.auth().verifyIdToken(access_token);
+    // 驗證通過 Google 登入後給的 google_access_token 來驗證解碼使用者資料
+    const decodedUser = await admin.auth().verifyIdToken(google_access_token);
 
     if (decodedUser) {
       // 從中取得使用者的 email, name, picture

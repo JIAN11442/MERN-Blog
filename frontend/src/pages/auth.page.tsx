@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import axios from 'axios';
-import toast from 'react-hot-toast';
 
 import googleIcon from '../imgs/google.png';
 
 import InputBox from '../components/input-box.component';
 
 import useAuthStore from '../states/user-auth.state';
+import useAuthFetch from '../fetchs/auth.fetch';
 
 import AniamationWrapper from '../components/page-animation.component';
-import { authWithGoogleUsingPopUp } from '../commons/firebase.common';
 
 interface UserAuthFormProps {
   type: string;
@@ -22,57 +20,13 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
     email: '',
     password: '',
   });
-  const { authUser, setAuthUser } = useAuthStore();
+
+  const { authUser } = useAuthStore();
+  const { SignInOrSignUpWithServer, SignInWithGoogleAuth } = useAuthFetch();
+
+  // Handle input value change
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Through server to authenticate user
-  const userAuthThroughServer = (requestUrl: string, formData: object) => {
-    axios
-      .post(requestUrl, formData)
-      .then(({ data }) => {
-        if (data.message && data.user) {
-          sessionStorage.setItem('access_token', data.user.access_token);
-          setAuthUser(data.user);
-          toast.success(data.message);
-        }
-      })
-      .catch((error) => {
-        if (error.response) {
-          // 伺服器端返回了錯誤狀態碼
-          toast.error(error.response.data.errorMessage);
-        } else if (error.request) {
-          // 請求發出但沒有收到回應
-          console.log(error.request);
-          toast.error('Request made but no response received');
-        } else {
-          // 在設定請求時出現錯誤
-          console.log(error.message);
-          toast.error('Request setup error: ', error.message);
-        }
-      });
-  };
-
-  // Handle Google Auth
-  const handleGoogleAuth = async (e: React.FormEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-
-    authWithGoogleUsingPopUp()
-      .then((user) => {
-        if (user) {
-          const serverRoute = '/auth/google-auth';
-          const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
-          const formData = {
-            access_token: (user as { accessToken?: string })?.accessToken,
-          };
-          userAuthThroughServer(requestUrl, formData);
-        }
-      })
-      .catch((error) => {
-        toast.error('trouble login through google');
-        return console.log(error);
-      });
   };
 
   // Handle login or signup with input values
@@ -86,7 +40,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
     const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
 
     // 透過 axios 送出表單資料
-    userAuthThroughServer(requestUrl, formData);
+    SignInOrSignUpWithServer(requestUrl, formData);
   };
 
   return authUser ? (
@@ -186,7 +140,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
 
           {/* Other Options */}
           <button
-            onClick={handleGoogleAuth}
+            onClick={SignInWithGoogleAuth}
             className="
               btn-dark
               flex

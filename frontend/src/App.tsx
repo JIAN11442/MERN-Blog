@@ -1,38 +1,20 @@
-import { useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
-import axios from "axios";
+import { useEffect } from 'react';
+import { Route, Routes } from 'react-router-dom';
 
-import Navbar from "./components/navbar.component";
+import Navbar from './components/navbar.component';
 
-import useAuthStore from "./states/user-auth.state";
-
-import UserAuthPage from "./pages/auth.page";
-import Editor from "./pages/editor.page";
-import Homepage from "./pages/home.page";
+import UserAuthPage from './pages/auth.page';
+import Editor from './pages/editor.page';
+import Homepage from './pages/home.page';
+import useAuthFetch from './fetchs/auth.fetch';
 
 function App() {
-  const { setAuthUser } = useAuthStore();
+  const { GetAuthUserWithToken } = useAuthFetch();
 
-  axios.defaults.withCredentials = true;
-  axios.defaults.headers.common[
-    "Authorization"
-  ] = `Bearer ${sessionStorage.getItem("access_token")}`;
-
+  // 每一次刷新都會重新檢查使用者的登入狀態
   useEffect(() => {
-    const requestUrl =
-      import.meta.env.VITE_SERVER_DOMAIN + "/auth/authentication";
-
-    axios
-      .get(requestUrl)
-      .then(({ data }) => {
-        if (data.user) {
-          setAuthUser(data.user);
-        }
-      })
-      .catch((error) => {
-        console.log(error.response.data);
-      });
-  }, [setAuthUser]);
+    GetAuthUserWithToken();
+  }, []);
 
   return (
     <Routes>
