@@ -12,7 +12,7 @@ import {
 const blogRoute = express.Router();
 
 blogRoute.post('/create-blog', jwtVerify, createBlog);
-blogRoute.get('/latest-blogs', getLatestBlogs);
+blogRoute.post('/latest-blogs', getLatestBlogs);
 blogRoute.post('/tag-latest-blogs', getLatestBlogsByTag);
 blogRoute.get('/trending-blogs', getTrendingBlogs);
 blogRoute.get('/trending-tags', getTrendingTags);

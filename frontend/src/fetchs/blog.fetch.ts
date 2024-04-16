@@ -39,8 +39,8 @@ const useBlogFetch = () => {
       .get(requestURL)
       .then(({ data }) => {
         if (data.trendingTags) {
-          const newCategories = [...data.trendingTags, 'nothing test'];
-          setCategories(newCategories);
+          // const newCategories = [...data.trendingTags, 'nothing test'];
+          setCategories(data.trendingTags);
         }
       })
       .catch((error) => {
@@ -66,12 +66,12 @@ const useBlogFetch = () => {
   };
 
   // Fetch latest blogs
-  const GetLatestBlogs = async () => {
+  const GetLatestBlogs = async ({ page = 1 }) => {
     const requestURL =
       import.meta.env.VITE_SERVER_DOMAIN + '/blog/latest-blogs';
 
     await axios
-      .get(requestURL)
+      .post(requestURL, { page })
       .then(({ data }) => {
         if (data.latestBlogs) {
           setLatestBlogs(data.latestBlogs);

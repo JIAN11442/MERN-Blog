@@ -81,10 +81,18 @@ export const getLatestBlogs: RequestHandler = async (req, res, next) => {
     // 3. 只選取 blog_id, title, banner, des, activity, tags, publishedAt 這些資料(還有 author 資料，也就是第 4 點)
     // 4. 並根據 author 的 id，移植或填充(populate)該 id 對應 schema 中 ref 對象(users)的數據，也就是作者資料到 author 中
     // 5. 限制回傳的數量
+
+    const { page } = req.body;
+
+    if (!page) {
+      throw createHttpError(400, 'Please provide a page number from client.');
+    }
+
     const latestBlogs = await BlogSchema.find({ draft: false })
       .sort({ publishedAt: -1 })
       .select('blog_id title banner des activity tags publishedAt -_id')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+      .skip((page - 1) * env.GET_LATEST_BLOGS_LIMIT)
       .limit(getLatestBlogLimit);
 
     if (!latestBlogs) {

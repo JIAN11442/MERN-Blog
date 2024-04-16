@@ -1,20 +1,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 import InpageNavigation, {
   activeButtonRef,
-} from "../components/inpage-navigation.component";
-import AniamationWrapper from "../components/page-animation.component";
-import Loader from "../components/loader.component";
-import BlogPostCard from "../components/blog-card-banner.component";
-import MinimalBlogPostCard from "../components/blog-card-nobanner.component";
-import NoDataMessage from "../components/blog-nodata.component";
+} from '../components/inpage-navigation.component';
+import AniamationWrapper from '../components/page-animation.component';
+import Loader from '../components/loader.component';
+import BlogPostCard from '../components/blog-card-banner.component';
+import MinimalBlogPostCard from '../components/blog-card-nobanner.component';
+import NoDataMessage from '../components/blog-nodata.component';
 
-import useCollapseStore from "../states/collapse.state";
-import useHomeBlogStore from "../states/home-blog.state";
-import { FlatIcons } from "../icons/flaticons";
-import useBlogFetch from "../fetchs/blog.fetch";
+import useCollapseStore from '../states/collapse.state';
+import useHomeBlogStore from '../states/home-blog.state';
+import { FlatIcons } from '../icons/flaticons';
+import useBlogFetch from '../fetchs/blog.fetch';
 
 const Homepage = () => {
   const { searchBarVisibility } = useCollapseStore();
@@ -55,7 +55,7 @@ const Homepage = () => {
     // 接著防止重複點擊，或是點擊相同的分類，直接返回 home
     // 如果 inPageNavState 已經是 category，則設定為 home
     if (inPageNavState === category) {
-      setInPageNavState("home");
+      setInPageNavState('home');
       return;
     }
 
@@ -72,8 +72,8 @@ const Homepage = () => {
     activeButtonRef.current?.click();
 
     // 如果 inPageNavState 是 home，則 fetch 最新的 blog
-    if (inPageNavState === "home") {
-      GetLatestBlogs();
+    if (inPageNavState === 'home') {
+      GetLatestBlogs({ page: 1 });
     } else {
       GetLatestBlogsByCategory(inPageNavState);
     }
@@ -102,13 +102,13 @@ const Homepage = () => {
           h-cover
           gap-10
           justify-center
-          ${searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""}
+          ${searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''}
         `}
       >
         {/* latest blogs and trending blogs */}
         <div className="w-full">
           <InpageNavigation
-            routes={[inPageNavState, "trending blogs"]}
+            routes={[inPageNavState, 'trending blogs']}
             defaultHiddenIndex={1}
           >
             {/* Latest blogs */}
@@ -192,8 +192,8 @@ const Homepage = () => {
                       text-nowrap
                       ${
                         category === inPageNavState
-                          ? "btn-dark text-white"
-                          : "tag"
+                          ? 'btn-dark text-white'
+                          : 'tag'
                       }`}
                       onClick={(e) => loadBlogByCategory(e)}
                     >
