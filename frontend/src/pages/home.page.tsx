@@ -15,6 +15,7 @@ import useCollapseStore from '../states/collapse.state';
 import useHomeBlogStore from '../states/home-blog.state';
 import { FlatIcons } from '../icons/flaticons';
 import useBlogFetch from '../fetchs/blog.fetch';
+import LoadMoreBtn from '../components/load-more-component';
 
 const Homepage = () => {
   const { searchBarVisibility } = useCollapseStore();
@@ -133,6 +134,8 @@ const Homepage = () => {
                       />
                     </AniamationWrapper>
                   ))}
+
+                  <LoadMoreBtn />
                 </div>
               ) : (
                 // 如果 latestBlogs 不為 null 且沒有值，顯示 NoDataMessage

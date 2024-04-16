@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import useHomeBlogStore from '../states/home-blog.state';
 import useEditorBlogStore from '../states/editor-blog.state';
 import useAuthStore from '../states/user-auth.state';
+import type { FormatBlogDataProps } from '../../../backend/src/utils/types.util';
 
 const useBlogFetch = () => {
   const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + '/blog';
@@ -15,6 +16,37 @@ const useBlogFetch = () => {
   const { blog, textEditor, characterLimit } = useEditorBlogStore();
   const { setLatestBlogs, setTrendingBlogs, setCategories } =
     useHomeBlogStore();
+
+  // Generate blog data
+  const FormatBlogData = async ({
+    create_new_arr = false,
+    prevArr,
+    fetchData,
+    page,
+    countRoute,
+    data_to_send,
+  }: FormatBlogDataProps) => {
+    let obj;
+    if (prevArr !== null && !create_new_arr) {
+      obj = {
+        ...prevArr,
+        results: 'results' in prevArr &&
+          fetchData && [...prevArr.results, ...fetchData],
+        page: page,
+      };
+    } else {
+      await axios
+        .post(BLOG_SERVER_ROUTE + countRoute, data_to_send)
+        .then(({ data: totalDocs }) => {
+          obj = { results: fetchData, page: 1, totalDocs };
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+
+    return obj;
+  };
 
   // Fetch latest blogs by category
   const GetLatestBlogsByCategory = async (category: string) => {
@@ -220,6 +252,7 @@ const useBlogFetch = () => {
     GetTrendingBlogs,
     GetTrendingTags,
     GetLatestBlogsByCategory,
+    FormatBlogData,
   };
 };
 

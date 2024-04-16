@@ -59,3 +59,18 @@ export interface BlogStructureType {
   activity?: ActivityStructureType;
   publishedAt?: string;
 }
+
+export interface GenerateBlogStructureType {
+  page: number;
+  results: BlogStructureType[];
+  totalDocs: number;
+}
+
+export interface FormatBlogDataProps {
+  create_new_arr: boolean;
+  prevArr: GenerateBlogStructureType | BlogStructureType[] | null;
+  fetchData: BlogStructureType[] | null;
+  page: number;
+  countRoute: string;
+  data_to_send?: object;
+}
