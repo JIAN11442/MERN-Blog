@@ -5,7 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import useHomeBlogStore from '../states/home-blog.state';
 import useEditorBlogStore from '../states/editor-blog.state';
 import useAuthStore from '../states/user-auth.state';
-import type { FormatBlogDataProps } from '../../../backend/src/utils/types.util';
+import type {
+  FormatBlogDataProps,
+  GenerateBlogStructureType,
+} from '../../../backend/src/utils/types.util';
 
 const useBlogFetch = () => {
   const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + '/blog';
@@ -14,7 +17,7 @@ const useBlogFetch = () => {
 
   const { authUser } = useAuthStore();
   const { blog, textEditor, characterLimit } = useEditorBlogStore();
-  const { setLatestBlogs, setTrendingBlogs, setCategories } =
+  const { setLatestBlogs, setTrendingBlogs, setCategories, latestBlogs } =
     useHomeBlogStore();
 
   // Generate blog data
@@ -27,6 +30,7 @@ const useBlogFetch = () => {
     data_to_send,
   }: FormatBlogDataProps) => {
     let obj;
+
     if (prevArr !== null && !create_new_arr) {
       obj = {
         ...prevArr,
@@ -37,7 +41,7 @@ const useBlogFetch = () => {
     } else {
       await axios
         .post(BLOG_SERVER_ROUTE + countRoute, data_to_send)
-        .then(({ data: totalDocs }) => {
+        .then(({ data: { totalDocs } }) => {
           obj = { results: fetchData, page: 1, totalDocs };
         })
         .catch((error) => {
@@ -48,14 +52,54 @@ const useBlogFetch = () => {
     return obj;
   };
 
+  interface GetLatestBlogsByCategoryType {
+    category?: string;
+    page: number;
+  }
+
+  // Fetch latest blogs
+  const GetLatestBlogs = async ({ page = 1 }) => {
+    const requestURL =
+      import.meta.env.VITE_SERVER_DOMAIN + '/blog/latest-blogs';
+
+    await axios
+      .post(requestURL, { page })
+      .then(async ({ data }) => {
+        if (data.latestBlogs) {
+          const formattedData = await FormatBlogData({
+            prevArr: latestBlogs,
+            fetchData: data.latestBlogs,
+            page,
+            countRoute: '/latest-blogs-count',
+          });
+
+          setLatestBlogs(formattedData as GenerateBlogStructureType);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   // Fetch latest blogs by category
-  const GetLatestBlogsByCategory = async (category: string) => {
+  const GetLatestBlogsByCategory = async ({
+    category,
+    page = 1,
+  }: GetLatestBlogsByCategoryType) => {
     const requestURL = BLOG_SERVER_ROUTE + '/tag-latest-blogs';
     await axios
-      .post(requestURL, { tag: category })
-      .then(({ data }) => {
+      .post(requestURL, { tag: category, page })
+      .then(async ({ data }) => {
         if (data.tagBlogs) {
-          setLatestBlogs(data.tagBlogs);
+          const formattedData = await FormatBlogData({
+            prevArr: latestBlogs,
+            fetchData: data.tagBlogs,
+            page,
+            countRoute: '/tag-latest-blogs-count',
+            data_to_send: { tag: category },
+          });
+
+          setLatestBlogs(formattedData as GenerateBlogStructureType);
         }
       })
       .catch((error) => {
@@ -90,23 +134,6 @@ const useBlogFetch = () => {
       .then(({ data }) => {
         if (data.trendingBlogs) {
           setTrendingBlogs(data.trendingBlogs);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  // Fetch latest blogs
-  const GetLatestBlogs = async ({ page = 1 }) => {
-    const requestURL =
-      import.meta.env.VITE_SERVER_DOMAIN + '/blog/latest-blogs';
-
-    await axios
-      .post(requestURL, { page })
-      .then(({ data }) => {
-        if (data.latestBlogs) {
-          setLatestBlogs(data.latestBlogs);
         }
       })
       .catch((error) => {

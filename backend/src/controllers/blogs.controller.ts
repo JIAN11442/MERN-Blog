@@ -109,16 +109,21 @@ export const getLatestBlogs: RequestHandler = async (req, res, next) => {
 // 取得特定 tag 最新的幾篇文章
 export const getLatestBlogsByTag: RequestHandler = async (req, res, next) => {
   try {
-    const { tag } = req.body;
+    const { tag, page } = req.body;
 
     if (!tag) {
       throw createHttpError(400, 'Please provide a tag from client.');
+    }
+
+    if (!page) {
+      throw createHttpError(400, 'Please provide a page number from client.');
     }
 
     const tagBlogs = await BlogSchema.find({ tags: tag, draft: false })
       .sort({ publishedAt: -1 })
       .select('blod_id title banner des activity tags publishedAt -_id')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+      .skip((page - 1) * env.GET_LATEST_BLOGS_LIMIT)
       .limit(getLatestBlogLimit);
 
     if (!tagBlogs) {
@@ -167,6 +172,36 @@ export const getTrendingTags: RequestHandler = async (req, res, next) => {
     const randomLimitTags = generateTagsWithLimitNum(trendingTags, env.GET_TRENDING_TAGS_LIMIT);
 
     res.status(200).json({ trendingTags: randomLimitTags });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得最新文章數量
+export const getLatestBlogsCount: RequestHandler = async (req, res, next) => {
+  try {
+    const latestBlogsCount = await BlogSchema.countDocuments({ draft: false });
+
+    res.status(200).json({ totalDocs: latestBlogsCount });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得特定 tag 最新文章數量
+export const getLatestBlogsByTagCount: RequestHandler = async (req, res, next) => {
+  try {
+    const { tag } = req.body;
+
+    if (!tag) {
+      throw createHttpError(400, 'Please provide a tag from client.');
+    }
+
+    const tagBlogsCount = await BlogSchema.countDocuments({ tags: tag, draft: false });
+
+    res.status(200).json({ totalDocs: tagBlogsCount });
   } catch (error) {
     console.log(error);
     next(error);

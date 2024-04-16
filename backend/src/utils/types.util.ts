@@ -67,7 +67,7 @@ export interface GenerateBlogStructureType {
 }
 
 export interface FormatBlogDataProps {
-  create_new_arr: boolean;
+  create_new_arr?: boolean;
   prevArr: GenerateBlogStructureType | BlogStructureType[] | null;
   fetchData: BlogStructureType[] | null;
   page: number;

@@ -1,16 +1,21 @@
 import { create } from 'zustand';
-import type { BlogStructureType } from '../../../backend/src/utils/types.util';
+import type {
+  BlogStructureType,
+  GenerateBlogStructureType,
+} from '../../../backend/src/utils/types.util';
 
 interface homeBlogProps {
   inPageNavIndex: number;
   inPageNavState: string;
-  latestBlogs: BlogStructureType[] | null;
+  latestBlogs: BlogStructureType[] | GenerateBlogStructureType | null;
   trendingBlogs: BlogStructureType[] | null;
   categories: string[];
 
   setInPageNavIndex: (index: number) => void;
   setInPageNavState: (state: string) => void;
-  setLatestBlogs: (blogs: BlogStructureType[] | null) => void;
+  setLatestBlogs: (
+    blogs: BlogStructureType[] | GenerateBlogStructureType | null
+  ) => void;
   setTrendingBlogs: (blogs: BlogStructureType[]) => void;
   setCategories: (tags: string[]) => void;
 }

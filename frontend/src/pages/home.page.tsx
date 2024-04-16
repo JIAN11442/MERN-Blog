@@ -74,9 +74,16 @@ const Homepage = () => {
 
     // 如果 inPageNavState 是 home，則 fetch 最新的 blog
     if (inPageNavState === 'home') {
-      GetLatestBlogs({ page: 1 });
+      // 如果 latestBlogs 不為 null，則返回
+      // 為了避免每次刷新會重複 fetch blogs 並累加在 latestBlogs 中
+      if (latestBlogs) {
+        return;
+      } else {
+        GetLatestBlogs({ page: 1 });
+      }
     } else {
-      GetLatestBlogsByCategory(inPageNavState);
+      // 反之如果 inPageNavState 不是 home，則 fetch 特定分類的 blog
+      GetLatestBlogsByCategory({ category: inPageNavState, page: 1 });
     }
 
     // 如果 inPageNavState 是 trending blogs，則 fetch 熱門的 blog
@@ -89,6 +96,12 @@ const Homepage = () => {
       GetTrendingTags();
     }
   }, [inPageNavState]);
+
+  // useEffect(() => {
+  //   if (latestBlogs) {
+  //     console.log(latestBlogs);
+  //   }
+  // }, [latestBlogs]);
 
   return (
     <AniamationWrapper
@@ -117,10 +130,10 @@ const Homepage = () => {
               {latestBlogs === null ? (
                 // 如果 latestBlogs 為 null，顯示 loader
                 <Loader loader={{ speed: 1, size: 50 }} />
-              ) : latestBlogs.length ? (
+              ) : 'results' in latestBlogs && latestBlogs.results.length ? (
                 // 如果 latestBlogs 不為 null 且有長度，則顯示 blog card
                 <div>
-                  {latestBlogs.map((blog, i) => (
+                  {latestBlogs.results.map((blog, i) => (
                     // delay: i * 0.1 可以讓每個 blog card 依次延遲出現
                     <AniamationWrapper
                       key={blog.title}
@@ -135,7 +148,7 @@ const Homepage = () => {
                     </AniamationWrapper>
                   ))}
 
-                  <LoadMoreBtn />
+                  <LoadMoreBtn data={latestBlogs} />
                 </div>
               ) : (
                 // 如果 latestBlogs 不為 null 且沒有值，顯示 NoDataMessage
