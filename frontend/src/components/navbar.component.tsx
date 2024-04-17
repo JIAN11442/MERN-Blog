@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { FlatIcons } from '../icons/flaticons';
 
@@ -13,6 +13,8 @@ import AniamationWrapper from './page-animation.component';
 
 const Navbar = () => {
   const currPath = useLocation().pathname;
+  const navigate = useNavigate();
+
   const { authUser } = useAuthStore();
   const {
     panelCollapsed,
@@ -23,14 +25,22 @@ const Navbar = () => {
 
   const searchBarRef = useRef<HTMLInputElement>(null);
 
-  const handleSearchBar = () => {
+  const handleSearchButton = () => {
     setSearchBarVisibility(!searchBarVisibility);
   };
 
-  const handleCollapse = () => {
+  const handleSearchBar = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const query = (e.target as HTMLInputElement).value;
+
+    if (e.key === 'Enter' && query.length) {
+      navigate(`/search/${query}`);
+    }
+  };
+
+  const handlePanelCollapse = () => {
     setPanelCollapsed(!panelCollapsed);
   };
-  const handleBlur = () => {
+  const handlePanelBlur = () => {
     setTimeout(() => {
       setPanelCollapsed(false);
     }, 200);
@@ -84,6 +94,7 @@ const Navbar = () => {
               ref={searchBarRef}
               type="text"
               placeholder="Search"
+              onKeyDown={(e) => handleSearchBar(e)}
               className="
                 w-full
                 bg-grey-custom
@@ -126,7 +137,7 @@ const Navbar = () => {
         >
           {/* Search Button */}
           <button
-            onClick={() => handleSearchBar()}
+            onClick={() => handleSearchButton()}
             className="
               md:hidden
               bg-grey-custom
@@ -187,8 +198,8 @@ const Navbar = () => {
               <div className="relative">
                 {/* Avatar */}
                 <button
-                  onClick={handleCollapse}
-                  onBlur={handleBlur}
+                  onClick={handlePanelCollapse}
+                  onBlur={handlePanelBlur}
                   className="w-12 h-12 mt-1"
                 >
                   <img
