@@ -1,6 +1,6 @@
-import type { GenerateBlogStructureType } from '../../../backend/src/utils/types.util';
-import useBlogFetch from '../fetchs/blog.fetch';
-import useHomeBlogStore from '../states/home-blog.state';
+import type { GenerateBlogStructureType } from "../../../backend/src/utils/types.util";
+import useBlogFetch from "../fetchs/blog.fetch";
+import useHomeBlogStore from "../states/home-blog.state";
 
 interface LoadMoreBtnProps {
   data: GenerateBlogStructureType;
@@ -9,17 +9,17 @@ interface LoadMoreBtnProps {
 
 const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({ data, state }) => {
   const { inPageNavState: category, inPageNavIndex } = useHomeBlogStore();
-  const { GetLatestBlogs, GetLatestBlogsByCategory, GetTrendingBlogs } =
+  const { GetLatestBlogs, GetLatestBlogsBySearch, GetTrendingBlogs } =
     useBlogFetch();
 
   if (data.results.length < data.totalDocs) {
     // 判斷 state 是否為 home，如果是則呼叫 GetLatestBlogs，否則呼叫 GetLatestBlogsByCategory
     const LoadMoreFunction =
-      inPageNavIndex || state === 'trendingBlogs'
+      inPageNavIndex || state === "trendingBlogs"
         ? GetTrendingBlogs
-        : category === 'home'
+        : category === "home"
         ? GetLatestBlogs
-        : GetLatestBlogsByCategory;
+        : GetLatestBlogsBySearch;
 
     return (
       <div

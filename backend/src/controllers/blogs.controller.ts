@@ -107,19 +107,23 @@ export const getLatestBlogs: RequestHandler = async (req, res, next) => {
 };
 
 // 取得特定 tag 最新的幾篇文章
-export const getLatestBlogsByTag: RequestHandler = async (req, res, next) => {
+export const getLatestBlogsBySearch: RequestHandler = async (req, res, next) => {
   try {
-    const { tag, page } = req.body;
+    const { category, query, page } = req.body;
 
-    if (!tag) {
-      throw createHttpError(400, 'Please provide a tag from client.');
+    let findQuery = {};
+
+    if (category) {
+      findQuery = { tags: category, draft: false };
+    } else if (query) {
+      // title: new RegExp(query, 'i') 是一個正則表達式，
+      // 用於匹配 title 中包含 query 的所有文檔，類似模糊查詢。而其中的 'i' 表示不區分大小寫
+      // 另外，也可以寫成以下格式：
+      // findQuery = { title: { $regex: query, $options: 'i' }, draft: false };
+      findQuery = { title: new RegExp(query, 'i'), tags: new RegExp(query, 'i'), draft: false };
     }
 
-    if (!page) {
-      throw createHttpError(400, 'Please provide a page number from client.');
-    }
-
-    const tagBlogs = await BlogSchema.find({ tags: tag, draft: false })
+    const tagBlogs = await BlogSchema.find(findQuery)
       .sort({ publishedAt: -1 })
       .select('blod_id title banner des activity tags publishedAt -_id')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
@@ -198,15 +202,11 @@ export const getLatestBlogsCount: RequestHandler = async (req, res, next) => {
 };
 
 // 取得特定 tag 最新文章數量
-export const getLatestBlogsByTagCount: RequestHandler = async (req, res, next) => {
+export const getLatestBlogsBySearchCount: RequestHandler = async (req, res, next) => {
   try {
-    const { tag } = req.body;
+    const { tag, query } = req.body;
 
-    if (!tag) {
-      throw createHttpError(400, 'Please provide a tag from client.');
-    }
-
-    const tagBlogsCount = await BlogSchema.countDocuments({ tags: tag, draft: false });
+    const tagBlogsCount = await BlogSchema.countDocuments({ tags: tag || query, draft: false });
 
     res.status(200).json({ totalDocs: tagBlogsCount });
   } catch (error) {

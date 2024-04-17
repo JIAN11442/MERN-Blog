@@ -1,21 +1,21 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 import InpageNavigation, {
   activeButtonRef,
-} from '../components/inpage-navigation.component';
-import AniamationWrapper from '../components/page-animation.component';
-import Loader from '../components/loader.component';
-import BlogPostCard from '../components/blog-card-banner.component';
-import MinimalBlogPostCard from '../components/blog-card-nobanner.component';
-import NoDataMessage from '../components/blog-nodata.component';
+} from "../components/inpage-navigation.component";
+import AniamationWrapper from "../components/page-animation.component";
+import Loader from "../components/loader.component";
+import BlogPostCard from "../components/blog-card-banner.component";
+import MinimalBlogPostCard from "../components/blog-card-nobanner.component";
+import NoDataMessage from "../components/blog-nodata.component";
 
-import useCollapseStore from '../states/collapse.state';
-import useHomeBlogStore from '../states/home-blog.state';
-import { FlatIcons } from '../icons/flaticons';
-import useBlogFetch from '../fetchs/blog.fetch';
-import LoadMoreBtn from '../components/load-more.component';
+import useCollapseStore from "../states/collapse.state";
+import useHomeBlogStore from "../states/home-blog.state";
+import { FlatIcons } from "../icons/flaticons";
+import useBlogFetch from "../fetchs/blog.fetch";
+import LoadMoreBtn from "../components/load-more.component";
 
 const Homepage = () => {
   const { searchBarVisibility } = useCollapseStore();
@@ -31,7 +31,7 @@ const Homepage = () => {
   const {
     GetLatestBlogs,
     GetTrendingBlogs,
-    GetLatestBlogsByCategory,
+    GetLatestBlogsBySearch,
     GetTrendingTags,
   } = useBlogFetch();
 
@@ -56,7 +56,7 @@ const Homepage = () => {
     // 接著防止重複點擊，或是點擊相同的分類，直接返回 home
     // 如果 inPageNavState 已經是 category，則設定為 home
     if (inPageNavState === category) {
-      setInPageNavState('home');
+      setInPageNavState("home");
       return;
     }
 
@@ -77,11 +77,11 @@ const Homepage = () => {
     if (latestBlogs) return;
 
     // 如果 inPageNavState 是 home，則 fetch 最新的 blog
-    if (inPageNavState === 'home') {
+    if (inPageNavState === "home") {
       GetLatestBlogs({ page: 1 });
     } else {
       // 反之如果 inPageNavState 不是 home，則 fetch 特定分類的 blog
-      GetLatestBlogsByCategory({ category: inPageNavState, page: 1 });
+      GetLatestBlogsBySearch({ category: inPageNavState, page: 1 });
     }
 
     // 如果 inPageNavState 是 trending blogs，則 fetch 熱門的 blog
@@ -94,12 +94,6 @@ const Homepage = () => {
       GetTrendingTags();
     }
   }, [inPageNavState]);
-
-  // useEffect(() => {
-  //   if (latestBlogs) {
-  //     console.log(latestBlogs);
-  //   }
-  // }, [latestBlogs]);
 
   return (
     <AniamationWrapper
@@ -114,13 +108,13 @@ const Homepage = () => {
           h-cover
           gap-10
           justify-center
-          ${searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''}
+          ${searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""}
         `}
       >
         {/* latest blogs and trending blogs */}
         <div className="w-full">
           <InpageNavigation
-            routes={[inPageNavState, 'trending blogs']}
+            routes={[inPageNavState, "trending blogs"]}
             defaultHiddenIndex={1}
           >
             {/* Latest blogs */}
@@ -128,7 +122,7 @@ const Homepage = () => {
               {latestBlogs === null ? (
                 // 如果 latestBlogs 為 null，顯示 loader
                 <Loader loader={{ speed: 1, size: 50 }} />
-              ) : 'results' in latestBlogs && latestBlogs.results.length ? (
+              ) : "results" in latestBlogs && latestBlogs.results.length ? (
                 // 如果 latestBlogs 不為 null 且有長度，則顯示 blog card
                 <div>
                   {latestBlogs.results.map((blog, i) => (
@@ -158,7 +152,7 @@ const Homepage = () => {
             <>
               {trendingBlogs === null ? (
                 <Loader loader={{ speed: 1, size: 50 }} />
-              ) : 'results' in trendingBlogs && trendingBlogs.results.length ? (
+              ) : "results" in trendingBlogs && trendingBlogs.results.length ? (
                 <div>
                   {trendingBlogs.results.map((blog, i) => (
                     <AniamationWrapper
@@ -210,8 +204,8 @@ const Homepage = () => {
                       text-nowrap
                       ${
                         category === inPageNavState
-                          ? 'btn-dark text-white'
-                          : 'tag'
+                          ? "btn-dark text-white"
+                          : "tag"
                       }`}
                       onClick={(e) => loadBlogByCategory(e)}
                     >
@@ -231,7 +225,7 @@ const Homepage = () => {
               <div>
                 {trendingBlogs === null ? (
                   <Loader loader={{ speed: 1, size: 30 }} />
-                ) : 'results' in trendingBlogs &&
+                ) : "results" in trendingBlogs &&
                   trendingBlogs.results.length ? (
                   <div>
                     {trendingBlogs.results.map((blog, i) => (

@@ -1,17 +1,18 @@
-import axios from 'axios';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-import useHomeBlogStore from '../states/home-blog.state';
-import useEditorBlogStore from '../states/editor-blog.state';
-import useAuthStore from '../states/user-auth.state';
+import useHomeBlogStore from "../states/home-blog.state";
+import useEditorBlogStore from "../states/editor-blog.state";
+import useAuthStore from "../states/user-auth.state";
 import type {
+  FetchBlogsPropsType,
   FormatBlogDataProps,
   GenerateBlogStructureType,
-} from '../../../backend/src/utils/types.util';
+} from "../../../backend/src/utils/types.util";
 
 const useBlogFetch = () => {
-  const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + '/blog';
+  const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/blog";
 
   const navigate = useNavigate();
 
@@ -27,23 +28,36 @@ const useBlogFetch = () => {
 
   // Generate blog data
   const FormatBlogData = async ({
-    create_new_arr = false,
     prevArr,
     fetchData,
     page,
     countRoute,
     data_to_send,
+    state = "initial",
   }: FormatBlogDataProps) => {
     let obj;
 
-    if (prevArr !== null && !create_new_arr) {
+    // Loadmore
+    if (state === "loadmore" && prevArr !== null) {
       obj = {
         ...prevArr,
-        results: 'results' in prevArr &&
+        results: "results" in prevArr &&
           fetchData && [...prevArr.results, ...fetchData],
         page: page,
       };
-    } else {
+    }
+    // Loadless
+    else if (state === "loadless" && prevArr !== null && page > 1) {
+      obj = {
+        ...prevArr,
+        results: "results" in prevArr && [
+          ...prevArr.results.slice(0, prevArr.results.length - 5),
+        ],
+        page: page - 1,
+      };
+    }
+    // Initial
+    else {
       if (data_to_send) {
         await axios
           .post(BLOG_SERVER_ROUTE + countRoute, data_to_send)
@@ -68,15 +82,10 @@ const useBlogFetch = () => {
     return obj;
   };
 
-  interface GetLatestBlogsByCategoryType {
-    category?: string;
-    page: number;
-  }
-
   // Fetch latest blogs
-  const GetLatestBlogs = async ({ page = 1 }) => {
+  const GetLatestBlogs = async ({ page = 1, state }: FetchBlogsPropsType) => {
     const requestURL =
-      import.meta.env.VITE_SERVER_DOMAIN + '/blog/latest-blogs';
+      import.meta.env.VITE_SERVER_DOMAIN + "/blog/latest-blogs";
 
     await axios
       .post(requestURL, { page })
@@ -86,7 +95,8 @@ const useBlogFetch = () => {
             prevArr: latestBlogs,
             fetchData: data.latestBlogs,
             page,
-            countRoute: '/latest-blogs-count',
+            countRoute: "/latest-blogs-count",
+            state,
           });
 
           setLatestBlogs(formattedData as GenerateBlogStructureType);
@@ -98,21 +108,24 @@ const useBlogFetch = () => {
   };
 
   // Fetch latest blogs by category
-  const GetLatestBlogsByCategory = async ({
+  const GetLatestBlogsBySearch = async ({
     category,
+    query,
     page = 1,
-  }: GetLatestBlogsByCategoryType) => {
-    const requestURL = BLOG_SERVER_ROUTE + '/tag-latest-blogs';
+    state,
+  }: FetchBlogsPropsType) => {
+    const requestURL = BLOG_SERVER_ROUTE + "/search-latest-blogs";
     await axios
-      .post(requestURL, { tag: category, page })
+      .post(requestURL, { category, query, page })
       .then(async ({ data }) => {
         if (data.tagBlogs) {
           const formattedData = await FormatBlogData({
             prevArr: latestBlogs,
             fetchData: data.tagBlogs,
             page,
-            countRoute: '/tag-latest-blogs-count',
-            data_to_send: { tag: category },
+            countRoute: "/search-latest-blogs-count",
+            data_to_send: { category, query },
+            state,
           });
 
           setLatestBlogs(formattedData as GenerateBlogStructureType);
@@ -125,7 +138,7 @@ const useBlogFetch = () => {
 
   // Fetch trending tags
   const GetTrendingTags = async () => {
-    const requestURL = BLOG_SERVER_ROUTE + '/trending-tags';
+    const requestURL = BLOG_SERVER_ROUTE + "/trending-tags";
 
     await axios
       .get(requestURL)
@@ -141,9 +154,9 @@ const useBlogFetch = () => {
   };
 
   // Fetch trending blogs
-  const GetTrendingBlogs = async ({ page = 1 }) => {
+  const GetTrendingBlogs = async ({ page = 1, state }: FetchBlogsPropsType) => {
     const requestURL =
-      import.meta.env.VITE_SERVER_DOMAIN + '/blog/trending-blogs';
+      import.meta.env.VITE_SERVER_DOMAIN + "/blog/trending-blogs";
 
     await axios
       .post(requestURL, { page })
@@ -153,7 +166,8 @@ const useBlogFetch = () => {
             prevArr: trendingBlogs,
             fetchData: data.trendingBlogs,
             page,
-            countRoute: '/latest-blogs-count',
+            countRoute: "/latest-blogs-count",
+            state,
           });
 
           setTrendingBlogs(formattedData as GenerateBlogStructureType);
@@ -168,7 +182,7 @@ const useBlogFetch = () => {
     const target = e.target as HTMLElement;
 
     // 如果按鈕已經被 disable，則不執行任何動作
-    if (target.className.includes('disable')) {
+    if (target.className.includes("disable")) {
       return;
     }
 
@@ -176,7 +190,7 @@ const useBlogFetch = () => {
     const { title, des, tags, banner, content } = blog;
 
     if (!title?.length) {
-      return toast.error('Write blog title before publishing.');
+      return toast.error("Write blog title before publishing.");
     }
 
     if (!des?.length || des.length > characterLimit) {
@@ -186,17 +200,17 @@ const useBlogFetch = () => {
     }
 
     if (!tags?.length) {
-      return toast.error('Enter at least 1 tag to help us rank your blog.');
+      return toast.error("Enter at least 1 tag to help us rank your blog.");
     }
 
     // 如果完整，則啟動 loading toast，表示正在發布
-    const loadingToast = toast.loading('Publishing....');
+    const loadingToast = toast.loading("Publishing....");
 
     // 同時，將按鈕 disable，避免重複點擊
-    (target as HTMLButtonElement).classList.add('disable');
+    (target as HTMLButtonElement).classList.add("disable");
 
     // 發布 blog
-    const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + '/blog/create-blog';
+    const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + "/blog/create-blog";
     const blogData = { title, banner, des, content, tags, draft: false };
 
     axios
@@ -206,7 +220,7 @@ const useBlogFetch = () => {
       .then(({ data }) => {
         if (data) {
           // 如果成功訪問並返回數據，移除 disable 狀態
-          (e.target as HTMLButtonElement).classList.remove('disable');
+          (e.target as HTMLButtonElement).classList.remove("disable");
 
           // 關閉 loading toast
           toast.dismiss(loadingToast);
@@ -214,13 +228,13 @@ const useBlogFetch = () => {
 
           // 移動到首頁
           setTimeout(() => {
-            navigate('/');
+            navigate("/");
           }, 500);
         }
       })
       .catch((error) => {
         // 如果訪問過程中出現錯誤，也要移除 disable 狀態
-        (e.target as HTMLButtonElement).classList.remove('disable');
+        (e.target as HTMLButtonElement).classList.remove("disable");
 
         // 關閉 loading toast
         toast.dismiss(loadingToast);
@@ -234,7 +248,7 @@ const useBlogFetch = () => {
     const target = e.target as HTMLElement;
 
     // 如果按鈕已經被 disable，則不執行任何動作
-    if (target.className.includes('disable')) {
+    if (target.className.includes("disable")) {
       return;
     }
 
@@ -242,14 +256,14 @@ const useBlogFetch = () => {
 
     // 如果標題為空，則顯示警告訊息並停止下一步操作
     if (!title?.length) {
-      return toast.error('Write blog title before saving it as a draft.');
+      return toast.error("Write blog title before saving it as a draft.");
     }
 
     // 反之，顯示 loading toast 表示開始保存草稿
-    const loadingToast = toast.loading('Saving Draft....');
+    const loadingToast = toast.loading("Saving Draft....");
 
     // 同時，將按鈕設置為 disable 狀態，避免重複點擊
-    (e.target as HTMLButtonElement).classList.add('disable');
+    (e.target as HTMLButtonElement).classList.add("disable");
 
     // 如果 textEditor 已經初始化了，則代表有內容可以保存(即使是空內容)
     if (textEditor?.isReady) {
@@ -257,7 +271,7 @@ const useBlogFetch = () => {
       textEditor.save().then((content) => {
         // 訪問後端 API 路徑
         const requestUrl =
-          import.meta.env.VITE_SERVER_DOMAIN + '/blog/create-blog';
+          import.meta.env.VITE_SERVER_DOMAIN + "/blog/create-blog";
 
         // 要上傳到資料庫的數據
         const blogData = { title, banner, des, content, tags, draft: true };
@@ -270,21 +284,21 @@ const useBlogFetch = () => {
           .then(({ data }) => {
             if (data) {
               // 如果成功訪問並返回數據，移除 disable 狀態
-              (target as HTMLButtonElement).classList.remove('disable');
+              (target as HTMLButtonElement).classList.remove("disable");
 
               // 關閉 loading toast 並顯示成功訊息
               toast.dismiss(loadingToast);
-              toast.success('Draft saved successfully.');
+              toast.success("Draft saved successfully.");
 
               // 0.5秒后移動到首頁
               setTimeout(() => {
-                navigate('/');
+                navigate("/");
               }, 500);
             }
           })
           .catch((error) => {
             // 如果訪問過程中出現錯誤，也要移除 disable 狀態
-            (e.target as HTMLButtonElement).classList.remove('disable');
+            (e.target as HTMLButtonElement).classList.remove("disable");
 
             // 關閉 loading toast
             toast.dismiss(loadingToast);
@@ -301,7 +315,7 @@ const useBlogFetch = () => {
     GetLatestBlogs,
     GetTrendingBlogs,
     GetTrendingTags,
-    GetLatestBlogsByCategory,
+    GetLatestBlogsBySearch,
     FormatBlogData,
   };
 };

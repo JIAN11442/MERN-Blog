@@ -73,4 +73,13 @@ export interface FormatBlogDataProps {
   page: number;
   countRoute: string;
   data_to_send?: object;
+  state?: string;
+}
+
+export interface FetchBlogsPropsType {
+  category?: string;
+  query?: string;
+  page?: number;
+  create_new_arr?: boolean;
+  state?: string;
 }
