@@ -4,16 +4,22 @@ import useHomeBlogStore from '../states/home-blog.state';
 
 interface LoadMoreBtnProps {
   data: GenerateBlogStructureType;
+  state?: string;
 }
 
-const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({ data }) => {
-  const { inPageNavState: category } = useHomeBlogStore();
-  const { GetLatestBlogs, GetLatestBlogsByCategory } = useBlogFetch();
+const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({ data, state }) => {
+  const { inPageNavState: category, inPageNavIndex } = useHomeBlogStore();
+  const { GetLatestBlogs, GetLatestBlogsByCategory, GetTrendingBlogs } =
+    useBlogFetch();
 
   if (data.results.length < data.totalDocs) {
     // 判斷 state 是否為 home，如果是則呼叫 GetLatestBlogs，否則呼叫 GetLatestBlogsByCategory
     const LoadMoreFunction =
-      category === 'home' ? GetLatestBlogs : GetLatestBlogsByCategory;
+      inPageNavIndex || state === 'trendingBlogs'
+        ? GetTrendingBlogs
+        : category === 'home'
+        ? GetLatestBlogs
+        : GetLatestBlogsByCategory;
 
     return (
       <div
@@ -30,7 +36,8 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({ data }) => {
           transition
         "
       >
-        <p>· Load more ·</p>
+        {/* <p>· Load more ·</p> */}
+        <p>Load more</p>
       </div>
     );
   }

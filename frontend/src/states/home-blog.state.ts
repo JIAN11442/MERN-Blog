@@ -8,7 +8,7 @@ interface homeBlogProps {
   inPageNavIndex: number;
   inPageNavState: string;
   latestBlogs: BlogStructureType[] | GenerateBlogStructureType | null;
-  trendingBlogs: BlogStructureType[] | null;
+  trendingBlogs: BlogStructureType[] | GenerateBlogStructureType | null;
   categories: string[];
 
   setInPageNavIndex: (index: number) => void;
@@ -16,7 +16,9 @@ interface homeBlogProps {
   setLatestBlogs: (
     blogs: BlogStructureType[] | GenerateBlogStructureType | null
   ) => void;
-  setTrendingBlogs: (blogs: BlogStructureType[]) => void;
+  setTrendingBlogs: (
+    blogs: BlogStructureType[] | GenerateBlogStructureType | null
+  ) => void;
   setCategories: (tags: string[]) => void;
 }
 

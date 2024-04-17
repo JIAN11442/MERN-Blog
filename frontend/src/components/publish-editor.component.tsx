@@ -133,6 +133,7 @@ const PublishEditor = () => {
           lg:grid-cols-2
           lg:gap-4
           py-16
+          mx-auto
         "
       >
         {/* Close button */}

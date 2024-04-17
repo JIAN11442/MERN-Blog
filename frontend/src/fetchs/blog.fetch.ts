@@ -17,8 +17,13 @@ const useBlogFetch = () => {
 
   const { authUser } = useAuthStore();
   const { blog, textEditor, characterLimit } = useEditorBlogStore();
-  const { setLatestBlogs, setTrendingBlogs, setCategories, latestBlogs } =
-    useHomeBlogStore();
+  const {
+    setLatestBlogs,
+    setTrendingBlogs,
+    setCategories,
+    latestBlogs,
+    trendingBlogs,
+  } = useHomeBlogStore();
 
   // Generate blog data
   const FormatBlogData = async ({
@@ -39,14 +44,25 @@ const useBlogFetch = () => {
         page: page,
       };
     } else {
-      await axios
-        .post(BLOG_SERVER_ROUTE + countRoute, data_to_send)
-        .then(({ data: { totalDocs } }) => {
-          obj = { results: fetchData, page: 1, totalDocs };
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      if (data_to_send) {
+        await axios
+          .post(BLOG_SERVER_ROUTE + countRoute, data_to_send)
+          .then(({ data: { totalDocs } }) => {
+            obj = { results: fetchData, page: 1, totalDocs };
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      } else {
+        await axios
+          .get(BLOG_SERVER_ROUTE + countRoute)
+          .then(({ data: { totalDocs } }) => {
+            obj = { results: fetchData, page: 1, totalDocs };
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     }
 
     return obj;
@@ -125,15 +141,22 @@ const useBlogFetch = () => {
   };
 
   // Fetch trending blogs
-  const GetTrendingBlogs = async () => {
+  const GetTrendingBlogs = async ({ page = 1 }) => {
     const requestURL =
       import.meta.env.VITE_SERVER_DOMAIN + '/blog/trending-blogs';
 
     await axios
-      .get(requestURL)
-      .then(({ data }) => {
+      .post(requestURL, { page })
+      .then(async ({ data }) => {
         if (data.trendingBlogs) {
-          setTrendingBlogs(data.trendingBlogs);
+          const formattedData = await FormatBlogData({
+            prevArr: trendingBlogs,
+            fetchData: data.trendingBlogs,
+            page,
+            countRoute: '/latest-blogs-count',
+          });
+
+          setTrendingBlogs(formattedData as GenerateBlogStructureType);
         }
       })
       .catch((error) => {

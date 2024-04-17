@@ -15,7 +15,7 @@ import useCollapseStore from '../states/collapse.state';
 import useHomeBlogStore from '../states/home-blog.state';
 import { FlatIcons } from '../icons/flaticons';
 import useBlogFetch from '../fetchs/blog.fetch';
-import LoadMoreBtn from '../components/load-more-component';
+import LoadMoreBtn from '../components/load-more.component';
 
 const Homepage = () => {
   const { searchBarVisibility } = useCollapseStore();
@@ -72,15 +72,13 @@ const Homepage = () => {
     // 使得 hr 的 left 和 width 屬性可以正確設定
     activeButtonRef.current?.click();
 
+    // 如果 latestBlogs 不為 null，則返回
+    // 為了避免每次刷新會重複 fetch blogs 並累加在 latestBlogs 中
+    if (latestBlogs) return;
+
     // 如果 inPageNavState 是 home，則 fetch 最新的 blog
     if (inPageNavState === 'home') {
-      // 如果 latestBlogs 不為 null，則返回
-      // 為了避免每次刷新會重複 fetch blogs 並累加在 latestBlogs 中
-      if (latestBlogs) {
-        return;
-      } else {
-        GetLatestBlogs({ page: 1 });
-      }
+      GetLatestBlogs({ page: 1 });
     } else {
       // 反之如果 inPageNavState 不是 home，則 fetch 特定分類的 blog
       GetLatestBlogsByCategory({ category: inPageNavState, page: 1 });
@@ -88,7 +86,7 @@ const Homepage = () => {
 
     // 如果 inPageNavState 是 trending blogs，則 fetch 熱門的 blog
     if (!trendingBlogs) {
-      GetTrendingBlogs();
+      GetTrendingBlogs({ page: 1 });
     }
 
     // 如果 categories 是空的，則 fetch 熱門的 tags
@@ -160,9 +158,9 @@ const Homepage = () => {
             <>
               {trendingBlogs === null ? (
                 <Loader loader={{ speed: 1, size: 50 }} />
-              ) : (
+              ) : 'results' in trendingBlogs && trendingBlogs.results.length ? (
                 <div>
-                  {trendingBlogs.map((blog, i) => (
+                  {trendingBlogs.results.map((blog, i) => (
                     <AniamationWrapper
                       key={blog.title}
                       initial={{ opacity: 0 }}
@@ -172,7 +170,11 @@ const Homepage = () => {
                       <MinimalBlogPostCard blog={blog} index={i} />
                     </AniamationWrapper>
                   ))}
+
+                  <LoadMoreBtn data={trendingBlogs} />
                 </div>
+              ) : (
+                <NoDataMessage message="No trending blogs" />
               )}
             </>
           </InpageNavigation>
@@ -229,9 +231,10 @@ const Homepage = () => {
               <div>
                 {trendingBlogs === null ? (
                   <Loader loader={{ speed: 1, size: 30 }} />
-                ) : trendingBlogs.length ? (
+                ) : 'results' in trendingBlogs &&
+                  trendingBlogs.results.length ? (
                   <div>
-                    {trendingBlogs.map((blog, i) => (
+                    {trendingBlogs.results.map((blog, i) => (
                       <AniamationWrapper
                         key={blog.title}
                         initial={{ opacity: 0 }}
@@ -241,6 +244,8 @@ const Homepage = () => {
                         <MinimalBlogPostCard blog={blog} index={i} />
                       </AniamationWrapper>
                     ))}
+
+                    <LoadMoreBtn data={trendingBlogs} state="trendingBlogs" />
                   </div>
                 ) : (
                   <NoDataMessage message="No trending blogs" />
