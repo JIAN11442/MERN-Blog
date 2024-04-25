@@ -107,23 +107,19 @@ export const getLatestBlogs: RequestHandler = async (req, res, next) => {
 };
 
 // 取得特定 tag 最新的幾篇文章
-export const getLatestBlogsBySearch: RequestHandler = async (req, res, next) => {
+export const getLatestBlogsByCategory: RequestHandler = async (req, res, next) => {
   try {
-    const { category, query, page } = req.body;
+    const { category, page } = req.body;
 
-    let findQuery = {};
-
-    if (category) {
-      findQuery = { tags: category, draft: false };
-    } else if (query) {
-      // title: new RegExp(query, 'i') 是一個正則表達式，
-      // 用於匹配 title 中包含 query 的所有文檔，類似模糊查詢。而其中的 'i' 表示不區分大小寫
-      // 另外，也可以寫成以下格式：
-      // findQuery = { title: { $regex: query, $options: 'i' }, draft: false };
-      findQuery = { title: new RegExp(query, 'i'), tags: new RegExp(query, 'i'), draft: false };
+    if (!category) {
+      throw createHttpError(400, 'Please provide a category from client.');
     }
 
-    const tagBlogs = await BlogSchema.find(findQuery)
+    if (!page) {
+      throw createHttpError(400, 'Please provide a page number from client.');
+    }
+
+    const tagBlogs = await BlogSchema.find({ tags: category, draft: false })
       .sort({ publishedAt: -1 })
       .select('blod_id title banner des activity tags publishedAt -_id')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
@@ -135,6 +131,41 @@ export const getLatestBlogsBySearch: RequestHandler = async (req, res, next) => 
     }
 
     res.status(200).json({ tagBlogs });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+export const getLatestBlogsByQuery: RequestHandler = async (req, res, next) => {
+  try {
+    const { query, page } = req.body;
+
+    if (!query) {
+      throw createHttpError(400, 'Please provide a query from client.');
+    }
+
+    if (!page) {
+      throw createHttpError(400, 'Please provide a page number from client.');
+    }
+
+    // title: new RegExp(query, 'i') 是一個正則表達式，
+    // 用於匹配 title 中包含 query 的所有文檔，類似模糊查詢。而其中的 'i' 表示不區分大小寫
+    // 另外，也可以寫成以下格式：
+    // findQuery = { title: { $regex: query, $options: 'i' }, draft: false };
+
+    const queryBlogs = await BlogSchema.find({ title: new RegExp(query, 'i'), draft: false })
+      .sort({ publishedAt: -1 })
+      .select('blod_id title banner des activity tags publishedAt -_id')
+      .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+      .skip((page - 1) * env.GET_LATEST_BLOGS_LIMIT)
+      .limit(getLatestBlogLimit);
+
+    if (!queryBlogs) {
+      throw createHttpError(500, 'No blogs found with this query.');
+    }
+
+    res.status(200).json({ queryBlogs });
   } catch (error) {
     console.log(error);
     next(error);
@@ -202,13 +233,27 @@ export const getLatestBlogsCount: RequestHandler = async (req, res, next) => {
 };
 
 // 取得特定 tag 最新文章數量
-export const getLatestBlogsBySearchCount: RequestHandler = async (req, res, next) => {
+export const getLatestBlogsByCategoryCount: RequestHandler = async (req, res, next) => {
   try {
-    const { tag, query } = req.body;
+    const { category } = req.body;
 
-    const tagBlogsCount = await BlogSchema.countDocuments({ tags: tag || query, draft: false });
+    const tagBlogsCount = await BlogSchema.countDocuments({ tags: category, draft: false });
 
     res.status(200).json({ totalDocs: tagBlogsCount });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得 query 最新文章數量
+export const getLatestBlogsByQueryCount: RequestHandler = async (req, res, next) => {
+  try {
+    const { query } = req.body;
+
+    const queryBlogsCount = await BlogSchema.countDocuments({ title: new RegExp(query, 'i'), draft: false });
+
+    res.status(200).json({ totalDocs: queryBlogsCount });
   } catch (error) {
     console.log(error);
     next(error);

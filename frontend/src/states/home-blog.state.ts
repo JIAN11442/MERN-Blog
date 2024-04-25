@@ -9,7 +9,10 @@ interface homeBlogProps {
   inPageNavState: string;
   latestBlogs: BlogStructureType[] | GenerateBlogStructureType | null;
   trendingBlogs: BlogStructureType[] | GenerateBlogStructureType | null;
-  categories: string[];
+  queryBlogs: BlogStructureType[] | GenerateBlogStructureType | null;
+  allCategories: string[] | null;
+  scrollbarVisible: boolean;
+  loadBlogsLimit: number;
 
   setInPageNavIndex: (index: number) => void;
   setInPageNavState: (state: string) => void;
@@ -19,7 +22,11 @@ interface homeBlogProps {
   setTrendingBlogs: (
     blogs: BlogStructureType[] | GenerateBlogStructureType | null
   ) => void;
-  setCategories: (tags: string[]) => void;
+  setQueryBlogs: (
+    blogs: BlogStructureType[] | GenerateBlogStructureType | null
+  ) => void;
+  setAllCategories: (tags: string[] | null) => void;
+  setScrollbarVisible: (visible: boolean) => void;
 }
 
 const useHomeBlogStore = create<homeBlogProps>((set) => ({
@@ -27,13 +34,18 @@ const useHomeBlogStore = create<homeBlogProps>((set) => ({
   inPageNavState: 'home',
   latestBlogs: null,
   trendingBlogs: null,
-  categories: [],
+  queryBlogs: null,
+  allCategories: [],
+  scrollbarVisible: false,
+  loadBlogsLimit: import.meta.env.VITE_BLOGS_LIMIT,
 
   setInPageNavIndex: (index) => set({ inPageNavIndex: index }),
   setInPageNavState: (state) => set({ inPageNavState: state }),
   setLatestBlogs: (blogs) => set({ latestBlogs: blogs }),
   setTrendingBlogs: (blogs) => set({ trendingBlogs: blogs }),
-  setCategories: (tags) => set({ categories: tags }),
+  setQueryBlogs: (blogs) => set({ queryBlogs: blogs }),
+  setAllCategories: (tags) => set({ allCategories: tags }),
+  setScrollbarVisible: (visible) => set({ scrollbarVisible: visible }),
 }));
 
 export default useHomeBlogStore;

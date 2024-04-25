@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from "framer-motion";
 
 interface AniamationWrapperProps {
   ref?: React.RefObject<HTMLDivElement>;
@@ -7,6 +7,7 @@ interface AniamationWrapperProps {
   initial: { opacity: number };
   animate: { opacity: number };
   transition: { duration: number; delay?: number };
+  exit?: { opacity: number };
   className?: string;
 }
 
@@ -17,6 +18,7 @@ const AniamationWrapper: React.FC<AniamationWrapperProps> = ({
   initial,
   animate,
   transition,
+  exit,
   className,
 }) => {
   return (
@@ -28,6 +30,7 @@ const AniamationWrapper: React.FC<AniamationWrapperProps> = ({
         animate={animate}
         transition={transition}
         className={className}
+        exit={exit}
       >
         {children}
       </motion.div>

@@ -4,11 +4,13 @@ import { jwtVerify } from '../controllers/users.controller';
 import {
   createBlog,
   getLatestBlogs,
-  getLatestBlogsBySearch,
+  getLatestBlogsByCategory,
+  getLatestBlogsByQuery,
   getTrendingBlogs,
   getTrendingTags,
   getLatestBlogsCount,
-  getLatestBlogsBySearchCount,
+  getLatestBlogsByCategoryCount,
+  getLatestBlogsByQueryCount,
 } from '../controllers/blogs.controller';
 
 const blogRoute = express.Router();
@@ -18,8 +20,10 @@ blogRoute.post('/create-blog', jwtVerify, createBlog);
 blogRoute.post('/latest-blogs', getLatestBlogs);
 blogRoute.get('/latest-blogs-count', getLatestBlogsCount);
 
-blogRoute.post('/search-latest-blogs', getLatestBlogsBySearch);
-blogRoute.post('/search-latest-blogs-count', getLatestBlogsBySearchCount);
+blogRoute.post('/category-latest-blogs', getLatestBlogsByCategory);
+blogRoute.post('/query-latest-blogs', getLatestBlogsByQuery);
+blogRoute.post('/category-latest-blogs-count', getLatestBlogsByCategoryCount);
+blogRoute.post('/query-latest-blogs-count', getLatestBlogsByQueryCount);
 
 blogRoute.post('/trending-blogs', getTrendingBlogs);
 blogRoute.get('/trending-tags', getTrendingTags);

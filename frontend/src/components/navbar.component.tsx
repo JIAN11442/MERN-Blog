@@ -25,10 +25,12 @@ const Navbar = () => {
 
   const searchBarRef = useRef<HTMLInputElement>(null);
 
+  // 控制 SearchBar 的顯示與隱藏
   const handleSearchButton = () => {
     setSearchBarVisibility(!searchBarVisibility);
   };
 
+  // SearchBar 按下 Enter 後跳轉至搜尋結果頁面
   const handleSearchBar = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const query = (e.target as HTMLInputElement).value;
 
@@ -37,13 +39,28 @@ const Navbar = () => {
     }
   };
 
+  // 控制 NavigationPanel 的顯示與隱藏
   const handlePanelCollapse = () => {
     setPanelCollapsed(!panelCollapsed);
   };
+
+  // 控制 NavigationPanel 在失焦後隱藏
   const handlePanelBlur = () => {
     setTimeout(() => {
       setPanelCollapsed(false);
     }, 200);
+  };
+
+  // 點擊 Logo 返回首頁
+  const handleBacktoHome = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
+    // 讓 link 不要跳轉
+    e.preventDefault();
+    // 而是透過 navigate 返回首頁
+    navigate('/');
+    // 再重新載入頁面，以便重新取得資料，數據也能得到重置
+    window.location.reload();
   };
 
   useEffect(() => {
@@ -56,7 +73,11 @@ const Navbar = () => {
     <>
       <nav className="navbar">
         {/* Logo */}
-        <Link to="/" className="flex-none w-10">
+        <Link
+          to="/"
+          className="flex-none w-10"
+          onClick={(e) => handleBacktoHome(e)}
+        >
           <img src={logo} alt="Blogging" />
         </Link>
 

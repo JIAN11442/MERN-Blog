@@ -1,8 +1,9 @@
-# POST http://localhost:5000/api/blog/tag-latest-blogs
-# Content-Type: application/json
+POST http://localhost:5000/api/blog/query-latest-blogs
+Content-Type: application/json
 
-# {
-#     "tag": "swot",
-# }
+{
+    "query": "shoes",
+    "page": 1
+}
 
-GET http://localhost:5000/api/blog/trending-tags
+# GET http://localhost:5000/api/blog/trending-tags

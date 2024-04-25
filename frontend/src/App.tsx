@@ -8,13 +8,29 @@ import Editor from './pages/editor.page';
 import Homepage from './pages/home.page';
 import useAuthFetch from './fetchs/auth.fetch';
 import SearchPage from './pages/search.page';
+import useHomeBlogStore from './states/home-blog.state';
 
 function App() {
   const { GetAuthUserWithToken } = useAuthFetch();
+  const { setScrollbarVisible } = useHomeBlogStore();
 
-  // 每一次刷新都會重新檢查使用者的登入狀態
   useEffect(() => {
+    // 每一次刷新都會重新檢查使用者的登入狀態
     GetAuthUserWithToken();
+
+    // 檢查滾動條是否顯示(爲了控制返回頂部按鈕的顯示與隱藏)
+    const checkScroll = () => {
+      if (window.scrollY >= 100 && window.scrollbars.visible) {
+        setScrollbarVisible(true);
+      } else {
+        setScrollbarVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', checkScroll);
+    return () => {
+      window.removeEventListener('scroll', checkScroll);
+    };
   }, []);
 
   return (

@@ -1,22 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 import InpageNavigation, {
   activeButtonRef,
-} from "../components/inpage-navigation.component";
-import AniamationWrapper from "../components/page-animation.component";
-import Loader from "../components/loader.component";
-import BlogPostCard from "../components/blog-card-banner.component";
-import MinimalBlogPostCard from "../components/blog-card-nobanner.component";
-import NoDataMessage from "../components/blog-nodata.component";
+} from '../components/inpage-navigation.component';
+import AniamationWrapper from '../components/page-animation.component';
+import Loader from '../components/loader.component';
+import BlogPostCard from '../components/blog-card-banner.component';
+import MinimalBlogPostCard from '../components/blog-card-nobanner.component';
+import NoDataMessage from '../components/blog-nodata.component';
+import LoadOptions from '../components/load-options.components';
 
-import useCollapseStore from "../states/collapse.state";
-import useHomeBlogStore from "../states/home-blog.state";
-import { FlatIcons } from "../icons/flaticons";
-import useBlogFetch from "../fetchs/blog.fetch";
-import LoadMoreBtn from "../components/load-more.component";
-import LoadOptions from "../components/load-options.components";
+import useCollapseStore from '../states/collapse.state';
+import useHomeBlogStore from '../states/home-blog.state';
+
+import { FlatIcons } from '../icons/flaticons';
+import useBlogFetch from '../fetchs/blog.fetch';
 
 const Homepage = () => {
   const { searchBarVisibility } = useCollapseStore();
@@ -24,7 +24,8 @@ const Homepage = () => {
     latestBlogs,
     trendingBlogs,
     inPageNavState,
-    categories,
+    allCategories,
+    loadBlogsLimit,
     setLatestBlogs,
     setInPageNavState,
   } = useHomeBlogStore();
@@ -32,7 +33,7 @@ const Homepage = () => {
   const {
     GetLatestBlogs,
     GetTrendingBlogs,
-    GetLatestBlogsBySearch,
+    GetLatestBlogsByCategory,
     GetTrendingTags,
   } = useBlogFetch();
 
@@ -47,8 +48,6 @@ const Homepage = () => {
   //   'travel',
   // ];
 
-  const loadBlogsLimit = import.meta.env.VITE_BLOGS_LIMIT;
-
   const loadBlogByCategory = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 取得 Button 的文字內容
     const category = e.currentTarget.textContent?.toLowerCase();
@@ -59,7 +58,7 @@ const Homepage = () => {
     // 接著防止重複點擊，或是點擊相同的分類，直接返回 home
     // 如果 inPageNavState 已經是 category，則設定為 home
     if (inPageNavState === category) {
-      setInPageNavState("home");
+      setInPageNavState('home');
       return;
     }
 
@@ -80,33 +79,27 @@ const Homepage = () => {
     if (latestBlogs) return;
 
     // 如果 inPageNavState 是 home，則 fetch 最新的 blog
-    if (inPageNavState === "home") {
-      GetLatestBlogs({ page: 1, state: "initial" });
+    if (inPageNavState === 'home') {
+      GetLatestBlogs({ page: 1, state: 'initial' });
     } else {
       // 反之如果 inPageNavState 不是 home，則 fetch 特定分類的 blog
-      GetLatestBlogsBySearch({
+      GetLatestBlogsByCategory({
         category: inPageNavState,
         page: 1,
-        state: "initial",
+        state: 'initial',
       });
     }
 
     // 如果 inPageNavState 是 trending blogs，則 fetch 熱門的 blog
     if (!trendingBlogs) {
-      GetTrendingBlogs({ page: 1, state: "initial" });
+      GetTrendingBlogs({ page: 1, state: 'initial' });
     }
 
-    // 如果 categories 是空的，則 fetch 熱門的 tags
-    if (!categories.length) {
+    // 如果 allCategories 是空的，則 fetch 熱門的 tags
+    if (!allCategories || !allCategories.length) {
       GetTrendingTags();
     }
   }, [inPageNavState]);
-
-  useEffect(() => {
-    if (trendingBlogs) {
-      console.log(trendingBlogs);
-    }
-  }, [trendingBlogs]);
 
   return (
     <AniamationWrapper
@@ -121,13 +114,13 @@ const Homepage = () => {
           h-cover
           gap-10
           justify-center
-          ${searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""}
+          ${searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''}
         `}
       >
-        {/* latest blogs and trending blogs */}
+        {/* latest blogs and min-screen trending blogs */}
         <div className="w-full">
           <InpageNavigation
-            routes={[inPageNavState, "trending blogs"]}
+            routes={[inPageNavState, 'trending blogs']}
             defaultHiddenIndex={1}
           >
             {/* Latest blogs */}
@@ -135,7 +128,7 @@ const Homepage = () => {
               {latestBlogs === null ? (
                 // 如果 latestBlogs 為 null，顯示 loader
                 <Loader loader={{ speed: 1, size: 50 }} />
-              ) : "results" in latestBlogs && latestBlogs.results.length ? (
+              ) : 'results' in latestBlogs && latestBlogs.results.length ? (
                 // 如果 latestBlogs 不為 null 且有長度，則顯示 blog card
                 <div>
                   {latestBlogs.results.map((blog, i) => (
@@ -144,6 +137,7 @@ const Homepage = () => {
                       key={blog.title}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                       transition={{ duration: 1, delay: i * 0.1 }}
                     >
                       <BlogPostCard
@@ -153,7 +147,12 @@ const Homepage = () => {
                     </AniamationWrapper>
                   ))}
 
-                  <LoadMoreBtn data={latestBlogs} />
+                  {/* Load Operation */}
+                  <LoadOptions
+                    id="latestBlogs"
+                    data={latestBlogs}
+                    loadBlogsLimit={loadBlogsLimit}
+                  />
                 </div>
               ) : (
                 // 如果 latestBlogs 不為 null 且沒有值，顯示 NoDataMessage
@@ -165,7 +164,7 @@ const Homepage = () => {
             <>
               {trendingBlogs === null ? (
                 <Loader loader={{ speed: 1, size: 50 }} />
-              ) : "results" in trendingBlogs && trendingBlogs.results.length ? (
+              ) : 'results' in trendingBlogs && trendingBlogs.results.length ? (
                 <div>
                   {trendingBlogs.results.map((blog, i) => (
                     <AniamationWrapper
@@ -178,7 +177,18 @@ const Homepage = () => {
                     </AniamationWrapper>
                   ))}
 
-                  <LoadMoreBtn data={trendingBlogs} />
+                  {/* Load Operation */}
+                  <LoadOptions
+                    id="trendingMinScreen"
+                    data={trendingBlogs}
+                    loadBlogsLimit={loadBlogsLimit}
+                    target="trendingBlogs"
+                    className="
+                      pt-4
+                      border-t
+                      border-grey-custom
+                    "
+                  />
                 </div>
               ) : (
                 <NoDataMessage message="No trending blogs" />
@@ -209,16 +219,16 @@ const Homepage = () => {
               </h1>
               {/* Tags */}
               <div className="flex flex-wrap gap-3">
-                {categories !== null &&
-                  categories.map((category, i) => (
+                {allCategories !== null &&
+                  allCategories.map((category, i) => (
                     <button
                       key={i}
                       className={`
                       text-nowrap
                       ${
                         category === inPageNavState
-                          ? "btn-dark text-white"
-                          : "tag"
+                          ? 'btn-dark text-white'
+                          : 'tag'
                       }`}
                       onClick={(e) => loadBlogByCategory(e)}
                     >
@@ -238,7 +248,7 @@ const Homepage = () => {
               <div>
                 {trendingBlogs === null ? (
                   <Loader loader={{ speed: 1, size: 30 }} />
-                ) : "results" in trendingBlogs &&
+                ) : 'results' in trendingBlogs &&
                   trendingBlogs.results.length ? (
                   <div>
                     {trendingBlogs.results.map((blog, i) => (
@@ -254,6 +264,7 @@ const Homepage = () => {
 
                     {/* Load Operation */}
                     <LoadOptions
+                      id="trendingMiddleScreen"
                       data={trendingBlogs}
                       loadBlogsLimit={loadBlogsLimit}
                       target="trendingBlogs"
