@@ -1,25 +1,27 @@
-import type { GenerateBlogStructureType } from "../../../backend/src/utils/types.util";
+import { GenerateBlogStructureType } from "../../../backend/src/utils/types.util";
 import useBlogFetch from "../fetchs/blog.fetch";
 import useHomeBlogStore from "../states/home-blog.state";
 
-interface LoadMoreBtnProps {
+interface LoadLessBtnProps {
   data: GenerateBlogStructureType;
   target?: string;
   state?: string;
+  loadBlogsLimit: number;
 }
 
-const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
+const LoadLessBtn: React.FC<LoadLessBtnProps> = ({
   data,
   target,
-  state = "loadmore",
+  state = "loadless",
+  loadBlogsLimit,
 }) => {
   const { inPageNavState: category, inPageNavIndex } = useHomeBlogStore();
   const { GetLatestBlogs, GetLatestBlogsBySearch, GetTrendingBlogs } =
     useBlogFetch();
 
-  if (data.results.length < data.totalDocs) {
+  if (data.results.length > loadBlogsLimit) {
     // 判斷 state 是否為 home，如果是則呼叫 GetLatestBlogs，否則呼叫 GetLatestBlogsByCategory
-    const LoadMoreFunction =
+    const LoadLessFunction =
       inPageNavIndex || target === "trendingBlogs"
         ? GetTrendingBlogs
         : category === "home"
@@ -28,9 +30,7 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
 
     return (
       <div
-        onClick={() =>
-          LoadMoreFunction({ category, page: data.page + 1, state })
-        }
+        onClick={() => LoadLessFunction({ category, page: data.page, state })}
         className="
           flex
           items-center
@@ -44,10 +44,10 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
         "
       >
         {/* <p>· Load more ·</p> */}
-        <p>Load more</p>
+        <p>Load less</p>
       </div>
     );
   }
 };
 
-export default LoadMoreBtn;
+export default LoadLessBtn;

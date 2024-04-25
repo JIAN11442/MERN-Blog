@@ -16,6 +16,7 @@ import useHomeBlogStore from "../states/home-blog.state";
 import { FlatIcons } from "../icons/flaticons";
 import useBlogFetch from "../fetchs/blog.fetch";
 import LoadMoreBtn from "../components/load-more.component";
+import LoadOptions from "../components/load-options.components";
 
 const Homepage = () => {
   const { searchBarVisibility } = useCollapseStore();
@@ -45,6 +46,8 @@ const Homepage = () => {
   //   'finance',
   //   'travel',
   // ];
+
+  const loadBlogsLimit = import.meta.env.VITE_BLOGS_LIMIT;
 
   const loadBlogByCategory = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 取得 Button 的文字內容
@@ -78,15 +81,19 @@ const Homepage = () => {
 
     // 如果 inPageNavState 是 home，則 fetch 最新的 blog
     if (inPageNavState === "home") {
-      GetLatestBlogs({ page: 1 });
+      GetLatestBlogs({ page: 1, state: "initial" });
     } else {
       // 反之如果 inPageNavState 不是 home，則 fetch 特定分類的 blog
-      GetLatestBlogsBySearch({ category: inPageNavState, page: 1 });
+      GetLatestBlogsBySearch({
+        category: inPageNavState,
+        page: 1,
+        state: "initial",
+      });
     }
 
     // 如果 inPageNavState 是 trending blogs，則 fetch 熱門的 blog
     if (!trendingBlogs) {
-      GetTrendingBlogs({ page: 1 });
+      GetTrendingBlogs({ page: 1, state: "initial" });
     }
 
     // 如果 categories 是空的，則 fetch 熱門的 tags
@@ -94,6 +101,12 @@ const Homepage = () => {
       GetTrendingTags();
     }
   }, [inPageNavState]);
+
+  useEffect(() => {
+    if (trendingBlogs) {
+      console.log(trendingBlogs);
+    }
+  }, [trendingBlogs]);
 
   return (
     <AniamationWrapper
@@ -148,7 +161,7 @@ const Homepage = () => {
               )}
             </>
 
-            {/* Trending blogs */}
+            {/* Trending blogs - min screen */}
             <>
               {trendingBlogs === null ? (
                 <Loader loader={{ speed: 1, size: 50 }} />
@@ -215,7 +228,7 @@ const Homepage = () => {
               </div>
             </div>
 
-            {/* Trending blogs */}
+            {/* Trending blogs - middle screen*/}
             <div>
               {/* Title */}
               <h1 className="text-xl font-medium mb-8">
@@ -239,7 +252,17 @@ const Homepage = () => {
                       </AniamationWrapper>
                     ))}
 
-                    <LoadMoreBtn data={trendingBlogs} state="trendingBlogs" />
+                    {/* Load Operation */}
+                    <LoadOptions
+                      data={trendingBlogs}
+                      loadBlogsLimit={loadBlogsLimit}
+                      target="trendingBlogs"
+                      className="
+                        pt-4
+                        border-t
+                        border-grey-custom
+                      "
+                    />
                   </div>
                 ) : (
                   <NoDataMessage message="No trending blogs" />

@@ -64,6 +64,7 @@ export interface GenerateBlogStructureType {
   page: number;
   results: BlogStructureType[];
   totalDocs: number;
+  prevLoadNum: number[];
 }
 
 export interface FormatBlogDataProps {
