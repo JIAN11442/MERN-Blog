@@ -1,24 +1,32 @@
 import { twMerge } from 'tailwind-merge';
-import { GenerateBlogStructureType } from '../../../backend/src/utils/types.util';
+
 import LoadLessBtn from './load-less.component';
 import LoadMoreBtn from './load-more.component';
 import BackToTopBtn from './back-top.component';
 
+import { GenerateStructureType } from '../../../backend/src/utils/types.util';
+
 interface LoadOptionsProps {
   id: string;
-  data: GenerateBlogStructureType;
-  target?: string;
-  loadBlogsLimit: number;
+  data: GenerateStructureType;
+  loadLimit: number;
   query?: string;
+  loadFunction: ({
+    page,
+    state,
+  }: {
+    page?: number;
+    state?: string;
+  }) => Promise<void>;
   className?: string;
 }
 
 const LoadOptions: React.FC<LoadOptionsProps> = ({
   id,
   data,
-  target,
-  loadBlogsLimit,
+  loadLimit,
   query,
+  loadFunction,
   className,
 }) => {
   return (
@@ -34,12 +42,15 @@ const LoadOptions: React.FC<LoadOptionsProps> = ({
       )}
     >
       {/* Load more button */}
-      <LoadMoreBtn data={data} target={target} query={query} />
+      <LoadMoreBtn data={data} query={query} loadFunction={loadFunction} />
 
       {/* Load less button */}
-      {data.results.length > loadBlogsLimit && (
-        <LoadLessBtn data={data} target={target} query={query} />
-      )}
+      <LoadLessBtn
+        data={data}
+        query={query}
+        loadLimit={loadLimit}
+        loadFunction={loadFunction}
+      />
 
       {/* Move to top */}
       <BackToTopBtn />

@@ -1,9 +1,8 @@
-POST http://localhost:5000/api/blog/query-latest-blogs
+POST http://localhost:5000/api/blog/query-related-users-count
 Content-Type: application/json
 
 {
-    "query": "shoes",
-    "page": 1
+    "query":"a"
 }
 
 # GET http://localhost:5000/api/blog/trending-tags

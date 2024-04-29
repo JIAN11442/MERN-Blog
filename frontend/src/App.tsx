@@ -20,7 +20,7 @@ function App() {
 
     // 檢查滾動條是否顯示(爲了控制返回頂部按鈕的顯示與隱藏)
     const checkScroll = () => {
-      if (window.scrollY >= 100 && window.scrollbars.visible) {
+      if (window.scrollY >= 1 && window.scrollbars.visible) {
         setScrollbarVisible(true);
       } else {
         setScrollbarVisible(false);

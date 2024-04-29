@@ -8,9 +8,11 @@ import {
   getLatestBlogsByQuery,
   getTrendingBlogs,
   getTrendingTags,
+  getRelatedUsersByQuery,
   getLatestBlogsCount,
   getLatestBlogsByCategoryCount,
   getLatestBlogsByQueryCount,
+  getRelatedUsersByQueryCount,
 } from '../controllers/blogs.controller';
 
 const blogRoute = express.Router();
@@ -27,5 +29,8 @@ blogRoute.post('/query-latest-blogs-count', getLatestBlogsByQueryCount);
 
 blogRoute.post('/trending-blogs', getTrendingBlogs);
 blogRoute.get('/trending-tags', getTrendingTags);
+
+blogRoute.post('/query-related-users', getRelatedUsersByQuery);
+blogRoute.post('/query-related-users-count', getRelatedUsersByQueryCount);
 
 export default blogRoute;

@@ -1,32 +1,38 @@
 import { create } from 'zustand';
 import type {
+  PersonalInfoStructureType,
   BlogStructureType,
-  GenerateBlogStructureType,
+  GenerateStructureType,
 } from '../../../backend/src/utils/types.util';
 
 interface homeBlogProps {
   inPageNavIndex: number;
   inPageNavState: string;
-  latestBlogs: BlogStructureType[] | GenerateBlogStructureType | null;
-  trendingBlogs: BlogStructureType[] | GenerateBlogStructureType | null;
-  queryBlogs: BlogStructureType[] | GenerateBlogStructureType | null;
+  latestBlogs: BlogStructureType[] | GenerateStructureType | null;
+  trendingBlogs: BlogStructureType[] | GenerateStructureType | null;
+  queryBlogs: BlogStructureType[] | GenerateStructureType | null;
   allCategories: string[] | null;
   scrollbarVisible: boolean;
   loadBlogsLimit: number;
+  queryUsers: PersonalInfoStructureType[] | GenerateStructureType | null;
+  loadUsersLimit: number;
 
   setInPageNavIndex: (index: number) => void;
   setInPageNavState: (state: string) => void;
   setLatestBlogs: (
-    blogs: BlogStructureType[] | GenerateBlogStructureType | null
+    blogs: BlogStructureType[] | GenerateStructureType | null
   ) => void;
   setTrendingBlogs: (
-    blogs: BlogStructureType[] | GenerateBlogStructureType | null
+    blogs: BlogStructureType[] | GenerateStructureType | null
   ) => void;
   setQueryBlogs: (
-    blogs: BlogStructureType[] | GenerateBlogStructureType | null
+    blogs: BlogStructureType[] | GenerateStructureType | null
   ) => void;
   setAllCategories: (tags: string[] | null) => void;
   setScrollbarVisible: (visible: boolean) => void;
+  setQueryUsers: (
+    users: PersonalInfoStructureType[] | GenerateStructureType | null
+  ) => void;
 }
 
 const useHomeBlogStore = create<homeBlogProps>((set) => ({
@@ -38,6 +44,8 @@ const useHomeBlogStore = create<homeBlogProps>((set) => ({
   allCategories: [],
   scrollbarVisible: false,
   loadBlogsLimit: import.meta.env.VITE_BLOGS_LIMIT,
+  queryUsers: null,
+  loadUsersLimit: import.meta.env.VITE_USERS_LIMIT,
 
   setInPageNavIndex: (index) => set({ inPageNavIndex: index }),
   setInPageNavState: (state) => set({ inPageNavState: state }),
@@ -46,6 +54,7 @@ const useHomeBlogStore = create<homeBlogProps>((set) => ({
   setQueryBlogs: (blogs) => set({ queryBlogs: blogs }),
   setAllCategories: (tags) => set({ allCategories: tags }),
   setScrollbarVisible: (visible) => set({ scrollbarVisible: visible }),
+  setQueryUsers: (users) => set({ queryUsers: users }),
 }));
 
 export default useHomeBlogStore;

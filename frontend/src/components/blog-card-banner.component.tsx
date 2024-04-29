@@ -1,14 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import type {
-  AuthorStructureType,
   BlogStructureType,
-} from "../../../backend/src/utils/types.util";
+  PersonalInfoStructureType,
+} from '../../../backend/src/utils/types.util';
 
-import { getDate } from "../commons/date.common";
-import { FlatIcons } from "../icons/flaticons";
+import { getDate } from '../commons/date.common';
+import { FlatIcons } from '../icons/flaticons';
 
 interface BlogPostCardProps {
-  author: AuthorStructureType;
+  author: PersonalInfoStructureType;
   content: BlogStructureType;
 }
 

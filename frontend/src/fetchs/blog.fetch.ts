@@ -8,7 +8,7 @@ import useAuthStore from '../states/user-auth.state';
 import type {
   FetchBlogsPropsType,
   FormatBlogDataProps,
-  GenerateBlogStructureType,
+  GenerateStructureType,
 } from '../../../backend/src/utils/types.util';
 
 const useBlogFetch = () => {
@@ -23,13 +23,15 @@ const useBlogFetch = () => {
     setTrendingBlogs,
     setAllCategories,
     setQueryBlogs,
+    setQueryUsers,
     latestBlogs,
     trendingBlogs,
     queryBlogs,
+    queryUsers,
   } = useHomeBlogStore();
 
   // Generate blog data
-  const FormatBlogData = async ({
+  const FormatData = async ({
     prevArr,
     fetchData,
     page,
@@ -94,6 +96,29 @@ const useBlogFetch = () => {
     return obj;
   };
 
+  // Get Related Blogs author
+  const GetRelatedBlogsAuthorByQuery = async ({
+    query,
+    page = 1,
+    state = 'initial',
+  }: FetchBlogsPropsType) => {
+    const requestURL = BLOG_SERVER_ROUTE + '/query-related-users';
+    await axios.post(requestURL, { query, page }).then(async ({ data }) => {
+      if (data.queryUsers) {
+        const formattedData = await FormatData({
+          prevArr: queryUsers,
+          fetchData: data.queryUsers,
+          page,
+          countRoute: '/query-related-users-count',
+          data_to_send: { query },
+          state,
+        });
+
+        setQueryUsers(formattedData as GenerateStructureType);
+      }
+    });
+  };
+
   // Fetch latest blogs
   const GetLatestBlogs = async ({ page = 1, state }: FetchBlogsPropsType) => {
     const requestURL =
@@ -103,7 +128,7 @@ const useBlogFetch = () => {
       .post(requestURL, { page })
       .then(async ({ data }) => {
         if (data.latestBlogs) {
-          const formattedData = await FormatBlogData({
+          const formattedData = await FormatData({
             prevArr: latestBlogs,
             fetchData: data.latestBlogs,
             page,
@@ -111,7 +136,7 @@ const useBlogFetch = () => {
             state,
           });
 
-          setLatestBlogs(formattedData as GenerateBlogStructureType);
+          setLatestBlogs(formattedData as GenerateStructureType);
         }
       })
       .catch((error) => {
@@ -131,7 +156,7 @@ const useBlogFetch = () => {
       .then(async ({ data }) => {
         console.log(data.tagBlogs);
         if (data.tagBlogs) {
-          const formattedData = await FormatBlogData({
+          const formattedData = await FormatData({
             prevArr: latestBlogs,
             fetchData: data.tagBlogs,
             page,
@@ -140,7 +165,7 @@ const useBlogFetch = () => {
             state,
           });
 
-          setLatestBlogs(formattedData as GenerateBlogStructureType);
+          setLatestBlogs(formattedData as GenerateStructureType);
         }
       })
       .catch((error) => {
@@ -159,7 +184,7 @@ const useBlogFetch = () => {
       .post(requestURL, { query, page })
       .then(async ({ data }) => {
         if (data.queryBlogs) {
-          const formattedData = await FormatBlogData({
+          const formattedData = await FormatData({
             prevArr: queryBlogs,
             fetchData: data.queryBlogs,
             page,
@@ -168,7 +193,7 @@ const useBlogFetch = () => {
             state,
           });
 
-          setQueryBlogs(formattedData as GenerateBlogStructureType);
+          setQueryBlogs(formattedData as GenerateStructureType);
         }
       })
       .catch((error) => {
@@ -202,7 +227,7 @@ const useBlogFetch = () => {
       .post(requestURL, { page })
       .then(async ({ data }) => {
         if (data.trendingBlogs) {
-          const formattedData = await FormatBlogData({
+          const formattedData = await FormatData({
             prevArr: trendingBlogs,
             fetchData: data.trendingBlogs,
             page,
@@ -210,7 +235,7 @@ const useBlogFetch = () => {
             state,
           });
 
-          setTrendingBlogs(formattedData as GenerateBlogStructureType);
+          setTrendingBlogs(formattedData as GenerateStructureType);
         }
       })
       .catch((error) => {
@@ -357,7 +382,8 @@ const useBlogFetch = () => {
     GetTrendingTags,
     GetLatestBlogsByCategory,
     GetLatestBlogsByQuery,
-    FormatBlogData,
+    FormatData,
+    GetRelatedBlogsAuthorByQuery,
   };
 };
 

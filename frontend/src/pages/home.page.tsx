@@ -17,6 +17,7 @@ import useHomeBlogStore from '../states/home-blog.state';
 
 import { FlatIcons } from '../icons/flaticons';
 import useBlogFetch from '../fetchs/blog.fetch';
+import type { BlogStructureType } from '../../../backend/src/utils/types.util';
 
 const Homepage = () => {
   const { searchBarVisibility } = useCollapseStore();
@@ -117,7 +118,7 @@ const Homepage = () => {
           ${searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''}
         `}
       >
-        {/* latest blogs and min-screen trending blogs */}
+        {/* latest blogs(md-screen) and trending blogs(min-screen) */}
         <div className="w-full">
           <InpageNavigation
             routes={[inPageNavState, 'trending blogs']}
@@ -131,7 +132,7 @@ const Homepage = () => {
               ) : 'results' in latestBlogs && latestBlogs.results.length ? (
                 // 如果 latestBlogs 不為 null 且有長度，則顯示 blog card
                 <div>
-                  {latestBlogs.results.map((blog, i) => (
+                  {latestBlogs.results.map((blog: BlogStructureType, i) => (
                     // delay: i * 0.1 可以讓每個 blog card 依次延遲出現
                     <AniamationWrapper
                       key={blog.title}
@@ -151,7 +152,12 @@ const Homepage = () => {
                   <LoadOptions
                     id="latestBlogs"
                     data={latestBlogs}
-                    loadBlogsLimit={loadBlogsLimit}
+                    loadLimit={loadBlogsLimit}
+                    loadFunction={
+                      inPageNavState === 'home'
+                        ? GetLatestBlogs
+                        : GetLatestBlogsByCategory
+                    }
                   />
                 </div>
               ) : (
@@ -166,7 +172,7 @@ const Homepage = () => {
                 <Loader loader={{ speed: 1, size: 50 }} />
               ) : 'results' in trendingBlogs && trendingBlogs.results.length ? (
                 <div>
-                  {trendingBlogs.results.map((blog, i) => (
+                  {trendingBlogs.results.map((blog: BlogStructureType, i) => (
                     <AniamationWrapper
                       key={blog.title}
                       initial={{ opacity: 0 }}
@@ -181,8 +187,8 @@ const Homepage = () => {
                   <LoadOptions
                     id="trendingMinScreen"
                     data={trendingBlogs}
-                    loadBlogsLimit={loadBlogsLimit}
-                    target="trendingBlogs"
+                    loadLimit={loadBlogsLimit}
+                    loadFunction={GetTrendingBlogs}
                     className="
                       pt-4
                       border-t
@@ -197,7 +203,7 @@ const Homepage = () => {
           </InpageNavigation>
         </div>
 
-        {/* tags filters and minimal trending blogs */}
+        {/* tags filters and minimal trending blogs(md-screen) */}
         <div
           className="
             min-w-[40%]
@@ -241,9 +247,17 @@ const Homepage = () => {
             {/* Trending blogs - middle screen*/}
             <div>
               {/* Title */}
-              <h1 className="text-xl font-medium mb-8">
-                Trending <FlatIcons name="fi fi-rr-arrow-trend-up" />
-              </h1>
+              <div
+                className="
+                  flex
+                  gap-x-2
+                  items-center
+                  mb-8
+              "
+              >
+                <h1 className="text-xl font-medium">Trending</h1>
+                <FlatIcons name="fi fi-br-arrow-trend-up" />
+              </div>
               {/* Blogs */}
               <div>
                 {trendingBlogs === null ? (
@@ -251,7 +265,7 @@ const Homepage = () => {
                 ) : 'results' in trendingBlogs &&
                   trendingBlogs.results.length ? (
                   <div>
-                    {trendingBlogs.results.map((blog, i) => (
+                    {trendingBlogs.results.map((blog: BlogStructureType, i) => (
                       <AniamationWrapper
                         key={blog.title}
                         initial={{ opacity: 0 }}
@@ -266,8 +280,8 @@ const Homepage = () => {
                     <LoadOptions
                       id="trendingMiddleScreen"
                       data={trendingBlogs}
-                      loadBlogsLimit={loadBlogsLimit}
-                      target="trendingBlogs"
+                      loadLimit={loadBlogsLimit}
+                      loadFunction={GetTrendingBlogs}
                       className="
                         pt-4
                         border-t

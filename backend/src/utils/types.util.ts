@@ -29,13 +29,17 @@ export interface UserRequestType extends UserSchemaType {
   _id: mongoose.Types.ObjectId;
 }
 
-export interface AuthorStructureType {
+export interface PersonalInfoStructureType {
   fullname?: string;
   email?: string;
   password?: string;
   username?: string;
   bio?: string;
   profile_img?: string;
+}
+
+export interface AuthorStructureType {
+  personal_info: PersonalInfoStructureType;
 }
 
 export interface ActivityStructureType {
@@ -54,22 +58,22 @@ export interface BlogStructureType {
   des?: string;
   draft?: boolean;
   author?: {
-    personal_info: AuthorStructureType;
+    personal_info: PersonalInfoStructureType;
   };
   activity?: ActivityStructureType;
   publishedAt?: string;
 }
 
-export interface GenerateBlogStructureType {
+export interface GenerateStructureType {
   page: number;
-  results: BlogStructureType[];
+  results: BlogStructureType[] | PersonalInfoStructureType[];
   totalDocs: number;
   prevLoadNum: number[];
 }
 
 export interface FormatBlogDataProps {
   create_new_arr?: boolean;
-  prevArr: GenerateBlogStructureType | BlogStructureType[] | null;
+  prevArr: GenerateStructureType | BlogStructureType[] | PersonalInfoStructureType[] | null;
   fetchData: BlogStructureType[] | null;
   page: number;
   countRoute: string;
@@ -82,5 +86,12 @@ export interface FetchBlogsPropsType {
   query?: string;
   page?: number;
   create_new_arr?: boolean;
+  state?: string;
+}
+
+export interface FunctionPropsType {
+  category?: string;
+  query?: string;
+  page?: number;
   state?: string;
 }
