@@ -9,6 +9,7 @@ import Homepage from './pages/home.page';
 import useAuthFetch from './fetchs/auth.fetch';
 import SearchPage from './pages/search.page';
 import useHomeBlogStore from './states/home-blog.state';
+import PageNotFound from './pages/404.page';
 
 function App() {
   const { GetAuthUserWithToken } = useAuthFetch();
@@ -42,6 +43,9 @@ function App() {
         <Route path="signin" element={<UserAuthPage type="sign-in" />} />
         <Route path="signup" element={<UserAuthPage type="sign-up" />} />
         <Route path="search/:query" element={<SearchPage />} />
+
+        {/* 如果當前的路徑都不是上面那些，就會來到這頁 */}
+        <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
   );

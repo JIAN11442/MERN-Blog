@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import EditorJS from '@editorjs/editorjs';
 
 import logo from '../imgs/logo.png';
-import defaultBanner from '../imgs/banner.png';
+import defaultBanner from '../imgs/banner-2.png';
 
 import AniamationWrapper from './page-animation.component';
 import tools from './tools.component';
