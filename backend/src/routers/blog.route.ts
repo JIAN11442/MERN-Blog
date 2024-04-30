@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { jwtVerify } from '../controllers/users.controller';
+import { jwtVerify } from '../controllers/auth.controller';
 import {
   createBlog,
   getLatestBlogs,
@@ -8,12 +8,10 @@ import {
   getLatestBlogsByQuery,
   getTrendingBlogs,
   getTrendingTags,
-  getRelatedUsersByQuery,
   getLatestBlogsCount,
   getLatestBlogsByCategoryCount,
   getLatestBlogsByQueryCount,
-  getRelatedUsersByQueryCount,
-} from '../controllers/blogs.controller';
+} from '../controllers/blog.controller';
 
 const blogRoute = express.Router();
 
@@ -29,8 +27,5 @@ blogRoute.post('/query-latest-blogs-count', getLatestBlogsByQueryCount);
 
 blogRoute.post('/trending-blogs', getTrendingBlogs);
 blogRoute.get('/trending-tags', getTrendingTags);
-
-blogRoute.post('/query-related-users', getRelatedUsersByQuery);
-blogRoute.post('/query-related-users-count', getRelatedUsersByQueryCount);
 
 export default blogRoute;

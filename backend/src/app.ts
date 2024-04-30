@@ -9,9 +9,10 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import admin from 'firebase-admin';
 
-import userRoute from './routers/users.route';
+import authRoute from './routers/auth.route';
 import awsRoute from './routers/aws.route';
 import blogRoute from './routers/blog.route';
+import userRoute from './routers/user.route';
 
 import ErrorsHandle from './utils/errors.util';
 import env from './utils/validateEnv.util';
@@ -44,8 +45,9 @@ app.use(
 );
 
 app.use('/api/aws', awsRoute);
-app.use('/api/auth', userRoute);
+app.use('/api/auth', authRoute);
 app.use('/api/blog', blogRoute);
+app.use('/api/user', userRoute);
 
 // Error handling
 app.use((req, res, next) => {

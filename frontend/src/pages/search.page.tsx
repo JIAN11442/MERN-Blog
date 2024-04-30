@@ -15,6 +15,8 @@ import useHomeBlogStore from '../states/home-blog.state';
 import useCollapseStore from '../states/collapse.state';
 
 import useBlogFetch from '../fetchs/blog.fetch';
+import useUserFetch from '../fetchs/user.fetch';
+
 import { FlatIcons } from '../icons/flaticons';
 
 import type { BlogStructureType } from '../../../backend/src/utils/types.util';
@@ -24,8 +26,8 @@ const SearchPage = () => {
 
   const { searchBarVisibility } = useCollapseStore();
   const { loadBlogsLimit, queryBlogs } = useHomeBlogStore();
-  const { GetLatestBlogsByQuery, GetRelatedBlogsAuthorByQuery } =
-    useBlogFetch();
+  const { GetLatestBlogsByQuery } = useBlogFetch();
+  const { GetRelatedBlogsAuthorByQuery } = useUserFetch();
 
   useEffect(() => {
     // 取得 title 中包含 query 的所有資料

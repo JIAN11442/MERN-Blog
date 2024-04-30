@@ -77,6 +77,7 @@ export interface FormatBlogDataProps {
   fetchData: BlogStructureType[] | null;
   page: number;
   countRoute: string;
+  fetchRoute?: string;
   data_to_send?: object;
   state?: string;
 }

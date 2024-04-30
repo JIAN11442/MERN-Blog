@@ -9,7 +9,7 @@ import Marker from '@editorjs/marker';
 import InlineCode from '@editorjs/inline-code';
 import Code from '@editorjs/code';
 
-import CodeBox from '@bomdi/codebox';
+// import CodeBox from '@bomdi/codebox';
 
 import useAwsFetch from '../fetchs/aws.fetch';
 

@@ -10,7 +10,7 @@ import type {
   AuthorStructureType,
   GenerateStructureType,
 } from '../../../backend/src/utils/types.util';
-import useBlogFetch from '../fetchs/blog.fetch';
+import useUserFetch from '../fetchs/user.fetch';
 
 interface UserCardWrapperProps {
   query: string;
@@ -18,7 +18,7 @@ interface UserCardWrapperProps {
 
 const UserCardWrapper: React.FC<UserCardWrapperProps> = ({ query }) => {
   const { queryUsers, loadUsersLimit } = useHomeBlogStore();
-  const { GetRelatedBlogsAuthorByQuery } = useBlogFetch();
+  const { GetRelatedBlogsAuthorByQuery } = useUserFetch();
 
   return (
     <>

@@ -13,15 +13,15 @@ const months = [
   'Dec',
 ];
 
-const days = [
-  'sunday',
-  'monday',
-  'tuesday',
-  'wednesday',
-  'thursday',
-  'friday',
-  'saturday',
-];
+// const days = [
+//   'sunday',
+//   'monday',
+//   'tuesday',
+//   'wednesday',
+//   'thursday',
+//   'friday',
+//   'saturday',
+// ];
 
 export const getDate = (timestamp: string) => {
   const date = new Date(timestamp);

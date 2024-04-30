@@ -1,4 +1,4 @@
-POST http://localhost:5000/api/blog/query-related-users-count
+POST http://localhost:5000/api/user/query-related-users-count
 Content-Type: application/json
 
 {

@@ -12,7 +12,6 @@ import BlogSchema from '../schemas/blog.schema';
 import UserSchema from '../schemas/user.schema';
 
 const getLatestBlogLimit = env.GET_LATEST_BLOGS_LIMIT;
-const getRelatedBlogLimit = env.GET_RELATED_USERS_LIMIT;
 
 // 創建文章
 export const createBlog: RequestHandler = async (req, res, next) => {
@@ -222,33 +221,6 @@ export const getTrendingTags: RequestHandler = async (req, res, next) => {
   }
 };
 
-// 取得 username 包含 query 的使用者
-export const getRelatedUsersByQuery: RequestHandler = async (req, res, next) => {
-  try {
-    const { query, page } = req.body;
-
-    if (!query) {
-      throw createHttpError(400, 'Please provide a query from client.');
-    }
-
-    if (!page) {
-      throw createHttpError(400, 'Please provide a page number from client.');
-    }
-
-    const users = await UserSchema.find({ 'personal_info.username': new RegExp(query, 'i') })
-      .skip((page - 1) * getRelatedBlogLimit)
-      .limit(getRelatedBlogLimit)
-      .select('personal_info.fullname personal_info.username personal_info.profile_img -_id');
-
-    if (!users) throw createHttpError(500, 'No users found with this query.');
-
-    res.status(200).json({ queryUsers: users });
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-};
-
 // 取得最新文章數量
 export const getLatestBlogsCount: RequestHandler = async (req, res, next) => {
   try {
@@ -283,24 +255,6 @@ export const getLatestBlogsByQueryCount: RequestHandler = async (req, res, next)
     const queryBlogsCount = await BlogSchema.countDocuments({ title: new RegExp(query, 'i'), draft: false });
 
     res.status(200).json({ totalDocs: queryBlogsCount });
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-};
-
-// 取得所有 username 包含 query 的使用者數量
-export const getRelatedUsersByQueryCount: RequestHandler = async (req, res, next) => {
-  try {
-    const { query } = req.body;
-
-    if (!query) {
-      throw createHttpError(400, 'Please provide a query from client.');
-    }
-
-    const queryUsersCount = await UserSchema.countDocuments({ 'personal_info.username': new RegExp(query, 'i') });
-
-    res.status(200).json({ totalDocs: queryUsersCount });
   } catch (error) {
     console.log(error);
     next(error);
