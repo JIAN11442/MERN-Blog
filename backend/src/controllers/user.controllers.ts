@@ -54,3 +54,27 @@ export const getRelatedUsersByQueryCount: RequestHandler = async (req, res, next
     next(error);
   }
 };
+
+// 取得目標作者的使用者資訊
+export const getAuthorProfileInfo: RequestHandler = async (req, res, next) => {
+  try {
+    const { username } = req.body;
+
+    if (!username) {
+      throw createHttpError(400, 'Please provide a username from client.');
+    }
+
+    const matchAuthor = await UserSchema.findOne({ 'personal_info.username': username }).select(
+      '-personal_info.password -google_auth -updatedAt -blogs',
+    );
+
+    if (!matchAuthor) {
+      throw createHttpError(404, 'No author found with this username.');
+    }
+
+    res.status(200).json({ author: matchAuthor });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};

@@ -96,3 +96,18 @@ export interface FunctionPropsType {
   page?: number;
   state?: string;
 }
+
+export interface AuthorProfileStructureType {
+  personal_info: {
+    fullname: string;
+    username: string;
+    profile_img: string;
+    bio: string;
+  };
+  account_info: {
+    total_posts: number;
+    total_reads: number;
+  };
+  social_links: object;
+  createdAt: string;
+}

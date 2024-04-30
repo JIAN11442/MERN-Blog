@@ -11,6 +11,7 @@ const BackToTopBtn = () => {
 
   return (
     <div
+      onClick={handleBackToTop}
       className="
         flex
         items-center
@@ -23,9 +24,7 @@ const BackToTopBtn = () => {
         transition
       "
     >
-      <button className="text-nowrap" onClick={handleBackToTop}>
-        Back to top
-      </button>
+      <button className="text-nowrap">Back to top</button>
     </div>
   );
 };

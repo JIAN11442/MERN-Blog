@@ -1,8 +1,8 @@
-POST http://localhost:5000/api/user/query-related-users-count
+POST http://localhost:5000/api/user/get-author-profile-info
 Content-Type: application/json
 
 {
-    "query":"a"
+    "username":"razlevy"
 }
 
 # GET http://localhost:5000/api/blog/trending-tags
