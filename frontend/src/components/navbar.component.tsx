@@ -9,7 +9,7 @@ import useAuthStore from '../states/user-auth.state';
 import useCollapseStore from '../states/collapse.state';
 
 import UserNavigationPanel from './user-navigation.component';
-import AniamationWrapper from './page-animation.component';
+import AnimationWrapper from './page-animation.component';
 
 const Navbar = () => {
   const currPath = useLocation().pathname;
@@ -82,7 +82,7 @@ const Navbar = () => {
         </Link>
 
         {/* Search Bar */}
-        <AniamationWrapper
+        <AnimationWrapper
           key="searchBar"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -90,7 +90,7 @@ const Navbar = () => {
         >
           <div
             className={`
-              ${searchBarVisibility ? 'flex' : 'hidden'}
+              ${searchBarVisibility ? 'block' : 'hidden'}
               group
               absolute
               w-full
@@ -126,7 +126,7 @@ const Navbar = () => {
                 rounded-full
                 md:w-auto
                 md:pr-6
-                md:pl-12
+                md:pl-[3.5rem]
               "
             />
             {/* SearchIcon */}
@@ -144,7 +144,7 @@ const Navbar = () => {
               "
             />
           </div>
-        </AniamationWrapper>
+        </AnimationWrapper>
 
         {/* Search Button && Editor Button && Login Button && Signup Button */}
         <div

@@ -9,14 +9,22 @@ interface LoadLessBtnProps {
   data: GenerateStructureType;
   state?: string;
   query?: string;
+  authorId?: string;
   loadLimit: number;
-  loadFunction: ({ category, query, page, state }: FunctionPropsType) => void;
+  loadFunction: ({
+    category,
+    query,
+    authorId,
+    page,
+    state,
+  }: FunctionPropsType) => void;
 }
 
 const LoadLessBtn: React.FC<LoadLessBtnProps> = ({
   data,
   state = 'loadless',
   query,
+  authorId,
   loadLimit,
   loadFunction: LoadLessFunction,
 }) => {
@@ -26,7 +34,13 @@ const LoadLessBtn: React.FC<LoadLessBtnProps> = ({
     return (
       <div
         onClick={() =>
-          LoadLessFunction({ category, query, page: data.page, state })
+          LoadLessFunction({
+            category,
+            query,
+            authorId,
+            page: data.page,
+            state,
+          })
         }
         className="
           flex

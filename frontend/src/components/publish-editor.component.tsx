@@ -1,11 +1,11 @@
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
-import Tag from './tag.component';
-import AniamationWrapper from './page-animation.component';
+import Tag from "./tag.component";
+import AnimationWrapper from "./page-animation.component";
 
-import useEditorBlogStore from '../states/editor-blog.state';
-import { FlatIcons } from '../icons/flaticons';
-import useBlogFetch from '../fetchs/blog.fetch';
+import useEditorBlogStore from "../states/editor-blog.state";
+import { FlatIcons } from "../icons/flaticons";
+import useBlogFetch from "../fetchs/blog.fetch";
 
 const PublishEditor = () => {
   const { setEditorState, blog, setBlog, characterLimit, tagsLimit } =
@@ -13,7 +13,7 @@ const PublishEditor = () => {
   const { PublishCompleteBlog } = useBlogFetch();
 
   const handleCloseEvent = () => {
-    setEditorState('editor');
+    setEditorState("editor");
   };
   const handleBlogTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
@@ -26,12 +26,12 @@ const PublishEditor = () => {
     setBlog({ ...blog, des: input.value });
   };
   const handleDesKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
     }
   };
   const handleTopicKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
 
       const tag = (e.target as HTMLInputElement).value;
@@ -41,16 +41,16 @@ const PublishEditor = () => {
           if (!blog.tags.includes(tag)) {
             setBlog({ ...blog, tags: [...blog.tags, tag] });
           } else {
-            toast.error('Tag already exists.');
+            toast.error("Tag already exists.");
           }
         } else {
-          toast.error('Tag cannot be empty.');
+          toast.error("Tag cannot be empty.");
         }
       } else {
         toast.error(`You can only add ${tagsLimit} tags.`);
       }
 
-      (e.target as HTMLInputElement).value = '';
+      (e.target as HTMLInputElement).value = "";
     }
   };
   // const handleBlogPublish = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -118,7 +118,7 @@ const PublishEditor = () => {
   //     });
   // };
   return (
-    <AniamationWrapper
+    <AnimationWrapper
       keyValue="publish-editor"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -298,7 +298,7 @@ const PublishEditor = () => {
           </button>
         </div>
       </section>
-    </AniamationWrapper>
+    </AnimationWrapper>
   );
 };
 

@@ -4,20 +4,18 @@ import LoadLessBtn from './load-less.component';
 import LoadMoreBtn from './load-more.component';
 import BackToTopBtn from './back-top.component';
 
-import { GenerateStructureType } from '../../../backend/src/utils/types.util';
+import {
+  GenerateStructureType,
+  type FunctionPropsType,
+} from '../../../backend/src/utils/types.util';
 
 interface LoadOptionsProps {
   id: string;
   data: GenerateStructureType;
   loadLimit: number;
   query?: string;
-  loadFunction: ({
-    page,
-    state,
-  }: {
-    page?: number;
-    state?: string;
-  }) => Promise<void>;
+  authorId?: string;
+  loadFunction: ({ page, state, authorId }: FunctionPropsType) => Promise<void>;
   className?: string;
 }
 
@@ -26,6 +24,7 @@ const LoadOptions: React.FC<LoadOptionsProps> = ({
   data,
   loadLimit,
   query,
+  authorId,
   loadFunction,
   className,
 }) => {
@@ -42,12 +41,18 @@ const LoadOptions: React.FC<LoadOptionsProps> = ({
       )}
     >
       {/* Load more button */}
-      <LoadMoreBtn data={data} query={query} loadFunction={loadFunction} />
+      <LoadMoreBtn
+        data={data}
+        query={query}
+        authorId={authorId}
+        loadFunction={loadFunction}
+      />
 
       {/* Load less button */}
       <LoadLessBtn
         data={data}
         query={query}
+        authorId={authorId}
         loadLimit={loadLimit}
         loadFunction={loadFunction}
       />

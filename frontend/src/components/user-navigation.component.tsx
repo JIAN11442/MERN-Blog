@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 
 import { FlatIcons } from "../icons/flaticons";
 import useAuthStore from "../states/user-auth.state";
-import AniamationWrapper from "./page-animation.component";
+import AnimationWrapper from "./page-animation.component";
 
 const UserNavigationPanel = () => {
   const { authUser, setAuthUser } = useAuthStore();
@@ -16,7 +16,7 @@ const UserNavigationPanel = () => {
   };
 
   return (
-    <AniamationWrapper
+    <AnimationWrapper
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
@@ -24,6 +24,9 @@ const UserNavigationPanel = () => {
         absolute
         right-0
         z-50
+        shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+        shadow-grey-dark/15
+        rounded-md
       "
     >
       <div
@@ -32,21 +35,11 @@ const UserNavigationPanel = () => {
           border
           bg-white-custom
           border-grey-custom
-          rounded-md
           duration-200
         "
       >
         {/* Editor */}
-        <Link
-          to="/editor"
-          className="
-            flex
-            gap-2
-            link
-            md:hidden
-            pl-8
-          "
-        >
+        <Link to="/editor" className="flex gap-4 link md:hidden pl-8">
           <FlatIcons name="fi fi-rr-file-edit" />
           <p>Write</p>
         </Link>
@@ -54,36 +47,25 @@ const UserNavigationPanel = () => {
         {/* Profile */}
         <Link
           to={`/user/${authUser?.username}`}
-          className="
-            link
-            pl-8
-          "
+          className="flex gap-4 link pl-8"
         >
-          Profile
+          <FlatIcons name="fi fi-rr-user" />
+          <p>Profile</p>
         </Link>
 
         {/* Dashboard */}
-        <Link
-          to="/dashboard/blogs"
-          className="
-            link
-            pl-8
-          "
-        >
-          Dashboard
+        <Link to="/dashboard/blogs" className="flex gap-4 link pl-8">
+          <FlatIcons name="fi fi-rr-dashboard" />
+          <p>Dashboard</p>
         </Link>
 
         {/* Settings */}
-        <Link
-          to="/settings/edit-profile"
-          className="
-            link
-            pl-8
-          "
-        >
-          Settings
+        <Link to="/settings/edit-profile" className="flex gap-4 link pl-8">
+          <FlatIcons name="fi fi-rr-settings" />
+          <p>Settings</p>
         </Link>
 
+        {/* Separate line */}
         <span
           className="
             absolute
@@ -97,34 +79,32 @@ const UserNavigationPanel = () => {
         <button
           onClick={handleSignOut}
           className="
+            group
+            flex
+            gap-4
+            items-center
             w-full
             p-3
             px-4
             pl-8
             text-left
             hover:bg-grey-custom
+            transition
           "
         >
-          <h1
-            className="
-              text-lg
-              font-bold
-            "
-          >
-            Sign Out
-          </h1>
-          <p
-            className="
-              text-sm
-            text-grey-dark
-              opacity-75
-          "
-          >
-            @{authUser?.username}
-          </p>
+          <FlatIcons
+            name="fi fi-rs-log-out"
+            className="text-grey-dark text-opacity-75 group-hover:text-opacity-100"
+          />
+          <div>
+            <h1 className="text-md font-bold">Sign Out</h1>
+            <p className="text-sm text-grey-dark opacity-75">
+              @{authUser?.username}
+            </p>
+          </div>
         </button>
       </div>
-    </AniamationWrapper>
+    </AnimationWrapper>
   );
 };
 

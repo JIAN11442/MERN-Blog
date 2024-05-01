@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import { GenarateDataType } from '../../../backend/src/utils/types.util';
+import { GenerateAuthDataType } from '../../../backend/src/utils/types.util';
 
 interface AuthProps {
-  authUser: GenarateDataType | null;
-  setAuthUser: (user: GenarateDataType | null) => void;
+  authUser: GenerateAuthDataType | null;
+  setAuthUser: (user: GenerateAuthDataType | null) => void;
 }
 
 const useAuthStore = create<AuthProps>((set) => ({

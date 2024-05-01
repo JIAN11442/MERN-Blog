@@ -9,13 +9,21 @@ interface LoadMoreBtnProps {
   data: GenerateStructureType;
   state?: string;
   query?: string;
-  loadFunction: ({ category, query, page, state }: FunctionPropsType) => void;
+  authorId?: string;
+  loadFunction: ({
+    category,
+    query,
+    authorId,
+    page,
+    state,
+  }: FunctionPropsType) => void;
 }
 
 const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
   data,
-  state = 'loadmore',
   query,
+  authorId,
+  state = 'loadmore',
   loadFunction: LoadMoreFunction,
 }) => {
   const { inPageNavState: category } = useHomeBlogStore();
@@ -24,7 +32,13 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
     return (
       <div
         onClick={() =>
-          LoadMoreFunction({ category, query, page: data.page + 1, state })
+          LoadMoreFunction({
+            category,
+            query,
+            authorId,
+            page: data.page + 1,
+            state,
+          })
         }
         className="
           flex

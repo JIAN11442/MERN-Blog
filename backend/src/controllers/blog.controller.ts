@@ -173,6 +173,37 @@ export const getLatestBlogsByQuery: RequestHandler = async (req, res, next) => {
   }
 };
 
+// 取得特定 author 最新的幾篇文章
+export const getLatestBlogsByAuthor: RequestHandler = async (req, res, next) => {
+  try {
+    const { authorId, page } = req.body;
+
+    if (!authorId) {
+      throw createHttpError(400, 'Please provide an author id from client.');
+    }
+
+    if (!page) {
+      throw createHttpError(400, 'Please provide a page number from client.');
+    }
+
+    const authorBlogs = await BlogSchema.find({ author: authorId, draft: false })
+      .sort({ publishedAt: -1 })
+      .select('blod_id title banner des activity tags publishedAt -_id')
+      .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+      .skip((page - 1) * getLatestBlogLimit)
+      .limit(getLatestBlogLimit);
+
+    if (!authorBlogs) {
+      throw createHttpError(500, 'No blogs found with this author.');
+    }
+
+    res.status(200).json({ authorBlogs });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
 // 取得熱門文章
 export const getTrendingBlogs: RequestHandler = async (req, res, next) => {
   try {
@@ -255,6 +286,24 @@ export const getLatestBlogsByQueryCount: RequestHandler = async (req, res, next)
     const queryBlogsCount = await BlogSchema.countDocuments({ title: new RegExp(query, 'i'), draft: false });
 
     res.status(200).json({ totalDocs: queryBlogsCount });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得所有 author 最新文章的數量
+export const getLatestBlogsByAuthorCount: RequestHandler = async (req, res, next) => {
+  try {
+    const { authorId } = req.body;
+
+    if (!authorId) {
+      throw createHttpError(400, 'Please provide an author id from client.');
+    }
+
+    const authorBlogsCount = await BlogSchema.countDocuments({ author: authorId, draft: false });
+
+    res.status(200).json({ totalDocs: authorBlogsCount });
   } catch (error) {
     console.log(error);
     next(error);

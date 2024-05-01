@@ -18,7 +18,7 @@ export interface SignInBody {
   password: string;
 }
 
-export interface GenarateDataType {
+export interface GenerateAuthDataType {
   access_token: string;
   profile_img: string;
   username: string;
@@ -85,6 +85,7 @@ export interface FormatBlogDataProps {
 export interface FetchBlogsPropsType {
   category?: string;
   query?: string;
+  authorId?: string;
   page?: number;
   create_new_arr?: boolean;
   state?: string;
@@ -93,13 +94,16 @@ export interface FetchBlogsPropsType {
 export interface FunctionPropsType {
   category?: string;
   query?: string;
+  authorId?: string;
   page?: number;
   state?: string;
 }
 
 export interface AuthorProfileStructureType {
+  _id: string;
   personal_info: {
     fullname: string;
+    email?: string;
     username: string;
     profile_img: string;
     bio: string;
@@ -108,6 +112,13 @@ export interface AuthorProfileStructureType {
     total_posts: number;
     total_reads: number;
   };
-  social_links: object;
+  social_links: {
+    youtube?: string;
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    github?: string;
+    website?: string;
+  };
   createdAt: string;
 }

@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 
-interface AniamationWrapperProps {
+interface AnimationWrapperProps {
   ref?: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
   keyValue?: string;
@@ -11,7 +11,7 @@ interface AniamationWrapperProps {
   className?: string;
 }
 
-const AniamationWrapper: React.FC<AniamationWrapperProps> = ({
+const AnimationWrapper: React.FC<AnimationWrapperProps> = ({
   ref,
   children,
   keyValue,
@@ -38,4 +38,4 @@ const AniamationWrapper: React.FC<AniamationWrapperProps> = ({
   );
 };
 
-export default AniamationWrapper;
+export default AnimationWrapper;

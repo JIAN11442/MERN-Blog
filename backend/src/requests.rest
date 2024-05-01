@@ -1,8 +1,9 @@
-POST http://localhost:5000/api/user/get-author-profile-info
+POST http://localhost:5000/api/blog/author-latest-blogs
 Content-Type: application/json
 
 {
-    "username":"razlevy"
+    "authorId":"660a666609ede800f1786e54",
+    "page": 2
 }
 
 # GET http://localhost:5000/api/blog/trending-tags

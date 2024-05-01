@@ -112,6 +112,30 @@ const useBlogFetch = () => {
       });
   };
 
+  // Fetch latest blogs by author
+  const GetLatestBlogsByAuthor = async ({
+    authorId,
+    page = 1,
+    state,
+  }: FetchBlogsPropsType) => {
+    const requestURL = BLOG_SERVER_ROUTE + '/author-latest-blogs';
+
+    await axios.post(requestURL, { authorId, page }).then(async ({ data }) => {
+      if (data.authorBlogs) {
+        const formattedData = await FormatData({
+          prevArr: latestBlogs,
+          fetchData: data.authorBlogs,
+          page,
+          countRoute: '/author-latest-blogs-count',
+          data_to_send: { authorId },
+          state,
+        });
+
+        setLatestBlogs(formattedData as GenerateStructureType);
+      }
+    });
+  };
+
   // Fetch trending tags
   const GetTrendingTags = async () => {
     const requestURL = BLOG_SERVER_ROUTE + '/trending-tags';
@@ -289,10 +313,11 @@ const useBlogFetch = () => {
     UploadSaveDraftBlog,
     PublishCompleteBlog,
     GetLatestBlogs,
-    GetTrendingBlogs,
-    GetTrendingTags,
     GetLatestBlogsByCategory,
     GetLatestBlogsByQuery,
+    GetLatestBlogsByAuthor,
+    GetTrendingBlogs,
+    GetTrendingTags,
     FormatData,
   };
 };

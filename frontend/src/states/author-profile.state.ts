@@ -2,13 +2,35 @@ import { create } from 'zustand';
 import type { AuthorProfileStructureType } from '../../../backend/src/utils/types.util';
 
 interface AuthorProfileProps {
-  authorProfile: AuthorProfileStructureType | null;
-  setAuthorProfile: (profile: AuthorProfileStructureType | null) => void;
+  authorProfileInfo: AuthorProfileStructureType | null;
+
+  setAuthorProfileInfo: (profile: AuthorProfileStructureType | null) => void;
 }
 
 const useAuthorProfileStore = create<AuthorProfileProps>((set) => ({
-  authorProfile: null,
-  setAuthorProfile: (profile) => set({ authorProfile: profile }),
+  authorProfileInfo: {
+    personal_info: {
+      fullname: '',
+      username: '',
+      profile_img: '',
+      bio: '',
+    },
+    account_info: {
+      total_posts: 0,
+      total_reads: 0,
+    },
+    social_links: {
+      youtube: '',
+      instagram: '',
+      facebook: '',
+      twitter: '',
+      github: '',
+      website: '',
+    },
+    createdAt: '',
+  },
+
+  setAuthorProfileInfo: (profile) => set({ authorProfileInfo: profile }),
 }));
 
 export default useAuthorProfileStore;
