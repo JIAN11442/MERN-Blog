@@ -1,9 +1,8 @@
-POST http://localhost:5000/api/blog/author-latest-blogs
+POST http://localhost:5000/api/blog/get-target-blog-info
 Content-Type: application/json
 
 {
-    "authorId":"660a666609ede800f1786e54",
-    "page": 2
+    "blogId":"How-to-upload-images-to-AWS-S3-using-React-JS-and-Node-JS-express-server-7ydpM41veb2rMI2hM9Egf"
 }
 
 # GET http://localhost:5000/api/blog/trending-tags

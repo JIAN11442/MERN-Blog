@@ -9,6 +9,7 @@ interface AuthorProfileProps {
 
 const useAuthorProfileStore = create<AuthorProfileProps>((set) => ({
   authorProfileInfo: {
+    _id: '',
     personal_info: {
       fullname: '',
       username: '',

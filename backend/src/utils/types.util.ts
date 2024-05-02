@@ -57,9 +57,7 @@ export interface BlogStructureType {
   tags?: string[];
   des?: string;
   draft?: boolean;
-  author?: {
-    personal_info: PersonalInfoStructureType;
-  };
+  author?: { personal_info: PersonalInfoStructureType };
   activity?: ActivityStructureType;
   publishedAt?: string;
 }

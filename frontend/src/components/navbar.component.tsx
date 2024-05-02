@@ -57,10 +57,8 @@ const Navbar = () => {
   ) => {
     // 讓 link 不要跳轉
     e.preventDefault();
-    // 而是透過 navigate 返回首頁
-    navigate('/');
     // 再重新載入頁面，以便重新取得資料，數據也能得到重置
-    window.location.reload();
+    window.location.href = '/';
   };
 
   useEffect(() => {

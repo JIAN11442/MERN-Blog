@@ -58,7 +58,6 @@ const ProfilePage = () => {
       key="profile"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
       {!profile_username ? (
@@ -165,7 +164,6 @@ const ProfilePage = () => {
                         key={blog.title}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
                         transition={{ duration: 0.5, delay: i * 0.1 }}
                       >
                         <BlogPostCard

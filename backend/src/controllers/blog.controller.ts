@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable import/prefer-default-export */
 
@@ -121,7 +122,7 @@ export const getLatestBlogsByCategory: RequestHandler = async (req, res, next) =
 
     const tagBlogs = await BlogSchema.find({ tags: category, draft: false })
       .sort({ publishedAt: -1 })
-      .select('blod_id title banner des activity tags publishedAt -_id')
+      .select('blog_id title banner des activity tags publishedAt -_id')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
       .skip((page - 1) * env.GET_LATEST_BLOGS_LIMIT)
       .limit(getLatestBlogLimit);
@@ -157,7 +158,7 @@ export const getLatestBlogsByQuery: RequestHandler = async (req, res, next) => {
 
     const queryBlogs = await BlogSchema.find({ title: new RegExp(query, 'i'), draft: false })
       .sort({ publishedAt: -1 })
-      .select('blod_id title banner des activity tags publishedAt -_id')
+      .select('blog_id title banner des activity tags publishedAt -_id')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
       .skip((page - 1) * getLatestBlogLimit)
       .limit(getLatestBlogLimit);
@@ -188,7 +189,7 @@ export const getLatestBlogsByAuthor: RequestHandler = async (req, res, next) => 
 
     const authorBlogs = await BlogSchema.find({ author: authorId, draft: false })
       .sort({ publishedAt: -1 })
-      .select('blod_id title banner des activity tags publishedAt -_id')
+      .select('blog_id title banner des activity tags publishedAt -_id')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
       .skip((page - 1) * getLatestBlogLimit)
       .limit(getLatestBlogLimit);
@@ -198,6 +199,51 @@ export const getLatestBlogsByAuthor: RequestHandler = async (req, res, next) => 
     }
 
     res.status(200).json({ authorBlogs });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得目標 blogId 的資料
+export const getBlogDataByBlogId: RequestHandler = async (req, res, next) => {
+  try {
+    const { blogId } = req.body;
+
+    if (!blogId) {
+      throw createHttpError(400, 'Please provide a blog id from client.');
+    }
+
+    const incrementVal = 1;
+
+    // 將該 blog 的 total_reads 加 1，並回傳該 blog 的資料
+    const blogData = await BlogSchema.findOneAndUpdate(
+      { blog_id: blogId },
+      { $inc: { 'activity.total_reads': incrementVal } },
+    )
+      .populate('author', 'personal_info.fullname personal_info.username personal_info.profile_img')
+      .select('blog_id title des content banner activity tags publishedAt');
+
+    // 如果沒有該 blog，拋出錯誤
+    if (!blogData) {
+      throw createHttpError(500, 'No blog found with this id.');
+    }
+
+    // 接著將與該 blog 有關的 user 的 total_reads 加 1
+    // 因為 blog 中的 author 是一個 user 的 id，即使後來經過 populate, typescript 也不會自動將其識別為對應的 author.personal_info... 類型
+    // 所以這裡需要特別將其轉換為 any 類型，以便取得 author 的 personal_info.username
+
+    await UserSchema.findOneAndUpdate(
+      { 'personal_info.username': (blogData as any).author.personal_info.username },
+      { $inc: { 'account_info.total_reads': incrementVal } },
+    ).catch((error) => {
+      // 如果更新失敗，拋出錯誤
+      console.log(error);
+      throw createHttpError(500, 'Failed to update total reads number in user account info.');
+    });
+
+    // 取得資料且成功更新 user 中的 total_reads 後，回傳該 blog 的資料
+    res.status(200).json({ blogData });
   } catch (error) {
     console.log(error);
     next(error);

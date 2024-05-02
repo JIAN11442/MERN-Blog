@@ -13,6 +13,7 @@ import {
   getLatestBlogsByCategoryCount,
   getLatestBlogsByQueryCount,
   getLatestBlogsByAuthorCount,
+  getBlogDataByBlogId,
 } from '../controllers/blog.controller';
 
 const blogRoute = express.Router();
@@ -33,5 +34,7 @@ blogRoute.post('/author-latest-blogs-count', getLatestBlogsByAuthorCount);
 
 blogRoute.post('/trending-blogs', getTrendingBlogs);
 blogRoute.get('/trending-tags', getTrendingTags);
+
+blogRoute.post('/get-target-blog-info', getBlogDataByBlogId);
 
 export default blogRoute;

@@ -5,7 +5,7 @@ import type {
   GenerateStructureType,
 } from '../../../backend/src/utils/types.util';
 
-interface homeBlogProps {
+interface HomeBlogProps {
   inPageNavIndex: number;
   inPageNavState: string;
   latestBlogs: BlogStructureType[] | GenerateStructureType | null;
@@ -35,7 +35,7 @@ interface homeBlogProps {
   ) => void;
 }
 
-const useHomeBlogStore = create<homeBlogProps>((set) => ({
+const useHomeBlogStore = create<HomeBlogProps>((set) => ({
   inPageNavIndex: 0,
   inPageNavState: 'home',
   latestBlogs: null,

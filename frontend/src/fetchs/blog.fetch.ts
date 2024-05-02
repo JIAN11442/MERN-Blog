@@ -12,6 +12,7 @@ import type {
 } from '../../../backend/src/utils/types.util';
 
 import { FormatData } from '../commons/generate.common';
+import useTargetBlogStore from '../states/target-blog.state';
 
 const useBlogFetch = () => {
   const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + '/blog';
@@ -29,6 +30,7 @@ const useBlogFetch = () => {
     trendingBlogs,
     queryBlogs,
   } = useHomeBlogStore();
+  const { setTargetBlogInfo } = useTargetBlogStore();
 
   // Fetch latest blogs
   const GetLatestBlogs = async ({ page = 1, state }: FetchBlogsPropsType) => {
@@ -120,20 +122,41 @@ const useBlogFetch = () => {
   }: FetchBlogsPropsType) => {
     const requestURL = BLOG_SERVER_ROUTE + '/author-latest-blogs';
 
-    await axios.post(requestURL, { authorId, page }).then(async ({ data }) => {
-      if (data.authorBlogs) {
-        const formattedData = await FormatData({
-          prevArr: latestBlogs,
-          fetchData: data.authorBlogs,
-          page,
-          countRoute: '/author-latest-blogs-count',
-          data_to_send: { authorId },
-          state,
-        });
+    await axios
+      .post(requestURL, { authorId, page })
+      .then(async ({ data }) => {
+        if (data.authorBlogs) {
+          const formattedData = await FormatData({
+            prevArr: latestBlogs,
+            fetchData: data.authorBlogs,
+            page,
+            countRoute: '/author-latest-blogs-count',
+            data_to_send: { authorId },
+            state,
+          });
 
-        setLatestBlogs(formattedData as GenerateStructureType);
-      }
-    });
+          setLatestBlogs(formattedData as GenerateStructureType);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // Fetch target blog info
+  const GetTargetBlogInfo = async (blogId: string) => {
+    const requestURL = BLOG_SERVER_ROUTE + '/get-target-blog-info';
+
+    await axios
+      .post(requestURL, { blogId })
+      .then(({ data }) => {
+        if (data.blogData) {
+          setTargetBlogInfo(data.blogData);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   // Fetch trending tags
@@ -316,6 +339,7 @@ const useBlogFetch = () => {
     GetLatestBlogsByCategory,
     GetLatestBlogsByQuery,
     GetLatestBlogsByAuthor,
+    GetTargetBlogInfo,
     GetTrendingBlogs,
     GetTrendingTags,
     FormatData,
