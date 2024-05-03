@@ -4,7 +4,7 @@ import type {
   PersonalInfoStructureType,
 } from '../../../backend/src/utils/types.util';
 
-import { getDate } from '../commons/date.common';
+import { getDay } from '../commons/date.common';
 import { FlatIcons } from '../icons/flaticons';
 
 interface BlogPostCardProps {
@@ -52,7 +52,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ author, content }) => {
             </span>
           </p>
           {/* blog post date */}
-          <p className="min-w-fit text-grey-dark/60">{getDate(publishedAt!)}</p>
+          <p className="min-w-fit text-grey-dark/60">{getDay(publishedAt!)}</p>
         </div>
 
         {/* Blog Title && Description */}

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { twMerge } from 'tailwind-merge';
 import type { AuthorProfileStructureType } from '../../../backend/src/utils/types.util';
 import { FlatIcons } from '../icons/flaticons';
-import { getFullDate } from '../commons/date.common';
+import { getFullDay } from '../commons/date.common';
 
 interface AuthorProfileInfoProps {
   bio: string;
@@ -63,7 +63,7 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
 
       {/* Joined date */}
       <p className="text-md leading-7 text-grey-dark">
-        Joined on {getFullDate(createdAt)}
+        Joined on {getFullDay(createdAt)}
       </p>
     </div>
   );

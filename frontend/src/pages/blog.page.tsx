@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import useBlogFetch from '../fetchs/blog.fetch';
 
@@ -8,9 +8,13 @@ import useTargetBlogStore from '../states/target-blog.state';
 import type { BlogStructureType } from '../../../backend/src/utils/types.util';
 import AnimationWrapper from '../components/page-animation.component';
 import Loader from '../components/loader.component';
+import { getDay } from '../commons/date.common';
+import BlogInteraction from '../components/blog-interaction.component';
+import useCollapseStore from '../states/collapse.state';
 
 const BlogPage = () => {
   const { blogId } = useParams();
+  const { searchBarVisibility } = useCollapseStore();
   const { GetTargetBlogInfo } = useBlogFetch();
   const { targetBlogInfo, initialBlogInfo } = useTargetBlogStore();
 
@@ -22,7 +26,7 @@ const BlogPage = () => {
     content,
     banner,
     author: {
-      personal_info: { username, fullname, profile_img },
+      personal_info: { username: author_username, fullname, profile_img },
     },
     publishedAt,
   } = targetBlogInfo as Required<BlogStructureType>;
@@ -54,18 +58,73 @@ const BlogPage = () => {
         />
       ) : (
         <div
-          className="
+          className={`
             max-w-[900px]
             mx-auto
             py-10
             max-lg:px-[5vw]
-          "
+            ${searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''}
+          `}
         >
           {/* Banner */}
           <img src={banner} className="aspect-video" />
 
+          {/* Title && Author */}
           <div className="mt-12">
+            {/* Title */}
             <h2>{title}</h2>
+
+            {/* Author && Blog */}
+            <div
+              // max-sm:flex-col: 指在 max-sm 的螢幕大小以下，即 640px 以下，
+              className="
+                flex
+                max-sm:flex-col
+                justify-between
+                my-8
+              "
+            >
+              {/*  Profile image && Fullname && Username */}
+              <div
+                className="
+                  flex 
+                  gap-5 
+                  items-start
+                "
+              >
+                {/* profile image */}
+                <img src={profile_img} className="w-12 h-12 rounded-full" />
+
+                {/* fullname && username */}
+                <p className="capitalize">
+                  {fullname}
+
+                  <br />
+
+                  <Link
+                    to={`/user/${author_username}`}
+                    className="underline underline-offset-2 text-blue-500"
+                  >
+                    @{author_username}
+                  </Link>
+                </p>
+              </div>
+
+              {/* Blog publish date */}
+              <p
+                className="
+                  text-grey-dark/60
+                  max-sm:mt-6
+                  max-sm:ml-12
+                  max-sm:pl-5
+                "
+              >
+                Published on {getDay(publishedAt)}
+              </p>
+            </div>
+
+            {/* Blog interaction */}
+            <BlogInteraction />
           </div>
         </div>
       )}
