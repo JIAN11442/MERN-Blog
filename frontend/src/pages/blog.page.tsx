@@ -11,6 +11,7 @@ import Loader from "../components/loader.component";
 import { getDay } from "../commons/date.common";
 import BlogInteraction from "../components/blog-interaction.component";
 import useCollapseStore from "../states/collapse.state";
+import BlogPostCard from "../components/blog-card-banner.component";
 
 const BlogPage = () => {
   const { blogId } = useParams();
@@ -44,12 +45,6 @@ const BlogPage = () => {
       initialBlogInfo();
     };
   }, [blogId]);
-
-  useEffect(() => {
-    if (similarBlogsInfo.length) {
-      console.log(similarBlogsInfo);
-    }
-  }, [similarBlogsInfo]);
 
   return (
     <AnimationWrapper
@@ -130,8 +125,60 @@ const BlogPage = () => {
               </p>
             </div>
 
-            {/* Blog interaction */}
+            {/* Blog interaction - top */}
             <BlogInteraction />
+
+            {/* Blog Content */}
+
+            {/* Blog interaction - bottom */}
+            <BlogInteraction />
+
+            {/* Similar Blogs */}
+            {similarBlogsInfo !== null && similarBlogsInfo.length ? (
+              <div
+                className="
+                  flex
+                  flex-col
+                  gap-4
+                "
+              >
+                {/* Title */}
+                <h1
+                  className="
+                    mt-14
+                    pb-4
+                    text-2xl
+                    font-semibold
+                    border-b
+                    border-grey-custom
+                  "
+                >
+                  Similar Blogs
+                </h1>
+
+                {/* Similar blog card */}
+                <div>
+                  {similarBlogsInfo.map((blog, i) => {
+                    const {
+                      author: { personal_info },
+                    } = blog as Required<BlogStructureType>;
+
+                    return (
+                      <AnimationWrapper
+                        key={i}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                      >
+                        <BlogPostCard content={blog} author={personal_info} />
+                      </AnimationWrapper>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              ""
+            )}
           </div>
         </div>
       )}

@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom';
-import type { BlogStructureType } from '../../../backend/src/utils/types.util';
-import { FlatIcons } from '../icons/flaticons';
-import useTargetBlogStore from '../states/target-blog.state';
-import useAuthStore from '../states/user-auth.state';
+import { Link } from "react-router-dom";
+import type { BlogStructureType } from "../../../backend/src/utils/types.util";
+import { FlatIcons } from "../icons/flaticons";
+import useTargetBlogStore from "../states/target-blog.state";
+import useAuthStore from "../states/user-auth.state";
 
 const BlogInteraction = () => {
   const { targetBlogInfo } = useTargetBlogStore();
