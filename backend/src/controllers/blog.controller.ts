@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable import/prefer-default-export */
@@ -244,6 +245,66 @@ export const getBlogDataByBlogId: RequestHandler = async (req, res, next) => {
 
     // 取得資料且成功更新 user 中的 total_reads 後，回傳該 blog 的資料
     res.status(200).json({ blogData });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得與目標 blogId 相似 tag 分類的所有 blogs 資料
+export const getSimilarBlogsByBlogId: RequestHandler = async (req, res, next) => {
+  try {
+    // 從 req.body 中取得 categories, limit, page, eliminate_blogId
+    const { categories, limit, page, eliminate_blogId } = req.body;
+
+    // 如果沒有 limit，則使用預設的 getLatestBlogLimit
+    const limitNum = limit || getLatestBlogLimit;
+
+    // 如果沒有 categories, page, eliminate_blogId，則拋出錯誤
+    if (!categories) {
+      throw createHttpError(400, 'Please provide a categories from client.');
+    }
+
+    if (!page) {
+      throw createHttpError(400, 'Please provide a page number from client.');
+    }
+
+    if (!eliminate_blogId) {
+      throw createHttpError(400, 'Please provide a eliminate blog id from client.');
+    }
+
+    // 先確認 eliminate_blogId 是否存在，並取得其 tags
+    const eliminateBlog = await BlogSchema.findOne({ blog_id: eliminate_blogId }).select('tags -_id');
+
+    // 如果找不到 eliminateBlog，則拋出錯誤
+    if (!eliminateBlog) {
+      throw createHttpError(500, 'No eliminate blog found with this id.');
+    }
+
+    // 接著確認 eliminateBlog 的 tags 是否有任何與 categories 相符的 tag
+    if (!eliminateBlog.tags.some((tag) => categories.includes(tag))) {
+      throw createHttpError(500, 'No similar blogs found with tags of target blog.');
+    }
+
+    // 最後，根據 categories 找出相似的 blogs
+    // $in: categories 表示 tags 中包含 categories 中任何一個 tag 的 blog 都納入篩選
+    // $ne: eliminate_blogId 表示 blog_id 不等於 eliminate_blogId 的 blog 都納入篩選
+    const similarBlogs = await BlogSchema.find({
+      tags: { $in: categories },
+      draft: false,
+      blog_id: { $ne: eliminate_blogId },
+    })
+      .sort({ publishedAt: -1 })
+      .select('blog_id title banner des activity tags publishedAt -_id')
+      .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
+      .skip((page - 1) * limitNum)
+      .limit(limitNum);
+
+    if (!similarBlogs) {
+      throw createHttpError(500, 'No similar blogs found with tags of target blog.');
+    }
+
+    res.status(200).json({ similarBlogs });
   } catch (error) {
     console.log(error);
     next(error);

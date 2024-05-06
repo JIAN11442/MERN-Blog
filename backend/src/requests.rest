@@ -1,8 +1,11 @@
-POST http://localhost:5000/api/blog/get-target-blog-info
+POST http://localhost:5000/api/blog/get-similar-blogs
 Content-Type: application/json
 
 {
-    "blogId":"How-to-upload-images-to-AWS-S3-using-React-JS-and-Node-JS-express-server-7ydpM41veb2rMI2hM9Egf"
+    "categories": ["aws s3","react","nodejs"],
+    "limit": 6,
+    "page": 1,
+    "eliminate_blogId":"How-to-upload-images-to-AWS-S3-using-React-JS-and-Node-JS-express-server-7ydpM41veb2rMI2hM9Egf"
 }
 
 # GET http://localhost:5000/api/blog/trending-tags
