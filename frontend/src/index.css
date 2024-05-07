@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Gelasio&family=Inter:wght@400;500&display=swap');
-@import '@flaticon/flaticon-uicons/css/all/all';
+@import url("https://fonts.googleapis.com/css2?family=Gelasio&family=Inter:wght@400;500&display=swap");
+@import "@flaticon/flaticon-uicons/css/all/all";
 
 @tailwind base;
 @tailwind components;
@@ -204,9 +204,9 @@
   max-width: 900px;
 }
 
-.cdx-settings-button[data-tune='withBorder'],
-.cdx-settings-button[data-tune='withBackground'],
-.cdx-settings-button[data-tune='stretched'] {
+.cdx-settings-button[data-tune="withBorder"],
+.cdx-settings-button[data-tune="withBackground"],
+.cdx-settings-button[data-tune="stretched"] {
   display: none;
 }
 
@@ -250,7 +250,7 @@
 }
 
 /* 調整 Heading placeholder */
-.ce-header[contentEditable='true'][data-placeholder]:before {
+.ce-header[contentEditable="true"][data-placeholder]:before {
   @apply text-grey-dark/30;
 }
 

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import useBlogFetch from "../fetchs/blog.fetch";
@@ -35,10 +35,17 @@ const BlogPage = () => {
     publishedAt,
   } = targetBlogInfo as Required<BlogStructureType>;
 
+  const previousBlogIdRef = useRef<string | null>(null);
+
   // Fetch target blog info
   useEffect(() => {
-    if (blogId) {
+    // 爲了避免 useEffect 的特性(會運行兩次)，而導致 total_reads 會被加兩次
+    // 所以這裏利用 useRef 來記錄上一次的 blogId
+    // 儅因爲 useEffect 特性而導致的第二次運行時，判斷 blogId 是否等於上一次的 blogId
+    // 如果等於，就不會再次呼叫 GetTargetBlogInfo
+    if (blogId && blogId !== previousBlogIdRef.current) {
       GetTargetBlogInfo(blogId);
+      previousBlogIdRef.current = blogId;
     }
 
     // 當離開這個頁面時，把 targetBlogInfo 重設為初始值
