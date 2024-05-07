@@ -252,7 +252,7 @@ export const getBlogDataByBlogId: RequestHandler = async (req, res, next) => {
 };
 
 // 取得與目標 blogId 相似 tag 分類的所有 blogs 資料
-export const getSimilarBlogsByBlogId: RequestHandler = async (req, res, next) => {
+export const getSimilarBlogsByTargetBlog: RequestHandler = async (req, res, next) => {
   try {
     // 從 req.body 中取得 categories, limit, page, eliminate_blogId
     const { categories, limit, page, eliminate_blogId } = req.body;

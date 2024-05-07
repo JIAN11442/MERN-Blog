@@ -157,7 +157,7 @@
   h3 {
     @apply font-inter
     text-2xl
-    md:text-[25px]
+    md:text-[22px]
     font-semibold
     leading-loose
     max-md:leading-normal !important;
@@ -167,15 +167,18 @@
   h4 {
     @apply font-inter
     text-xl
-    md:text-[20px]
-    font-medium
+    md:text-[18px]
+    font-semibold
     leading-loose
     max-md:leading-normal !important;
   }
 
-  #textEditor *,
+  #textEditor * {
+    @apply font-mono max-md:text-[15px] max-md:leading-8 md:text-[16px] md:leading-9 lg:text-[17px];
+  }
+
   .blog-page-content * {
-    @apply font-mono text-[16px] md:text-[17px] leading-6 md:leading-8;
+    @apply font-inter max-md:text-[15px] max-md:leading-8 md:text-[16px] md:leading-9 lg:text-[17px];
   }
 
   #textEditor a,

@@ -1,13 +1,13 @@
-import { create } from "zustand";
-import type { BlogStructureType } from "../../../backend/src/utils/types.util";
-import type { OutputData } from "@editorjs/editorjs";
+import { create } from 'zustand';
+import type { BlogStructureType } from '../../../backend/src/utils/types.util';
+import type { OutputData } from '@editorjs/editorjs';
 
 const initialBlogInfo = {
   author: {
     personal_info: {
-      fullname: "",
-      username: "",
-      profile_img: "",
+      fullname: '',
+      username: '',
+      profile_img: '',
     },
   },
   activity: {
@@ -16,13 +16,13 @@ const initialBlogInfo = {
     total_parent_comments: 0,
     total_reads: 0,
   },
-  banner: "",
-  blog_id: "",
+  banner: '',
+  blog_id: '',
   content: {} as OutputData,
-  des: "",
-  publishedAt: "",
+  des: '',
+  publishedAt: '',
   tags: [],
-  title: "",
+  title: '',
 };
 
 interface TargetBlogProps {
@@ -40,7 +40,8 @@ const useTargetBlogStore = create<TargetBlogProps>((set) => ({
 
   setTargetBlogInfo: (blog) => set({ targetBlogInfo: blog }),
   setSimilarBlogsInfo: (blogs) => set({ similarBlogsInfo: blogs }),
-  initialBlogInfo: () => set({ targetBlogInfo: initialBlogInfo }),
+  initialBlogInfo: () =>
+    set({ targetBlogInfo: initialBlogInfo, similarBlogsInfo: [] }),
 }));
 
 export default useTargetBlogStore;

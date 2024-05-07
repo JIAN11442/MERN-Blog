@@ -82,11 +82,14 @@ export interface FormatBlogDataProps {
 
 export interface FetchBlogsPropsType {
   category?: string;
+  categories?: string[];
   query?: string;
   authorId?: string;
   page?: number;
   create_new_arr?: boolean;
   state?: string;
+  limit?: number;
+  eliminate_blogId?: string;
 }
 
 export interface FunctionPropsType {

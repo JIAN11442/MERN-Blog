@@ -12,6 +12,8 @@ import { getDay } from "../commons/date.common";
 import BlogInteraction from "../components/blog-interaction.component";
 import useCollapseStore from "../states/collapse.state";
 import BlogPostCard from "../components/blog-card-banner.component";
+import BlogContent from "../components/blog-content.component";
+import type { OutputData } from "@editorjs/editorjs";
 
 const BlogPage = () => {
   const { blogId } = useParams();
@@ -45,6 +47,12 @@ const BlogPage = () => {
       initialBlogInfo();
     };
   }, [blogId]);
+
+  useEffect(() => {
+    if (Object.entries(content).length) {
+      console.log(content);
+    }
+  }, [content]);
 
   return (
     <AnimationWrapper
@@ -129,6 +137,30 @@ const BlogPage = () => {
             <BlogInteraction />
 
             {/* Blog Content */}
+            <div
+              className="
+                my-12
+                blog-page-content
+              "
+            >
+              {Object.entries(content).length
+                ? (content as unknown as { 0: OutputData })[0].blocks.map(
+                    (block, i) => {
+                      return (
+                        <div
+                          key={i}
+                          className="
+                          my-4
+                          md:my-8
+                        "
+                        >
+                          <BlogContent block={block} />
+                        </div>
+                      );
+                    }
+                  )
+                : ""}
+            </div>
 
             {/* Blog interaction - bottom */}
             <BlogInteraction />
@@ -157,7 +189,14 @@ const BlogPage = () => {
                 </h1>
 
                 {/* Similar blog card */}
-                <div>
+                <div
+                  className="
+                    grid
+                    max-md:grid-cols-1
+                    md:grid-cols-2
+                    md:gap-20
+                  "
+                >
                   {similarBlogsInfo.map((blog, i) => {
                     const {
                       author: { personal_info },
@@ -170,7 +209,11 @@ const BlogPage = () => {
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.5, delay: i * 0.1 }}
                       >
-                        <BlogPostCard content={blog} author={personal_info} />
+                        <BlogPostCard
+                          content={blog}
+                          author={personal_info}
+                          position="vertical"
+                        />
                       </AnimationWrapper>
                     );
                   })}
