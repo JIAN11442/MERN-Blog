@@ -1,21 +1,21 @@
-import { useEffect, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect, useRef } from "react";
+import { Link, useParams } from "react-router-dom";
 
-import useBlogFetch from '../fetchs/blog.fetch';
+import useBlogFetch from "../fetchs/blog.fetch";
 
-import useTargetBlogStore from '../states/target-blog.state';
+import useTargetBlogStore from "../states/target-blog.state";
 
-import type { BlogStructureType } from '../../../backend/src/utils/types.util';
-import AnimationWrapper from '../components/page-animation.component';
-import Loader from '../components/loader.component';
-import { getDay } from '../commons/date.common';
-import BlogInteraction from '../components/blog-interaction.component';
-import useCollapseStore from '../states/collapse.state';
-import BlogPostCard from '../components/blog-card-banner.component';
-import BlogContent from '../components/blog-content.component';
-import type { OutputData } from '@editorjs/editorjs';
-import useHomeBlogStore from '../states/home-blog.state';
-import HandyToolBtn from '../components/handy-tool.component';
+import type { BlogStructureType } from "../../../backend/src/utils/types.util";
+import AnimationWrapper from "../components/page-animation.component";
+import Loader from "../components/loader.component";
+import { getDay } from "../commons/date.common";
+import BlogInteraction from "../components/blog-interaction.component";
+import useCollapseStore from "../states/collapse.state";
+import BlogPostCard from "../components/blog-card-banner.component";
+import BlogContent from "../components/blog-content.component";
+import type { OutputData } from "@editorjs/editorjs";
+import useHomeBlogStore from "../states/home-blog.state";
+import HandyToolBtn from "../components/handy-tool.component";
 
 const BlogPage = () => {
   const { blogId } = useParams();
@@ -47,7 +47,7 @@ const BlogPage = () => {
     // 儅因爲 useEffect 特性而導致的第二次運行時，判斷 blogId 是否等於上一次的 blogId
     // 如果等於，就不會再次呼叫 GetTargetBlogInfo
     if (blogId && blogId !== previousBlogIdRef.current) {
-      GetTargetBlogInfo(blogId);
+      GetTargetBlogInfo({ blogId });
       previousBlogIdRef.current = blogId;
     }
 
@@ -64,10 +64,6 @@ const BlogPage = () => {
   //   }
   // }, [content]);
 
-  useEffect(() => {
-    console.log(scrollbarVisible);
-  }, [scrollbarVisible]);
-
   return (
     <AnimationWrapper
       key="BlogPage"
@@ -78,7 +74,7 @@ const BlogPage = () => {
       {!publishedAt ? (
         <Loader
           loader={{ speed: 1, size: 50 }}
-          className={{ container: 'mt-5' }}
+          className={{ container: "mt-5" }}
         />
       ) : (
         <div
@@ -87,7 +83,7 @@ const BlogPage = () => {
             mx-auto
             py-10
             max-lg:px-[5vw]
-            ${searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''}
+            ${searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""}
           `}
         >
           {/* Banner */}
@@ -173,7 +169,7 @@ const BlogPage = () => {
                       );
                     }
                   )
-                : ''}
+                : ""}
             </div>
 
             {/* Blog interaction - bottom */}
@@ -234,7 +230,7 @@ const BlogPage = () => {
                 </div>
               </div>
             ) : (
-              ''
+              ""
             )}
           </div>
 

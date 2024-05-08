@@ -1,25 +1,27 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import EditorJS from '@editorjs/editorjs';
+import { useEffect, useRef } from "react";
+import { Link, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
+import EditorJS from "@editorjs/editorjs";
 
-import logo from '../imgs/logo.png';
-import defaultBanner from '../imgs/banner-2.png';
+import logo from "../imgs/logo.png";
+import defaultBanner from "../imgs/banner-2.png";
 
-import AnimationWrapper from './page-animation.component';
-import tools from './tools.component';
+import AnimationWrapper from "./page-animation.component";
+import tools from "./tools.component";
 
-import useEditorBlogStore from '../states/editor-blog.state';
-import useBlogFetch from '../fetchs/blog.fetch';
-import useAwsFetch from '../fetchs/aws.fetch';
+import useEditorBlogStore from "../states/editor-blog.state";
+import useBlogFetch from "../fetchs/blog.fetch";
+import useAwsFetch from "../fetchs/aws.fetch";
 
 const BlogEditor = () => {
+  const { blogId: paramsBlogId } = useParams();
+
   const blogBannerRef = useRef<HTMLImageElement | null>(null);
   const editorRef = useRef<EditorJS | null>(null);
 
-  const { blog, setBlog, setTextEditor, textEditor, setEditorState } =
+  const { blog, textEditor, setBlog, setTextEditor, setEditorState } =
     useEditorBlogStore();
   const { UploadImageToAWS } = useAwsFetch();
   const { UploadSaveDraftBlog } = useBlogFetch();
@@ -30,13 +32,13 @@ const BlogEditor = () => {
       const img = e.target.files[0];
 
       // Check the file type
-      if (!img.type.startsWith('image/')) {
-        return toast.error('Please upload an image type file.');
+      if (!img.type.startsWith("image/")) {
+        return toast.error("Please upload an image type file.");
       }
 
       if (img) {
         // Show loading toast
-        const loadingToast = toast.loading('Uploading...');
+        const loadingToast = toast.loading("Uploading...");
 
         // Upload the image to S3
         UploadImageToAWS(img)
@@ -49,7 +51,7 @@ const BlogEditor = () => {
               blogBannerRef.current.onload = () => {
                 // Dismiss the loading toast and show success toast
                 toast.dismiss(loadingToast);
-                toast.success('Uploaded successfully');
+                toast.success("Uploaded successfully");
               };
             }
           })
@@ -61,7 +63,7 @@ const BlogEditor = () => {
     }
   };
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
     }
   };
@@ -80,7 +82,7 @@ const BlogEditor = () => {
     setBlog({ ...blog, title: input.value });
 
     // Auto resize the textarea with the content
-    input.style.height = 'auto';
+    input.style.height = "auto";
     input.style.height = `${input.scrollHeight}px`;
   };
   const handleImageError = (
@@ -91,10 +93,10 @@ const BlogEditor = () => {
   };
   const handlePublishEvent = () => {
     if (!blog.banner?.length) {
-      return toast.error('Please upload a blog banner.');
+      return toast.error("Please upload a blog banner.");
     }
     if (!blog.title?.length) {
-      return toast.error('Please enter a blog title.');
+      return toast.error("Please enter a blog title.");
     }
     if (textEditor?.isReady) {
       textEditor
@@ -102,9 +104,9 @@ const BlogEditor = () => {
         .then((data) => {
           if (data.blocks.length) {
             setBlog({ ...blog, content: data });
-            setEditorState('publish');
+            setEditorState("publish");
           } else {
-            return toast.error('Write something in your blog to publish it.');
+            return toast.error("Write something in your blog to publish it.");
           }
         })
         .catch((error) => {
@@ -118,10 +120,13 @@ const BlogEditor = () => {
     // Initialize the EditorJs for once(because useEffect cause rending twice)
     if (!editorRef.current) {
       const editor = new EditorJS({
-        holder: 'textEditor',
+        holder: "textEditor",
         tools: tools,
-        data: blog.content, // { blocks: [] } or { time:? , blocks: [?] version: ?}
-        placeholder: 'Enter text or type tab key to start writing...',
+        // 通過判斷 content 是否為陣列，來得知當前是編輯模式還是創建模式
+        // 如果是陣列，代表 blog 中存在内容(編輯模式)，我們直接將 content 還原
+        // 如果不是陣列，代表 blog 中不存在内容(創建模式)，我們創建一個空的 content
+        data: Array.isArray(blog.content) ? blog.content[0] : blog.content, // { blocks: [] } or { time:? , blocks: [?] version: ?}
+        placeholder: "Enter text or type tab key to start writing...",
       });
 
       editorRef.current = editor;
@@ -150,12 +155,12 @@ const BlogEditor = () => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             // 根據已知的目標 class 取得目標元素節點
             const textarea = (node as HTMLElement).querySelector(
-              '.ce-code__textarea'
+              ".ce-code__textarea"
             ) as HTMLTextAreaElement;
             // 如果目標元素存在，監聽 input 事件並自動調整高度
             if (textarea) {
-              textarea.addEventListener('input', () => {
-                textarea.style.height = 'auto';
+              textarea.addEventListener("input", () => {
+                textarea.style.height = "auto";
                 textarea.style.height = `${textarea.scrollHeight}px`;
               });
             }
@@ -167,7 +172,7 @@ const BlogEditor = () => {
     // 因為上一個 useEffect 會在組件渲染前會初始化 EditorJS
     // 所以這裡可以確保 textEditor 一定會存在
     // 而我們的目標是要監聽 textEditor 內的其他元素（codeblock）
-    const initialNode = document.getElementById('textEditor');
+    const initialNode = document.getElementById("textEditor");
 
     //  如果 textEditor 存在
     if (initialNode) {
@@ -207,7 +212,7 @@ const BlogEditor = () => {
             normal-case
           "
         >
-          {blog.title || 'New Blog'}
+          {blog.title || "New Blog"}
         </p>
 
         {/* Publish and save draft button */}
@@ -221,7 +226,10 @@ const BlogEditor = () => {
           <button onClick={handlePublishEvent} className="btn-dark">
             Publish
           </button>
-          <button onClick={(e) => UploadSaveDraftBlog(e)} className="btn-light">
+          <button
+            onClick={(e) => UploadSaveDraftBlog({ e, paramsBlogId })}
+            className="btn-light"
+          >
             Save Draft
           </button>
         </div>

@@ -1,19 +1,21 @@
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
-import Tag from './tag.component';
-import AnimationWrapper from './page-animation.component';
+import Tag from "./tag.component";
+import AnimationWrapper from "./page-animation.component";
 
-import useEditorBlogStore from '../states/editor-blog.state';
-import { FlatIcons } from '../icons/flaticons';
-import useBlogFetch from '../fetchs/blog.fetch';
+import useEditorBlogStore from "../states/editor-blog.state";
+import { FlatIcons } from "../icons/flaticons";
+import useBlogFetch from "../fetchs/blog.fetch";
+import { useParams } from "react-router-dom";
 
 const PublishEditor = () => {
-  const { setEditorState, blog, setBlog, characterLimit, tagsLimit } =
-    useEditorBlogStore();
+  const { blogId: paramsBlogId } = useParams();
   const { PublishCompleteBlog } = useBlogFetch();
+  const { blog, characterLimit, tagsLimit, setBlog, setEditorState } =
+    useEditorBlogStore();
 
   const handleCloseEvent = () => {
-    setEditorState('editor');
+    setEditorState("editor");
   };
   const handleBlogTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
@@ -26,12 +28,12 @@ const PublishEditor = () => {
     setBlog({ ...blog, des: input.value });
   };
   const handleDesKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
     }
   };
   const handleTopicKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
 
       const tag = (e.target as HTMLInputElement).value;
@@ -41,82 +43,19 @@ const PublishEditor = () => {
           if (!blog.tags.includes(tag)) {
             setBlog({ ...blog, tags: [...blog.tags, tag] });
           } else {
-            toast.error('Tag already exists.');
+            toast.error("Tag already exists.");
           }
         } else {
-          toast.error('Tag cannot be empty.');
+          toast.error("Tag cannot be empty.");
         }
       } else {
         toast.error(`You can only add ${tagsLimit} tags.`);
       }
 
-      (e.target as HTMLInputElement).value = '';
+      (e.target as HTMLInputElement).value = "";
     }
   };
-  // const handleBlogPublish = (e: React.MouseEvent<HTMLButtonElement>) => {
-  //   const target = e.target as HTMLElement;
 
-  //   // 如果按鈕已經被 disable，則不執行任何動作
-  //   if (target.className.includes("disable")) {
-  //     return;
-  //   }
-
-  //   // 判斷資料是否完整
-  //   const { title, des, tags, banner, content } = blog;
-
-  //   if (!title?.length) {
-  //     return toast.error("Write blog title before publishing.");
-  //   }
-
-  //   if (!des?.length || des.length > characterLimit) {
-  //     return toast.error(
-  //       `Write blog description about your blog within ${characterLimit} characters to publish.`
-  //     );
-  //   }
-
-  //   if (!tags?.length) {
-  //     return toast.error("Enter at least 1 tag to help us rank your blog.");
-  //   }
-
-  //   // 如果完整，則啟動 loading toast，表示正在發布
-  //   const loadingToast = toast.loading("Publishing....");
-
-  //   // 同時，將按鈕 disable，避免重複點擊
-  //   (target as HTMLButtonElement).classList.add("disable");
-
-  //   // 發布 blog
-  //   const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + "/blog/create-blog";
-  //   const blogData = { title, banner, des, content, tags, draft: false };
-
-  //   axios
-  //     .post(requestUrl, blogData, {
-  //       headers: { Authorization: `Bearer ${authUser?.access_token}` },
-  //     })
-  //     .then(({ data }) => {
-  //       if (data) {
-  //         // 如果成功訪問並返回數據，移除 disable 狀態
-  //         (e.target as HTMLButtonElement).classList.remove("disable");
-
-  //         // 關閉 loading toast
-  //         toast.dismiss(loadingToast);
-  //         toast.success(data.message);
-
-  //         // 移動到首頁
-  //         setTimeout(() => {
-  //           navigate("/");
-  //         }, 500);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       // 如果訪問過程中出現錯誤，也要移除 disable 狀態
-  //       (e.target as HTMLButtonElement).classList.remove("disable");
-
-  //       // 關閉 loading toast
-  //       toast.dismiss(loadingToast);
-
-  //       return toast.error(error.response.data.errorMessage);
-  //     });
-  // };
   return (
     <AnimationWrapper
       keyValue="publish-editor"
@@ -288,7 +227,7 @@ const PublishEditor = () => {
 
           {/* Submit Button */}
           <button
-            onClick={(e) => PublishCompleteBlog(e)}
+            onClick={(e) => PublishCompleteBlog({ e, paramsBlogId })}
             className="
               btn-dark
               px-8

@@ -90,6 +90,9 @@ export interface FetchBlogsPropsType {
   state?: string;
   limit?: number;
   eliminate_blogId?: string;
+  blogId?: string;
+  draft?: boolean;
+  mode?: string;
 }
 
 export interface FunctionPropsType {

@@ -1,15 +1,16 @@
-import { useEffect, useRef } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import { FlatIcons } from '../icons/flaticons';
+import { FlatIcons } from "../icons/flaticons";
 
-import logo from '../imgs/logo.png';
+import logo from "../imgs/logo.png";
 
-import useAuthStore from '../states/user-auth.state';
-import useCollapseStore from '../states/collapse.state';
+import useAuthStore from "../states/user-auth.state";
+import useCollapseStore from "../states/collapse.state";
 
-import UserNavigationPanel from './user-navigation.component';
-import AnimationWrapper from './page-animation.component';
+import UserNavigationPanel from "./user-navigation.component";
+import AnimationWrapper from "./page-animation.component";
+import useEditorBlogStore from "../states/editor-blog.state";
 
 const Navbar = () => {
   const currPath = useLocation().pathname;
@@ -22,6 +23,7 @@ const Navbar = () => {
     searchBarVisibility,
     setSearchBarVisibility,
   } = useCollapseStore();
+  const { initialEditBlog } = useEditorBlogStore();
 
   const searchBarRef = useRef<HTMLInputElement>(null);
 
@@ -34,7 +36,7 @@ const Navbar = () => {
   const handleSearchBar = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const query = (e.target as HTMLInputElement).value;
 
-    if (e.key === 'Enter' && query.length) {
+    if (e.key === "Enter" && query.length) {
       navigate(`/search/${query}`);
     }
   };
@@ -58,9 +60,10 @@ const Navbar = () => {
     // 讓 link 不要跳轉
     e.preventDefault();
     // 再重新載入頁面，以便重新取得資料，數據也能得到重置
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
+  // 搜尋欄顯示時，自動 focus
   useEffect(() => {
     if (searchBarVisibility) {
       searchBarRef.current?.focus();
@@ -88,7 +91,7 @@ const Navbar = () => {
         >
           <div
             className={`
-              ${searchBarVisibility ? 'block' : 'hidden'}
+              ${searchBarVisibility ? "block" : "hidden"}
               group
               absolute
               w-full
@@ -177,7 +180,8 @@ const Navbar = () => {
 
           {/* Editor Button */}
           <Link
-            to={'/editor'}
+            to={"/editor"}
+            onClick={initialEditBlog}
             className={`
               link
               hidden
@@ -240,14 +244,14 @@ const Navbar = () => {
             <>
               {/* Login Button */}
               <Link
-                to={'/signin'}
+                to={"/signin"}
                 className={`
                     ${
-                      currPath === '/signin'
-                        ? 'hidden md:block md:btn-dark'
-                        : currPath === '/signup'
-                        ? 'btn-dark md:btn-light'
-                        : 'btn-dark'
+                      currPath === "/signin"
+                        ? "hidden md:block md:btn-dark"
+                        : currPath === "/signup"
+                        ? "btn-dark md:btn-light"
+                        : "btn-dark"
                     }
                 `}
               >
@@ -256,14 +260,14 @@ const Navbar = () => {
 
               {/* Signup Button */}
               <Link
-                to={'/signup'}
+                to={"/signup"}
                 className={`
                   ${
-                    currPath === '/signup'
-                      ? 'hidden md:block md:btn-dark'
-                      : currPath === '/signin'
-                      ? 'btn-dark md:btn-light'
-                      : 'hidden'
+                    currPath === "/signup"
+                      ? "hidden md:block md:btn-dark"
+                      : currPath === "/signin"
+                      ? "btn-dark md:btn-light"
+                      : "hidden"
                   }
                 `}
               >

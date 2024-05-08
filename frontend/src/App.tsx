@@ -23,6 +23,7 @@ function App() {
   return (
     <Routes>
       <Route path="/editor" element={<Editor />} />
+      <Route path="editor/:blogId" element={<Editor />} />
       <Route path="/" element={<Navbar />}>
         {/* index 為 true 的路由 route 將預設為父路由下的子路由，建議只指定一個*/}
         <Route index element={<Homepage />} />

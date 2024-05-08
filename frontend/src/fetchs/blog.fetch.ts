@@ -1,21 +1,21 @@
-import axios from 'axios';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-import useHomeBlogStore from '../states/home-blog.state';
-import useEditorBlogStore from '../states/editor-blog.state';
-import useAuthStore from '../states/user-auth.state';
+import useHomeBlogStore from "../states/home-blog.state";
+import useEditorBlogStore from "../states/editor-blog.state";
+import useAuthStore from "../states/user-auth.state";
 
 import type {
   FetchBlogsPropsType,
   GenerateStructureType,
-} from '../../../backend/src/utils/types.util';
+} from "../../../backend/src/utils/types.util";
 
-import { FormatData } from '../commons/generate.common';
-import useTargetBlogStore from '../states/target-blog.state';
+import { FormatData } from "../commons/generate.common";
+import useTargetBlogStore from "../states/target-blog.state";
 
 const useBlogFetch = () => {
-  const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + '/blog';
+  const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/blog";
 
   const navigate = useNavigate();
 
@@ -30,12 +30,14 @@ const useBlogFetch = () => {
     trendingBlogs,
     queryBlogs,
   } = useHomeBlogStore();
+
   const { setTargetBlogInfo, setSimilarBlogsInfo } = useTargetBlogStore();
+  const { setBlog } = useEditorBlogStore();
 
   // Fetch latest blogs
   const GetLatestBlogs = async ({ page = 1, state }: FetchBlogsPropsType) => {
     const requestURL =
-      import.meta.env.VITE_SERVER_DOMAIN + '/blog/latest-blogs';
+      import.meta.env.VITE_SERVER_DOMAIN + "/blog/latest-blogs";
 
     await axios
       .post(requestURL, { page })
@@ -45,7 +47,7 @@ const useBlogFetch = () => {
             prevArr: latestBlogs,
             fetchData: data.latestBlogs,
             page,
-            countRoute: '/latest-blogs-count',
+            countRoute: "/latest-blogs-count",
             state,
           });
 
@@ -63,7 +65,7 @@ const useBlogFetch = () => {
     page = 1,
     state,
   }: FetchBlogsPropsType) => {
-    const requestURL = BLOG_SERVER_ROUTE + '/category-latest-blogs';
+    const requestURL = BLOG_SERVER_ROUTE + "/category-latest-blogs";
     await axios
       .post(requestURL, { category, page })
       .then(async ({ data }) => {
@@ -73,7 +75,7 @@ const useBlogFetch = () => {
             prevArr: latestBlogs,
             fetchData: data.tagBlogs,
             page,
-            countRoute: '/category-latest-blogs-count',
+            countRoute: "/category-latest-blogs-count",
             data_to_send: { category },
             state,
           });
@@ -92,7 +94,7 @@ const useBlogFetch = () => {
     page = 1,
     state,
   }: FetchBlogsPropsType) => {
-    const requestURL = BLOG_SERVER_ROUTE + '/query-latest-blogs';
+    const requestURL = BLOG_SERVER_ROUTE + "/query-latest-blogs";
     await axios
       .post(requestURL, { query, page })
       .then(async ({ data }) => {
@@ -101,7 +103,7 @@ const useBlogFetch = () => {
             prevArr: queryBlogs,
             fetchData: data.queryBlogs,
             page,
-            countRoute: '/query-latest-blogs-count',
+            countRoute: "/query-latest-blogs-count",
             data_to_send: { query },
             state,
           });
@@ -120,7 +122,7 @@ const useBlogFetch = () => {
     page = 1,
     state,
   }: FetchBlogsPropsType) => {
-    const requestURL = BLOG_SERVER_ROUTE + '/author-latest-blogs';
+    const requestURL = BLOG_SERVER_ROUTE + "/author-latest-blogs";
 
     await axios
       .post(requestURL, { authorId, page })
@@ -130,7 +132,7 @@ const useBlogFetch = () => {
             prevArr: latestBlogs,
             fetchData: data.authorBlogs,
             page,
-            countRoute: '/author-latest-blogs-count',
+            countRoute: "/author-latest-blogs-count",
             data_to_send: { authorId },
             state,
           });
@@ -144,11 +146,15 @@ const useBlogFetch = () => {
   };
 
   // Fetch target blog info && similar blogs
-  const GetTargetBlogInfo = async (blogId: string) => {
-    const targetReqURL = BLOG_SERVER_ROUTE + '/get-target-blog-info';
+  const GetTargetBlogInfo = async ({
+    blogId,
+    draft,
+    mode,
+  }: FetchBlogsPropsType) => {
+    const targetReqURL = BLOG_SERVER_ROUTE + "/get-target-blog-info";
 
     await axios
-      .post(targetReqURL, { blogId })
+      .post(targetReqURL, { blogId, draft, mode })
       .then(async ({ data: { blogData } }) => {
         if (blogData) {
           // Fetch similar blogs && set similar blogs info
@@ -161,6 +167,7 @@ const useBlogFetch = () => {
 
           // Set target blog info
           setTargetBlogInfo(blogData);
+          setBlog(blogData);
         }
       })
       .catch((error) => {
@@ -175,7 +182,7 @@ const useBlogFetch = () => {
     page,
     eliminate_blogId,
   }: FetchBlogsPropsType) => {
-    const requestURL = BLOG_SERVER_ROUTE + '/get-similar-blogs';
+    const requestURL = BLOG_SERVER_ROUTE + "/get-similar-blogs";
 
     await axios
       .post(requestURL, {
@@ -196,7 +203,7 @@ const useBlogFetch = () => {
 
   // Fetch trending tags
   const GetTrendingTags = async () => {
-    const requestURL = BLOG_SERVER_ROUTE + '/trending-tags';
+    const requestURL = BLOG_SERVER_ROUTE + "/trending-tags";
 
     await axios
       .get(requestURL)
@@ -214,7 +221,7 @@ const useBlogFetch = () => {
   // Fetch trending blogs
   const GetTrendingBlogs = async ({ page = 1, state }: FetchBlogsPropsType) => {
     const requestURL =
-      import.meta.env.VITE_SERVER_DOMAIN + '/blog/trending-blogs';
+      import.meta.env.VITE_SERVER_DOMAIN + "/blog/trending-blogs";
 
     await axios
       .post(requestURL, { page })
@@ -224,7 +231,7 @@ const useBlogFetch = () => {
             prevArr: trendingBlogs,
             fetchData: data.trendingBlogs,
             page,
-            countRoute: '/latest-blogs-count',
+            countRoute: "/latest-blogs-count",
             state,
           });
 
@@ -236,11 +243,19 @@ const useBlogFetch = () => {
       });
   };
 
-  const PublishCompleteBlog = (e: React.MouseEvent<HTMLButtonElement>) => {
+  interface PublishAndSaveDraftPropsType {
+    e: React.MouseEvent<HTMLButtonElement>;
+    paramsBlogId?: string;
+  }
+
+  const PublishCompleteBlog = ({
+    e,
+    paramsBlogId,
+  }: PublishAndSaveDraftPropsType) => {
     const target = e.target as HTMLElement;
 
     // 如果按鈕已經被 disable，則不執行任何動作
-    if (target.className.includes('disable')) {
+    if (target.className.includes("disable")) {
       return;
     }
 
@@ -248,7 +263,7 @@ const useBlogFetch = () => {
     const { title, des, tags, banner, content } = blog;
 
     if (!title?.length) {
-      return toast.error('Write blog title before publishing.');
+      return toast.error("Write blog title before publishing.");
     }
 
     if (!des?.length || des.length > characterLimit) {
@@ -258,18 +273,26 @@ const useBlogFetch = () => {
     }
 
     if (!tags?.length) {
-      return toast.error('Enter at least 1 tag to help us rank your blog.');
+      return toast.error("Enter at least 1 tag to help us rank your blog.");
     }
 
     // 如果完整，則啟動 loading toast，表示正在發布
-    const loadingToast = toast.loading('Publishing....');
+    const loadingToast = toast.loading("Publishing....");
 
     // 同時，將按鈕 disable，避免重複點擊
-    (target as HTMLButtonElement).classList.add('disable');
+    (target as HTMLButtonElement).classList.add("disable");
 
     // 發布 blog
-    const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + '/blog/create-blog';
-    const blogData = { title, banner, des, content, tags, draft: false };
+    const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + "/blog/create-blog";
+    const blogData = {
+      title,
+      banner,
+      des,
+      content,
+      tags,
+      draft: false,
+      paramsBlogId,
+    };
 
     axios
       .post(requestUrl, blogData, {
@@ -278,7 +301,7 @@ const useBlogFetch = () => {
       .then(({ data }) => {
         if (data) {
           // 如果成功訪問並返回數據，移除 disable 狀態
-          (e.target as HTMLButtonElement).classList.remove('disable');
+          (e.target as HTMLButtonElement).classList.remove("disable");
 
           // 關閉 loading toast
           toast.dismiss(loadingToast);
@@ -286,13 +309,13 @@ const useBlogFetch = () => {
 
           // 移動到首頁
           setTimeout(() => {
-            navigate('/');
+            window.location.href = "/";
           }, 500);
         }
       })
       .catch((error) => {
         // 如果訪問過程中出現錯誤，也要移除 disable 狀態
-        (e.target as HTMLButtonElement).classList.remove('disable');
+        (e.target as HTMLButtonElement).classList.remove("disable");
 
         // 關閉 loading toast
         toast.dismiss(loadingToast);
@@ -302,11 +325,14 @@ const useBlogFetch = () => {
   };
 
   // Upload and save draft blog
-  const UploadSaveDraftBlog = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const UploadSaveDraftBlog = ({
+    e,
+    paramsBlogId,
+  }: PublishAndSaveDraftPropsType) => {
     const target = e.target as HTMLElement;
 
     // 如果按鈕已經被 disable，則不執行任何動作
-    if (target.className.includes('disable')) {
+    if (target.className.includes("disable")) {
       return;
     }
 
@@ -314,14 +340,14 @@ const useBlogFetch = () => {
 
     // 如果標題為空，則顯示警告訊息並停止下一步操作
     if (!title?.length) {
-      return toast.error('Write blog title before saving it as a draft.');
+      return toast.error("Write blog title before saving it as a draft.");
     }
 
     // 反之，顯示 loading toast 表示開始保存草稿
-    const loadingToast = toast.loading('Saving Draft....');
+    const loadingToast = toast.loading("Saving Draft....");
 
     // 同時，將按鈕設置為 disable 狀態，避免重複點擊
-    (e.target as HTMLButtonElement).classList.add('disable');
+    (e.target as HTMLButtonElement).classList.add("disable");
 
     // 如果 textEditor 已經初始化了，則代表有內容可以保存(即使是空內容)
     if (textEditor?.isReady) {
@@ -329,10 +355,18 @@ const useBlogFetch = () => {
       textEditor.save().then((content) => {
         // 訪問後端 API 路徑
         const requestUrl =
-          import.meta.env.VITE_SERVER_DOMAIN + '/blog/create-blog';
+          import.meta.env.VITE_SERVER_DOMAIN + "/blog/create-blog";
 
         // 要上傳到資料庫的數據
-        const blogData = { title, banner, des, content, tags, draft: true };
+        const blogData = {
+          title,
+          banner,
+          des,
+          content,
+          tags,
+          draft: true,
+          paramsBlogId,
+        };
 
         // 開始訪問後端 API
         axios
@@ -342,21 +376,21 @@ const useBlogFetch = () => {
           .then(({ data }) => {
             if (data) {
               // 如果成功訪問並返回數據，移除 disable 狀態
-              (target as HTMLButtonElement).classList.remove('disable');
+              (target as HTMLButtonElement).classList.remove("disable");
 
               // 關閉 loading toast 並顯示成功訊息
               toast.dismiss(loadingToast);
-              toast.success('Draft saved successfully.');
+              toast.success("Draft saved successfully.");
 
               // 0.5秒后移動到首頁
               setTimeout(() => {
-                navigate('/');
+                navigate("/");
               }, 500);
             }
           })
           .catch((error) => {
             // 如果訪問過程中出現錯誤，也要移除 disable 狀態
-            (e.target as HTMLButtonElement).classList.remove('disable');
+            (e.target as HTMLButtonElement).classList.remove("disable");
 
             // 關閉 loading toast
             toast.dismiss(loadingToast);

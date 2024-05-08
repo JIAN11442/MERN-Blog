@@ -21,7 +21,7 @@ export const createBlog: RequestHandler = async (req, res, next) => {
     // 因為在執行 createBlog 前已執行 jwtVerify controller,
     // 所以可以從 req.userId 中取得 user id 作為 authorId
     const authorId = req.userId;
-    const { banner, title, content, des, draft } = req.body;
+    const { banner, title, content, des, draft, paramsBlogId } = req.body;
 
     const validateResult = ValidateForPublishBlog(req.body);
 
@@ -33,42 +33,59 @@ export const createBlog: RequestHandler = async (req, res, next) => {
     // 將 tags 轉為小寫
     const tags = req.body.tags.map((t: string) => t.toLowerCase());
 
-    // 根據 title 產生 blog id
-    const blogId = generateBlogID(title);
+    // 如果是從編輯狀態那 publish，應該會得到原本的 blogId，這樣就不需要重新生成
+    // 如果是從創建狀態那 publish， 根據 title 產生 blog id
+    const generateBlogId = paramsBlogId || generateBlogID(title);
 
-    // 上傳 Blog 資料到資料庫
-    const newBlog = await BlogSchema.create({
-      banner,
-      title,
-      content,
-      des,
-      tags,
-      author: authorId,
-      blog_id: blogId,
-      draft: Boolean(draft),
-    });
+    if (paramsBlogId) {
+      // 如果是編輯狀態，更新該 blog 的資料
+      const updatedBlog = await BlogSchema.findOneAndUpdate(
+        { blog_id: generateBlogId },
+        { banner, title, content, des, tags, draft: Boolean(draft) },
+      );
 
-    // 如果上傳失敗，拋出錯誤
-    if (!newBlog) {
-      throw createHttpError(500, 'Failed to create blog.');
+      // 如果更新失敗，拋出錯誤
+      if (!updatedBlog) {
+        throw createHttpError(500, 'Failed to update blog.');
+      }
+
+      // 反之，回傳成功訊息
+      res.status(200).json({ message: 'Blog updated successfully', blogId: updatedBlog.blog_id });
+    } else {
+      // 如果是創建狀態，則上傳 Blog 資料到資料庫
+      const newBlog = await BlogSchema.create({
+        banner,
+        title,
+        content,
+        des,
+        tags,
+        author: authorId,
+        blog_id: generateBlogId,
+        draft: Boolean(draft),
+      });
+
+      // 如果上傳失敗，拋出錯誤
+      if (!newBlog) {
+        throw createHttpError(500, 'Failed to create blog.');
+      }
+
+      // 如果 draft 為 true，則不增加 user 的 total_posts
+      const incrementVal = draft ? 0 : 1;
+
+      // 更新 user 的 total_posts 和與該 user 有關的 blog
+      const updatedUserInfo = await UserSchema.findOneAndUpdate(
+        { _id: authorId },
+        { $inc: { 'account_info.total_posts': incrementVal }, $push: { blogs: newBlog._id } },
+      );
+
+      // 如果更新失敗，拋出錯誤
+      if (!updatedUserInfo) {
+        throw createHttpError(500, "Failed to update total posts number in user's account info.");
+      }
+
+      // 反之，回傳成功訊息
+      res.status(200).json({ message: 'Blog created successfully', blogId: newBlog.blog_id });
     }
-
-    // 如果 draft 為 true，則不增加 user 的 total_posts
-    const incrementVal = draft ? 0 : 1;
-
-    // 更新 user 的 total_posts 和與該 user 有關的 blog
-    const updatedUserInfo = await UserSchema.findOneAndUpdate(
-      { _id: authorId },
-      { $inc: { 'account_info.total_posts': incrementVal }, $push: { blogs: newBlog._id } },
-    );
-
-    // 如果更新失敗，拋出錯誤
-    if (!updatedUserInfo) {
-      throw createHttpError(500, "Failed to update total posts number in user's account info.");
-    }
-
-    // 反之，回傳成功訊息
-    res.status(200).json({ message: 'Blog created successfully', blogId: newBlog.blog_id });
   } catch (error) {
     console.log(error);
     next(error);
@@ -209,15 +226,18 @@ export const getLatestBlogsByAuthor: RequestHandler = async (req, res, next) => 
 // 取得目標 blogId 的資料
 export const getBlogDataByBlogId: RequestHandler = async (req, res, next) => {
   try {
-    const { blogId } = req.body;
+    const { blogId, draft, mode } = req.body;
 
+    // 如果沒有 blogId，拋出錯誤
     if (!blogId) {
       throw createHttpError(400, 'Please provide a blog id from client.');
     }
 
-    const incrementVal = 1;
+    // 如果 mode 是 edit，則 incrementVal 為 0，否則為 1
+    const incrementVal = mode !== 'edit' ? 1 : 0;
 
-    // 將該 blog 的 total_reads 加 1，並回傳該 blog 的資料
+    // 如果是創建狀態，將該 blog 的 total_reads 加 1 (incrementVal)，並回傳該 blog 的資料
+    // 如果是編輯狀態，則該 blog 的 total_reads 加 0 (incrementVal)，並回傳該 blog 的資料
     const blogData = await BlogSchema.findOneAndUpdate(
       { blog_id: blogId },
       { $inc: { 'activity.total_reads': incrementVal } },
@@ -242,6 +262,11 @@ export const getBlogDataByBlogId: RequestHandler = async (req, res, next) => {
       console.log(error);
       throw createHttpError(500, 'Failed to update total reads number in user account info.');
     });
+
+    // 如果該 blog 是草稿，但我們傳遞的 draft 為 false 時，拋出錯誤且不回傳該 blog 的資料
+    if (blogData.draft && !draft) {
+      throw createHttpError(500, 'you can not access draft blog.');
+    }
 
     // 取得資料且成功更新 user 中的 total_reads 後，回傳該 blog 的資料
     res.status(200).json({ blogData });

@@ -1,7 +1,16 @@
-import { create } from 'zustand';
-import EditorJS from '@editorjs/editorjs';
+import { create } from "zustand";
+import EditorJS from "@editorjs/editorjs";
 
-import type { BlogStructureType } from '../../../backend/src/utils/types.util';
+import type { BlogStructureType } from "../../../backend/src/utils/types.util";
+
+export const initialBlog = {
+  title: "",
+  banner: "",
+  content: { blocks: [] },
+  tags: [],
+  des: "",
+  author: { personal_info: {} },
+};
 
 interface EditorBlogProps {
   editorState: string;
@@ -15,18 +24,12 @@ interface EditorBlogProps {
   setEditorState: (state: string) => void;
   setBlog: (blog: BlogStructureType) => void;
   setIsTagEdit: (status: { state: boolean; index: number | null }) => void;
+  initialEditBlog: () => void;
 }
 
 const useEditorBlogStore = create<EditorBlogProps>((set) => ({
-  editorState: 'editor',
-  blog: {
-    title: '',
-    banner: '',
-    content: { blocks: [] },
-    tags: [],
-    des: '',
-    author: { personal_info: {} },
-  },
+  editorState: "editor",
+  blog: initialBlog,
   textEditor: null,
   characterLimit: 300,
   tagsLimit: 10,
@@ -36,6 +39,7 @@ const useEditorBlogStore = create<EditorBlogProps>((set) => ({
   setBlog: (blog) => set({ blog }),
   setTextEditor: (editor) => set({ textEditor: editor }),
   setIsTagEdit: (status) => set({ isTagEdit: status }),
+  initialEditBlog: () => set({ blog: initialBlog }),
 }));
 
 export default useEditorBlogStore;
