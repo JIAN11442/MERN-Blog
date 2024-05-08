@@ -3,6 +3,7 @@ import type {
   PersonalInfoStructureType,
   BlogStructureType,
   GenerateStructureType,
+  ScrollPropsType,
 } from '../../../backend/src/utils/types.util';
 
 interface HomeBlogProps {
@@ -12,7 +13,7 @@ interface HomeBlogProps {
   trendingBlogs: BlogStructureType[] | GenerateStructureType | null;
   queryBlogs: BlogStructureType[] | GenerateStructureType | null;
   allCategories: string[] | null;
-  scrollbarVisible: boolean;
+  scrollbarVisible: ScrollPropsType;
   loadBlogsLimit: number;
   queryUsers: PersonalInfoStructureType[] | GenerateStructureType | null;
   loadUsersLimit: number;
@@ -29,7 +30,7 @@ interface HomeBlogProps {
     blogs: BlogStructureType[] | GenerateStructureType | null
   ) => void;
   setAllCategories: (tags: string[] | null) => void;
-  setScrollbarVisible: (visible: boolean) => void;
+  setScrollbarVisible: (state: ScrollPropsType) => void;
   setQueryUsers: (
     users: PersonalInfoStructureType[] | GenerateStructureType | null
   ) => void;
@@ -42,7 +43,7 @@ const useHomeBlogStore = create<HomeBlogProps>((set) => ({
   trendingBlogs: null,
   queryBlogs: null,
   allCategories: [],
-  scrollbarVisible: false,
+  scrollbarVisible: { visible: false, position: 0 },
   loadBlogsLimit: import.meta.env.VITE_BLOGS_LIMIT,
   queryUsers: null,
   loadUsersLimit: import.meta.env.VITE_USERS_LIMIT,
@@ -53,7 +54,7 @@ const useHomeBlogStore = create<HomeBlogProps>((set) => ({
   setTrendingBlogs: (blogs) => set({ trendingBlogs: blogs }),
   setQueryBlogs: (blogs) => set({ queryBlogs: blogs }),
   setAllCategories: (tags) => set({ allCategories: tags }),
-  setScrollbarVisible: (visible) => set({ scrollbarVisible: visible }),
+  setScrollbarVisible: (state) => set({ scrollbarVisible: state }),
   setQueryUsers: (users) => set({ queryUsers: users }),
 }));
 

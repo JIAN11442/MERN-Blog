@@ -123,3 +123,8 @@ export interface AuthorProfileStructureType {
   };
   createdAt: string;
 }
+
+export interface ScrollPropsType {
+  visible: boolean;
+  position: number;
+}

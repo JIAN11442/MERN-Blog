@@ -2,7 +2,7 @@ import { twMerge } from 'tailwind-merge';
 
 import LoadLessBtn from './load-less.component';
 import LoadMoreBtn from './load-more.component';
-import BackToTopBtn from './back-top.component';
+import HandyToolsBtn from './handy-tool.component';
 
 import {
   GenerateStructureType,
@@ -57,8 +57,8 @@ const LoadOptions: React.FC<LoadOptionsProps> = ({
         loadFunction={loadFunction}
       />
 
-      {/* Move to top */}
-      <BackToTopBtn />
+      {/* Scroll to top */}
+      <HandyToolsBtn name="BackToTop" type="textBtn" />
     </div>
   );
 };
