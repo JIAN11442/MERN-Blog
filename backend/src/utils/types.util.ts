@@ -1,11 +1,14 @@
 import type mongoose from 'mongoose';
 import type { InferSchemaType } from 'mongoose';
 import type { OutputData } from '@editorjs/editorjs';
+
 import { userSchema } from '../schemas/user.schema';
 import { blogSchema } from '../schemas/blog.schema';
+import { notificationSchema } from '../schemas/notification.schema';
 
 export type UserSchemaType = InferSchemaType<typeof userSchema>;
 export type BlogSchemaType = InferSchemaType<typeof blogSchema>;
+export type NotificationSchemaType = InferSchemaType<typeof notificationSchema>;
 
 export interface SignUpBody {
   fullname: string;
@@ -50,6 +53,7 @@ export interface ActivityStructureType {
 }
 
 export interface BlogStructureType {
+  _id?: string;
   blog_id?: string;
   title?: string;
   banner?: string;

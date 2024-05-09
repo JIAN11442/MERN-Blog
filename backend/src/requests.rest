@@ -1,11 +1,18 @@
-POST http://localhost:5000/api/blog/get-similar-blogs
+# POST http://localhost:5000/api/blog/get-similar-blogs
+# Content-Type: application/json
+
+# {
+#     "categories": ["aws s3", "react", "nodejs"],
+#     "limit": 6,
+#     "page": 1,
+#     "eliminate_blogId":"How-to-upload-images-to-AWS-S3-using-React-JS-and-Node-JS-express-server-7ydpM41veb2rMI2hM9Egf"
+# }
+
+# GET http://localhost:5000/api/blog/trending-tags
+
+POST http://localhost:5000/api/notification/get-user-like-status
 Content-Type: application/json
 
 {
-    "categories": ["aws s3", "react", "nodejs"],
-    "limit": 6,
-    "page": 1,
-    "eliminate_blogId":"How-to-upload-images-to-AWS-S3-using-React-JS-and-Node-JS-express-server-7ydpM41veb2rMI2hM9Egf"
+    "blogId": "Inside-DBRX-Databricks-Impressive-Open-Source-LLM-nymCInERsHZoV3izAFvRe"
 }
-
-# GET http://localhost:5000/api/blog/trending-tags

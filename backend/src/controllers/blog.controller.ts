@@ -207,7 +207,7 @@ export const getLatestBlogsByAuthor: RequestHandler = async (req, res, next) => 
 
     const authorBlogs = await BlogSchema.find({ author: authorId, draft: false })
       .sort({ publishedAt: -1 })
-      .select('blog_id title banner des activity tags publishedAt -_id')
+      .select('blog_id title banner des activity tags publishedAt')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
       .skip((page - 1) * getLatestBlogLimit)
       .limit(getLatestBlogLimit);

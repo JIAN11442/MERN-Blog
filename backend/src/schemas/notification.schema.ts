@@ -1,6 +1,7 @@
-import { InferSchemaType, Schema, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
+import type { NotificationSchemaType } from '../utils/types.util';
 
-const notificationSchema = new Schema(
+export const notificationSchema = new Schema(
   {
     type: { type: String, enum: ['like', 'comment', 'reply'], require: true },
     blog: { type: Schema.Types.ObjectId, require: true, ref: 'blogs' },
@@ -14,6 +15,6 @@ const notificationSchema = new Schema(
   { timestamps: true },
 );
 
-type notificationSchemaType = InferSchemaType<typeof notificationSchema>;
+// type NotificationSchemaType = InferSchemaType<typeof notificationSchema>;
 
-export default model<notificationSchemaType>('Notification', notificationSchema);
+export default model<NotificationSchemaType>('Notification', notificationSchema);

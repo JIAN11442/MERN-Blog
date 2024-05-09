@@ -1,13 +1,22 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import type { BlogStructureType } from "../../../backend/src/utils/types.util";
-import { FlatIcons } from "../icons/flaticons";
-import useTargetBlogStore from "../states/target-blog.state";
+import toast from "react-hot-toast";
+
 import useAuthStore from "../states/user-auth.state";
+import useTargetBlogStore from "../states/target-blog.state";
+import useBlogLikedStore from "../states/blog-liked.state";
+
+import { FlatIcons } from "../icons/flaticons";
+import useLikedFetch from "../fetchs/liked.fetch";
+
+import type { BlogStructureType } from "../../../backend/src/utils/types.util";
 
 const BlogInteraction = () => {
-  const { targetBlogInfo } = useTargetBlogStore();
   const { authUser } = useAuthStore();
+  const { targetBlogInfo, setTargetBlogInfo } = useTargetBlogStore();
+  const { isLikedByUser, setIsLikedByUser } = useBlogLikedStore();
   const {
+    _id,
     title,
     blog_id,
     activity,
@@ -16,6 +25,42 @@ const BlogInteraction = () => {
       personal_info: { username: author_username },
     },
   } = targetBlogInfo as Required<BlogStructureType>;
+
+  const { GetLikeStatusOfBlog, UpdateLikeStatusOfBlog } = useLikedFetch();
+
+  // Switch isLikedByUser state
+  const handleLike = () => {
+    // 如果已登入，執行按讚
+    if (authUser?.access_token) {
+      setIsLikedByUser(!isLikedByUser);
+
+      // 因爲 isLikedByUser 是異步，所以 setIsLikedByUser 之後，并不能馬上拿到最新的 isLikedByUser
+      // 因此這裏直接取反，不用等待 setIsLikedByUser 更新
+
+      const newTotalLikes = !isLikedByUser ? total_likes + 1 : total_likes - 1;
+
+      setTargetBlogInfo({
+        ...targetBlogInfo,
+        activity: { ...activity, total_likes: newTotalLikes },
+      });
+
+      UpdateLikeStatusOfBlog({
+        blogObjectID: _id,
+        isLikedByUser: !isLikedByUser,
+      });
+    } else {
+      // 如果還沒登入，當然就不能按讚
+      // 因為之後需要用戶資料記錄是哪位用戶按讚
+      toast.error("Please login first to like this blog");
+    }
+  };
+
+  // Get Like Status of Blog from beginning
+  useEffect(() => {
+    if (authUser?.access_token) {
+      GetLikeStatusOfBlog({ blogObjectID: _id });
+    }
+  }, [_id]);
 
   return (
     <>
@@ -48,17 +93,26 @@ const BlogInteraction = () => {
             "
           >
             <button
-              className="
+              onClick={handleLike}
+              className={`
                 w-10
                 h-10
                 rounded-full
                 flex
                 items-center
                 justify-center
-                bg-grey-custom/80      
-              "
+                transition
+                ${
+                  isLikedByUser
+                    ? `
+                        bg-red-custom/20
+                        text-red-custom
+                      `
+                    : "bg-grey-custom/80"
+                }
+              `}
             >
-              <FlatIcons name="fi fi-rr-heart" />
+              <FlatIcons name={`fi fi-${isLikedByUser ? "sr" : "rr"}-heart`} />
             </button>
             <p>{total_likes}</p>
           </div>

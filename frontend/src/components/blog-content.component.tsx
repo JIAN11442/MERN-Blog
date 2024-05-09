@@ -1,6 +1,6 @@
-import hljs from 'highlight.js';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import type { OutputBlockData } from '@editorjs/editorjs';
+import hljs from "highlight.js";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import type { OutputBlockData } from "@editorjs/editorjs";
 
 interface BlogContentProps {
   block: OutputBlockData;
@@ -10,12 +10,12 @@ const BlogContent: React.FC<BlogContentProps> = ({ block }) => {
   const { type, data } = block;
 
   // Paragraph
-  if (type === 'paragraph') {
+  if (type === "paragraph") {
     return <p dangerouslySetInnerHTML={{ __html: data.text }}></p>;
   }
 
   // Header
-  if (type === 'header') {
+  if (type === "header") {
     if (data.level === 4) {
       return <h4 dangerouslySetInnerHTML={{ __html: data.text }}></h4>;
     } else if (data.level === 3) {
@@ -28,20 +28,20 @@ const BlogContent: React.FC<BlogContentProps> = ({ block }) => {
   }
 
   // Code
-  if (type === 'code') {
+  if (type === "code") {
     let detectedLanguage = hljs.highlightAuto(data.code).language;
 
     // Fixing some languages
-    const languages = ['dsconfig', 'mipsasm', 'routeros'];
+    const languages = ["dsconfig", "mipsasm", "routeros"];
     if (detectedLanguage && languages.includes(detectedLanguage)) {
-      detectedLanguage = 'csharp';
+      detectedLanguage = "csharp";
     }
 
     return (
       <SyntaxHighlighter
         language={detectedLanguage}
         showLineNumbers={true}
-        codeTagProps={{ style: { fontFamily: 'Comic Sans' } }}
+        codeTagProps={{ style: { fontFamily: "Comic Sans" } }}
       >
         {data.code}
       </SyntaxHighlighter>
@@ -49,7 +49,7 @@ const BlogContent: React.FC<BlogContentProps> = ({ block }) => {
   }
 
   // Image
-  if (type === 'image') {
+  if (type === "image") {
     const url = data.file.url;
     const caption = data.caption;
 
@@ -70,14 +70,14 @@ const BlogContent: React.FC<BlogContentProps> = ({ block }) => {
             {caption}
           </p>
         ) : (
-          ''
+          ""
         )}
       </div>
     );
   }
 
   // Quote
-  if (type === 'quote') {
+  if (type === "quote") {
     const quote = data.text;
     const caption = data.caption;
 
@@ -86,9 +86,9 @@ const BlogContent: React.FC<BlogContentProps> = ({ block }) => {
         className="
           p-5
           pl-5
-        bg-purple-custom/10
+          bg-[#fbf3db]
           border-l-4
-          border-purple-custom
+          border-[#fbcf4a]
           rounded-r-md
         "
       >
@@ -108,21 +108,21 @@ const BlogContent: React.FC<BlogContentProps> = ({ block }) => {
           <p
             className="
               w-full
-              text-purple
+              text-[#fbb74a]
               text-base
             "
           >
             {caption}
           </p>
         ) : (
-          ''
+          ""
         )}
       </div>
     );
   }
 
   // List
-  if (type === 'list') {
+  if (type === "list") {
     const style = data.style;
     const items = data.items;
 
@@ -130,7 +130,7 @@ const BlogContent: React.FC<BlogContentProps> = ({ block }) => {
       <ol
         className={`
           pl-10
-          ${style === 'ordered' ? 'list-decimal' : 'list-disc'}
+          ${style === "ordered" ? "list-decimal" : "list-disc"}
         `}
       >
         {items.map((listItem: string[], i: number) => {

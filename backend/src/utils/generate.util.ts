@@ -22,7 +22,7 @@ export const genarateUsername = async (email: string) => {
 };
 
 // format user data to send to client
-export const formatDatatoSend = (user: UserRequestType & { userId: string }) => {
+export const formatDatatoSend = (user: UserRequestType) => {
   try {
     // access_token 用來驗證使用者身份
     const access_token = jwt.sign({ userId: user._id }, process.env.SECRET_ACCESS_KEY as string, {

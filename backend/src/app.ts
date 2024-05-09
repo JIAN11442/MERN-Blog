@@ -18,6 +18,7 @@ import ErrorsHandle from './utils/errors.util';
 import env from './utils/validateEnv.util';
 
 import serviceAccount from './firebase/mern-blogging-ts-firebase-adminsdk-l5srr-14255d77e6.json';
+import notificationRoute from './routers/notification.route';
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount as admin.ServiceAccount) });
@@ -48,6 +49,7 @@ app.use('/api/aws', awsRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/blog', blogRoute);
 app.use('/api/user', userRoute);
+app.use('/api/notification', notificationRoute);
 
 // Error handling
 app.use((req, res, next) => {

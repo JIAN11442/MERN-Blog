@@ -1,29 +1,31 @@
 import { useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
+import type { OutputData } from "@editorjs/editorjs";
 
-import useBlogFetch from "../fetchs/blog.fetch";
-
-import useTargetBlogStore from "../states/target-blog.state";
-
-import type { BlogStructureType } from "../../../backend/src/utils/types.util";
-import AnimationWrapper from "../components/page-animation.component";
 import Loader from "../components/loader.component";
-import { getDay } from "../commons/date.common";
 import BlogInteraction from "../components/blog-interaction.component";
-import useCollapseStore from "../states/collapse.state";
 import BlogPostCard from "../components/blog-card-banner.component";
 import BlogContent from "../components/blog-content.component";
-import type { OutputData } from "@editorjs/editorjs";
-import useHomeBlogStore from "../states/home-blog.state";
 import HandyToolBtn from "../components/handy-tool.component";
+import AnimationWrapper from "../components/page-animation.component";
+
+import useTargetBlogStore from "../states/target-blog.state";
+import useCollapseStore from "../states/collapse.state";
+import useHomeBlogStore from "../states/home-blog.state";
+
+import useBlogFetch from "../fetchs/blog.fetch";
+import { getDay } from "../commons/date.common";
+
+import type { BlogStructureType } from "../../../backend/src/utils/types.util";
 
 const BlogPage = () => {
   const { blogId } = useParams();
   const { searchBarVisibility } = useCollapseStore();
-  const { GetTargetBlogInfo } = useBlogFetch();
-  const { targetBlogInfo, initialBlogInfo, similarBlogsInfo } =
+  const { targetBlogInfo, similarBlogsInfo, initialBlogInfo } =
     useTargetBlogStore();
   const { scrollbarVisible } = useHomeBlogStore();
+
+  const { GetTargetBlogInfo } = useBlogFetch();
 
   // 因為原本的 BlogStructureType 是可選的，所以如果要在這裡呼叫所有屬性，typescript 會報錯，因為有可能為 undefined
   // 所以這裡使用 Required<BlogStructureType> 來告訴 typescript 這個物件裡面的所有屬性都是必要的
@@ -57,12 +59,6 @@ const BlogPage = () => {
       initialBlogInfo();
     };
   }, [blogId]);
-
-  // useEffect(() => {
-  //   if (Object.entries(content).length) {
-  //     console.log(content);
-  //   }
-  // }, [content]);
 
   return (
     <AnimationWrapper
