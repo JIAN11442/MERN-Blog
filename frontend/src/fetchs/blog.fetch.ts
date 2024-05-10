@@ -5,14 +5,15 @@ import { useNavigate } from "react-router-dom";
 import useHomeBlogStore from "../states/home-blog.state";
 import useEditorBlogStore from "../states/editor-blog.state";
 import useAuthStore from "../states/user-auth.state";
+import useTargetBlogStore from "../states/target-blog.state";
 
 import type {
+  BlogStructureType,
   FetchBlogsPropsType,
-  GenerateStructureType,
-} from "../../../backend/src/utils/types.util";
-
-import { FormatData } from "../commons/generate.common";
-import useTargetBlogStore from "../states/target-blog.state";
+  GenerateToLoadStructureType,
+} from "../commons/types.common";
+import useCommentFetch from "./comment.fetch";
+import { FormatDataForLoadMoreOrLess } from "../commons/generate.common";
 
 const useBlogFetch = () => {
   const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/blog";
@@ -20,7 +21,7 @@ const useBlogFetch = () => {
   const navigate = useNavigate();
 
   const { authUser } = useAuthStore();
-  const { blog, textEditor, characterLimit } = useEditorBlogStore();
+  const { editorBlog, textEditor, characterLimit } = useEditorBlogStore();
   const {
     setLatestBlogs,
     setTrendingBlogs,
@@ -32,7 +33,9 @@ const useBlogFetch = () => {
   } = useHomeBlogStore();
 
   const { setTargetBlogInfo, setSimilarBlogsInfo } = useTargetBlogStore();
-  const { setBlog } = useEditorBlogStore();
+  const { setEditorBlog } = useEditorBlogStore();
+
+  const { GetAndGenerateCommentsData } = useCommentFetch();
 
   // Fetch latest blogs
   const GetLatestBlogs = async ({ page = 1, state }: FetchBlogsPropsType) => {
@@ -43,7 +46,7 @@ const useBlogFetch = () => {
       .post(requestURL, { page })
       .then(async ({ data }) => {
         if (data.latestBlogs) {
-          const formattedData = await FormatData({
+          const formattedData = await FormatDataForLoadMoreOrLess({
             prevArr: latestBlogs,
             fetchData: data.latestBlogs,
             page,
@@ -51,7 +54,7 @@ const useBlogFetch = () => {
             state,
           });
 
-          setLatestBlogs(formattedData as GenerateStructureType);
+          setLatestBlogs(formattedData as GenerateToLoadStructureType);
         }
       })
       .catch((error) => {
@@ -69,9 +72,8 @@ const useBlogFetch = () => {
     await axios
       .post(requestURL, { category, page })
       .then(async ({ data }) => {
-        console.log(data.tagBlogs);
         if (data.tagBlogs) {
-          const formattedData = await FormatData({
+          const formattedData = await FormatDataForLoadMoreOrLess({
             prevArr: latestBlogs,
             fetchData: data.tagBlogs,
             page,
@@ -80,7 +82,7 @@ const useBlogFetch = () => {
             state,
           });
 
-          setLatestBlogs(formattedData as GenerateStructureType);
+          setLatestBlogs(formattedData as GenerateToLoadStructureType);
         }
       })
       .catch((error) => {
@@ -99,7 +101,7 @@ const useBlogFetch = () => {
       .post(requestURL, { query, page })
       .then(async ({ data }) => {
         if (data.queryBlogs) {
-          const formattedData = await FormatData({
+          const formattedData = await FormatDataForLoadMoreOrLess({
             prevArr: queryBlogs,
             fetchData: data.queryBlogs,
             page,
@@ -108,7 +110,7 @@ const useBlogFetch = () => {
             state,
           });
 
-          setQueryBlogs(formattedData as GenerateStructureType);
+          setQueryBlogs(formattedData as GenerateToLoadStructureType);
         }
       })
       .catch((error) => {
@@ -128,7 +130,7 @@ const useBlogFetch = () => {
       .post(requestURL, { authorId, page })
       .then(async ({ data }) => {
         if (data.authorBlogs) {
-          const formattedData = await FormatData({
+          const formattedData = await FormatDataForLoadMoreOrLess({
             prevArr: latestBlogs,
             fetchData: data.authorBlogs,
             page,
@@ -137,7 +139,7 @@ const useBlogFetch = () => {
             state,
           });
 
-          setLatestBlogs(formattedData as GenerateStructureType);
+          setLatestBlogs(formattedData as GenerateToLoadStructureType);
         }
       })
       .catch((error) => {
@@ -157,6 +159,43 @@ const useBlogFetch = () => {
       .post(targetReqURL, { blogId, draft, mode })
       .then(async ({ data: { blogData } }) => {
         if (blogData) {
+          // 將重構後的 comment 資料架構更新到 blogData 的 comments 屬性
+          blogData.comments = await GetAndGenerateCommentsData({
+            blogObjectId: blogData._id,
+            skip: 0,
+          });
+
+          // 為了在不重新向後端請求取得 latestBlogs 的情況下，即時改變目標 blog 的閲讀數
+          // 這裡直接在本地更新 zustand 管理的 latestBlogs 數據
+          if (latestBlogs && "results" in latestBlogs) {
+            const updateTargetBlogTotalReads = latestBlogs.results.map(
+              (blog: BlogStructureType) => {
+                if (blog.blog_id === blogData.blog_id) {
+                  return {
+                    ...blog,
+                    activity: {
+                      ...blog.activity,
+                      total_reads: (blog?.activity?.total_reads ?? 0) + 1,
+                    },
+                  };
+                } else {
+                  return blog;
+                }
+              }
+            );
+
+            setLatestBlogs({
+              ...latestBlogs,
+              results: updateTargetBlogTotalReads,
+            });
+          }
+
+          // 將目標 blog 資料傳到 targetBlogStore
+          setTargetBlogInfo(blogData);
+
+          // 同時，考慮到編輯狀態頁面也需要這個數據，所以也將數據傳到 editorBlogStore
+          setEditorBlog(blogData);
+
           // Fetch similar blogs && set similar blogs info
           GetSimilarBlogsInfo({
             categories: blogData.tags,
@@ -164,10 +203,6 @@ const useBlogFetch = () => {
             page: 1,
             eliminate_blogId: blogData.blog_id,
           });
-
-          // Set target blog info
-          setTargetBlogInfo(blogData);
-          setBlog(blogData);
         }
       })
       .catch((error) => {
@@ -227,7 +262,7 @@ const useBlogFetch = () => {
       .post(requestURL, { page })
       .then(async ({ data }) => {
         if (data.trendingBlogs) {
-          const formattedData = await FormatData({
+          const formattedData = await FormatDataForLoadMoreOrLess({
             prevArr: trendingBlogs,
             fetchData: data.trendingBlogs,
             page,
@@ -235,7 +270,7 @@ const useBlogFetch = () => {
             state,
           });
 
-          setTrendingBlogs(formattedData as GenerateStructureType);
+          setTrendingBlogs(formattedData as GenerateToLoadStructureType);
         }
       })
       .catch((error) => {
@@ -260,7 +295,7 @@ const useBlogFetch = () => {
     }
 
     // 判斷資料是否完整
-    const { title, des, tags, banner, content } = blog;
+    const { title, des, tags, banner, content } = editorBlog;
 
     if (!title?.length) {
       return toast.error("Write blog title before publishing.");
@@ -336,7 +371,7 @@ const useBlogFetch = () => {
       return;
     }
 
-    const { title, banner, des, tags } = blog;
+    const { title, banner, des, tags } = editorBlog;
 
     // 如果標題為空，則顯示警告訊息並停止下一步操作
     if (!title?.length) {
@@ -412,7 +447,6 @@ const useBlogFetch = () => {
     GetSimilarBlogsInfo,
     GetTrendingBlogs,
     GetTrendingTags,
-    FormatData,
   };
 };
 

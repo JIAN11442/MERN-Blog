@@ -348,7 +348,7 @@ export const getTrendingBlogs: RequestHandler = async (req, res, next) => {
     const trendingBlogs = await BlogSchema.find({ draft: false })
       .select('blog_id title publishedAt -_id')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
-      .sort({ 'activity.total_read': -1, 'activity.total_likes': -1, publishedAt: -1 })
+      .sort({ 'activity.total_reads': -1, 'activity.total_likes': -1, publishedAt: -1 })
       .skip((page - 1) * env.GET_TRENDING_BLOGS_LIMIT)
       .limit(env.GET_TRENDING_BLOGS_LIMIT);
 

@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import type { AuthorStructureType } from '../../../backend/src/utils/types.util';
+import { Link } from "react-router-dom";
+import type { AuthorStructureType } from "../commons/types.common";
 
 interface UserCardProps {
   user: AuthorStructureType;

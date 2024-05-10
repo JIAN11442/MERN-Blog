@@ -1,7 +1,7 @@
-import toast from 'react-hot-toast';
-import { FlatIcons } from '../icons/flaticons';
+import toast from "react-hot-toast";
+import { FlatIcons } from "../icons/flaticons";
 
-import useEditorBlogStore from '../states/editor-blog.state';
+import useEditorBlogStore from "../states/editor-blog.state";
 
 interface TagProps {
   tag: string;
@@ -9,14 +9,15 @@ interface TagProps {
 }
 
 const Tag: React.FC<TagProps> = ({ tag, index }) => {
-  const { isTagEdit, setIsTagEdit, blog, setBlog } = useEditorBlogStore();
+  const { isTagEdit, setIsTagEdit, editorBlog, setEditorBlog } =
+    useEditorBlogStore();
 
   const handleTagDelete = () => {
-    const tags = blog.tags?.filter((t) => t !== tag);
-    setBlog({ ...blog, tags });
+    const tags = editorBlog.tags?.filter((t) => t !== tag);
+    setEditorBlog({ ...editorBlog, tags });
   };
   const handleTagOnKeyDown = (e: React.KeyboardEvent<HTMLParagraphElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       e.currentTarget.blur();
     }
@@ -25,16 +26,16 @@ const Tag: React.FC<TagProps> = ({ tag, index }) => {
     const currentTag = e.target.textContent;
 
     if (currentTag) {
-      if (blog.tags) {
-        blog.tags[index] = currentTag;
-        setBlog({ ...blog, tags: [...blog.tags] });
+      if (editorBlog.tags) {
+        editorBlog.tags[index] = currentTag;
+        setEditorBlog({ ...editorBlog, tags: [...editorBlog.tags] });
       }
     } else {
       // Warning the user if the tag is empty
       setIsTagEdit({ state: true, index: index });
       e.currentTarget.focus();
 
-      return toast.error('Tag cannot be empty!');
+      return toast.error("Tag cannot be empty!");
     }
     setIsTagEdit({ state: false, index: null });
   };
@@ -84,7 +85,7 @@ const Tag: React.FC<TagProps> = ({ tag, index }) => {
           -top-2
           right-0
           hidden
-          ${!isTagEdit.state && 'group-hover:block'}
+          ${!isTagEdit.state && "group-hover:block"}
         `}
       >
         <FlatIcons

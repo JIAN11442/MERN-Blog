@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 
-import { SignUpBody, SignInBody, type BlogStructureType } from './types.util';
+import { SignUpReqBody, SignInReqBody, BlogReqBody } from './types.util';
 import env from './validateEnv.util';
 
 const emailRegex = /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*(\.[A-Za-z]+)+$/;
@@ -8,7 +8,7 @@ const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
 const characterLimit = env.BLOG_DES_CHAR_LIMIT;
 const tagsLimit = env.BLOG_TAGS_LIMIT;
 
-export const ValidateForSignUp = (RequestBody: SignUpBody) => {
+export const ValidateForSignUp = (RequestBody: SignUpReqBody) => {
   const { fullname, email, password } = RequestBody;
 
   if (!fullname || !email || !password) {
@@ -31,7 +31,7 @@ export const ValidateForSignUp = (RequestBody: SignUpBody) => {
   return true;
 };
 
-export const ValidateForSignIn = (RequestBody: SignInBody) => {
+export const ValidateForSignIn = (RequestBody: SignInReqBody) => {
   const { email, password } = RequestBody;
   if (!email || !password) {
     return { statusCode: 400, message: 'Parameters missings' };
@@ -50,7 +50,7 @@ export const ValidateForSignIn = (RequestBody: SignInBody) => {
   return true;
 };
 
-export const ValidateForPublishBlog = (RequestBody: BlogStructureType) => {
+export const ValidateForPublishBlog = (RequestBody: BlogReqBody) => {
   const { banner, title, content, des, tags, draft } = RequestBody;
 
   if (!title?.length) {

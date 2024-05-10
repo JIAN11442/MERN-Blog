@@ -1,26 +1,26 @@
-import { useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
 
-import AnimationWrapper from '../components/page-animation.component';
-import Loader from '../components/loader.component';
-import AuthProfileInfo from '../components/profile-info.component';
+import AnimationWrapper from "../components/page-animation.component";
+import Loader from "../components/loader.component";
+import AuthProfileInfo from "../components/profile-info.component";
+import InpageNavigation from "../components/inpage-navigation.component";
+import BlogPostCard from "../components/blog-card-banner.component";
+import LoadOptions from "../components/load-options.components";
+import NoDataMessage from "../components/blog-nodata.component";
 
-import useCollapseStore from '../states/collapse.state';
-import useAuthStore from '../states/user-auth.state';
-import useHomeBlogStore from '../states/home-blog.state';
-import useAuthorProfileStore from '../states/author-profile.state';
+import useUserFetch from "../fetchs/user.fetch";
+import useBlogFetch from "../fetchs/blog.fetch";
 
-import useUserFetch from '../fetchs/user.fetch';
-import useBlogFetch from '../fetchs/blog.fetch';
+import useCollapseStore from "../states/collapse.state";
+import useAuthStore from "../states/user-auth.state";
+import useHomeBlogStore from "../states/home-blog.state";
+import useAuthorProfileStore from "../states/author-profile.state";
 
 import {
   AuthorProfileStructureType,
   type BlogStructureType,
-} from '../../../backend/src/utils/types.util';
-import InpageNavigation from '../components/inpage-navigation.component';
-import BlogPostCard from '../components/blog-card-banner.component';
-import LoadOptions from '../components/load-options.components';
-import NoDataMessage from '../components/blog-nodata.component';
+} from "../commons/types.common";
 
 const ProfilePage = () => {
   const { authorId: paramsAuthor } = useParams();
@@ -63,7 +63,7 @@ const ProfilePage = () => {
       {!profile_username ? (
         <Loader
           loader={{ speed: 1, size: 50 }}
-          className={{ container: 'mt-5' }}
+          className={{ container: "mt-5" }}
         />
       ) : (
         // 因為這個 section 是 flex-row-reverse，
@@ -77,7 +77,7 @@ const ProfilePage = () => {
             items-start
             gap-5
             min-[1100px]:gap-12
-          ${searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''}
+          ${searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""}
           `}
         >
           {/* author profile info(md-screen) */}
@@ -120,7 +120,7 @@ const ProfilePage = () => {
 
             {/* Profile total posts && total reads */}
             <p className="text-md text-grey-dark">
-              {total_posts.toLocaleString()} Blogs -{' '}
+              {total_posts.toLocaleString()} Blogs -{" "}
               {total_reads.toLocaleString()} Reads
             </p>
 
@@ -150,14 +150,14 @@ const ProfilePage = () => {
           {/* latest blogs(min-screen && md-screen) && author profile info(min-screen) */}
           <div className="max-md:mt-12 w-full">
             <InpageNavigation
-              routes={['Blogs Published', 'About']}
+              routes={["Blogs Published", "About"]}
               defaultHiddenIndex={1}
             >
               {/* latest blogs */}
               <>
                 {latestBlogs === null ? (
                   <Loader loader={{ speed: 1, size: 50 }} />
-                ) : 'results' in latestBlogs && latestBlogs.results.length ? (
+                ) : "results" in latestBlogs && latestBlogs.results.length ? (
                   <div>
                     {latestBlogs.results.map((blog: BlogStructureType, i) => (
                       <AnimationWrapper

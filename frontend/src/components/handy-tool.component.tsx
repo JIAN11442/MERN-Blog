@@ -5,15 +5,18 @@ import { FlatIcons } from '../icons/flaticons';
 interface HandyToolBtnProps {
   name: string;
   type: string;
-  className?: string;
+  textBtnContainer?: string;
+  iconBtnContainer?: { position?: string; className?: string };
 }
 
 const HandyToolBtn: React.FC<HandyToolBtnProps> = ({
   name,
   type,
-  className,
+  textBtnContainer,
+  iconBtnContainer,
 }) => {
   const { scrollbarVisible } = useHomeBlogStore();
+
   const position = scrollbarVisible.position;
   const names = ['BackToTop', 'BackToTopAndBottom'];
   const types = ['textBtn', 'IconBtn'];
@@ -45,7 +48,7 @@ const HandyToolBtn: React.FC<HandyToolBtnProps> = ({
             cursor-pointer
             transition
           `,
-          className
+          textBtnContainer
         )}
       >
         <button className="text-nowrap">Back to top</button>
@@ -57,18 +60,25 @@ const HandyToolBtn: React.FC<HandyToolBtnProps> = ({
   if (name === names[1] && type === types[1]) {
     return (
       <div
-        className={`
-          fixed
-          right-5
-          ${
-            // 當捲軸到底時，將按鈕定位在底部，其他時候則定位在右中
-            position + window.innerHeight === document.body.scrollHeight
-              ? 'md:bottom-10 max-md:bottom-[7rem]'
-              : 'translate-y-1/2 bottom-1/2'
-          }
-          flex
-          flex-col
-        `}
+        className={twMerge(
+          `
+            fixed
+            ${
+              iconBtnContainer?.position && iconBtnContainer.position === 'left'
+                ? 'left-5'
+                : 'right-5'
+            }
+            ${
+              // 當捲軸到底時，將按鈕定位在底部，其他時候則定位在右中
+              position + window.innerHeight === document.body.scrollHeight
+                ? 'md:bottom-10 max-md:bottom-[7rem]'
+                : 'translate-y-1/2 bottom-1/2'
+            }
+            flex
+            flex-col
+          `,
+          iconBtnContainer?.className
+        )}
       >
         {/* Back to top */}
         <button onClick={handleBackToTop}>

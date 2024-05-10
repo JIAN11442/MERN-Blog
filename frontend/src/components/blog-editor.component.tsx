@@ -21,8 +21,13 @@ const BlogEditor = () => {
   const blogBannerRef = useRef<HTMLImageElement | null>(null);
   const editorRef = useRef<EditorJS | null>(null);
 
-  const { blog, textEditor, setBlog, setTextEditor, setEditorState } =
-    useEditorBlogStore();
+  const {
+    editorBlog,
+    textEditor,
+    setEditorBlog,
+    setTextEditor,
+    setEditorState,
+  } = useEditorBlogStore();
   const { UploadImageToAWS } = useAwsFetch();
   const { UploadSaveDraftBlog } = useBlogFetch();
 
@@ -46,7 +51,7 @@ const BlogEditor = () => {
             if (url && blogBannerRef.current) {
               // Set the image url to the blog banner
               blogBannerRef.current.src = url;
-              setBlog({ ...blog, banner: url });
+              setEditorBlog({ ...editorBlog, banner: url });
 
               blogBannerRef.current.onload = () => {
                 // Dismiss the loading toast and show success toast
@@ -79,7 +84,7 @@ const BlogEditor = () => {
   const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const input = e.target;
 
-    setBlog({ ...blog, title: input.value });
+    setEditorBlog({ ...editorBlog, title: input.value });
 
     // Auto resize the textarea with the content
     input.style.height = "auto";
@@ -92,10 +97,10 @@ const BlogEditor = () => {
     img.src = defaultBanner;
   };
   const handlePublishEvent = () => {
-    if (!blog.banner?.length) {
+    if (!editorBlog.banner?.length) {
       return toast.error("Please upload a blog banner.");
     }
-    if (!blog.title?.length) {
+    if (!editorBlog.title?.length) {
       return toast.error("Please enter a blog title.");
     }
     if (textEditor?.isReady) {
@@ -103,7 +108,7 @@ const BlogEditor = () => {
         .save()
         .then((data) => {
           if (data.blocks.length) {
-            setBlog({ ...blog, content: data });
+            setEditorBlog({ ...editorBlog, content: data });
             setEditorState("publish");
           } else {
             return toast.error("Write something in your blog to publish it.");
@@ -125,7 +130,9 @@ const BlogEditor = () => {
         // 通過判斷 content 是否為陣列，來得知當前是編輯模式還是創建模式
         // 如果是陣列，代表 blog 中存在内容(編輯模式)，我們直接將 content 還原
         // 如果不是陣列，代表 blog 中不存在内容(創建模式)，我們創建一個空的 content
-        data: Array.isArray(blog.content) ? blog.content[0] : blog.content, // { blocks: [] } or { time:? , blocks: [?] version: ?}
+        data: Array.isArray(editorBlog.content)
+          ? editorBlog.content[0]
+          : editorBlog.content, // { blocks: [] } or { time:? , blocks: [?] version: ?}
         placeholder: "Enter text or type tab key to start writing...",
       });
 
@@ -212,7 +219,7 @@ const BlogEditor = () => {
             normal-case
           "
         >
-          {blog.title || "New Blog"}
+          {editorBlog.title || "New Blog"}
         </p>
 
         {/* Publish and save draft button */}
@@ -269,7 +276,7 @@ const BlogEditor = () => {
                 */}
                 <img
                   ref={blogBannerRef}
-                  src={blog.banner}
+                  src={editorBlog.banner}
                   onError={(e) => handleImageError(e)}
                   className={`
                     z-10
@@ -288,7 +295,7 @@ const BlogEditor = () => {
 
             {/* Blog Title */}
             <textarea
-              defaultValue={blog.title}
+              defaultValue={editorBlog.title}
               placeholder="Blog Title"
               onInput={(e) => handleTitleInput(e)}
               onChange={(e) => handleTitleChange(e)}

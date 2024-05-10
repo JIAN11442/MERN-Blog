@@ -1,12 +1,12 @@
-import useHomeBlogStore from '../states/home-blog.state';
+import useHomeBlogStore from "../states/home-blog.state";
 
 import type {
-  FunctionPropsType,
-  GenerateStructureType,
-} from '../../../backend/src/utils/types.util';
+  LoadFunctionPropsType,
+  GenerateToLoadStructureType,
+} from "../commons/types.common";
 
 interface LoadMoreBtnProps {
-  data: GenerateStructureType;
+  data: GenerateToLoadStructureType;
   state?: string;
   query?: string;
   authorId?: string;
@@ -16,14 +16,14 @@ interface LoadMoreBtnProps {
     authorId,
     page,
     state,
-  }: FunctionPropsType) => void;
+  }: LoadFunctionPropsType) => void;
 }
 
 const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
   data,
   query,
   authorId,
-  state = 'loadmore',
+  state = "loadmore",
   loadFunction: LoadMoreFunction,
 }) => {
   const { inPageNavState: category } = useHomeBlogStore();

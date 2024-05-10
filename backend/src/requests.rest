@@ -10,9 +10,19 @@
 
 # GET http://localhost:5000/api/blog/trending-tags
 
-POST http://localhost:5000/api/notification/get-user-like-status
+# POST http://localhost:5000/api/notification/get-user-like-status
+# Content-Type: application/json
+
+# {
+#     "blogId": "Inside-DBRX-Databricks-Impressive-Open-Source-LLM-nymCInERsHZoV3izAFvRe"
+# }
+
+
+POST http://localhost:5000/api/comment/create-new-comment
 Content-Type: application/json
 
 {
-    "blogId": "Inside-DBRX-Databricks-Impressive-Open-Source-LLM-nymCInERsHZoV3izAFvRe"
+    "blogObjectId": "6609519e4fe2b7cf455d35a8",
+    "comment": "This is a test comment",
+    "blog_author": "660951324fe2b7cf455d35a6"
 }

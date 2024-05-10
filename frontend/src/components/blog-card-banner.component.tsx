@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import type {
   BlogStructureType,
   PersonalInfoStructureType,
-} from "../../../backend/src/utils/types.util";
+} from "../commons/types.common";
 
 import { getDay } from "../commons/date.common";
 import { FlatIcons } from "../icons/flaticons";
@@ -151,6 +151,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
             mt-7
           "
         >
+          {/* Tag */}
           <span
             className="
               btn-light
@@ -161,6 +162,8 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
           >
             {tags && tags[0]}
           </span>
+
+          {/* Liked */}
           <span
             className="
               flex
@@ -172,6 +175,20 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
           >
             <FlatIcons name="fi fi-rr-heart" className="text-xl" />
             {activity?.total_likes}
+          </span>
+
+          {/* Read */}
+          <span
+            className="
+              flex
+              ml-2
+              items-center
+              gap-2
+              text-grey-dark
+            "
+          >
+            <FlatIcons name="fi fi-rr-eye" className="text-xl" />
+            {activity?.total_reads}
           </span>
         </div>
       </div>

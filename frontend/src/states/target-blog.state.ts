@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { OutputData } from "@editorjs/editorjs";
 
-import type { BlogStructureType } from "../../../backend/src/utils/types.util";
+import type { BlogStructureType } from "../commons/types.common";
 
 const initialBlogInfo = {
   _id: "",
@@ -25,6 +25,7 @@ const initialBlogInfo = {
   publishedAt: "",
   tags: [],
   title: "",
+  comments: { results: [] },
 };
 
 interface TargetBlogProps {

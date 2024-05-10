@@ -1,12 +1,12 @@
-import useHomeBlogStore from '../states/home-blog.state';
+import useHomeBlogStore from "../states/home-blog.state";
 
 import {
-  GenerateStructureType,
-  type FunctionPropsType,
-} from '../../../backend/src/utils/types.util';
+  GenerateToLoadStructureType,
+  type LoadFunctionPropsType,
+} from "../commons/types.common";
 
 interface LoadLessBtnProps {
-  data: GenerateStructureType;
+  data: GenerateToLoadStructureType;
   state?: string;
   query?: string;
   authorId?: string;
@@ -17,12 +17,12 @@ interface LoadLessBtnProps {
     authorId,
     page,
     state,
-  }: FunctionPropsType) => void;
+  }: LoadFunctionPropsType) => void;
 }
 
 const LoadLessBtn: React.FC<LoadLessBtnProps> = ({
   data,
-  state = 'loadless',
+  state = "loadless",
   query,
   authorId,
   loadLimit,

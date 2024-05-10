@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import type { BlogStructureType } from '../../../backend/src/utils/types.util';
-import { getDay } from '../commons/date.common';
+import { Link } from "react-router-dom";
+import type { BlogStructureType } from "../commons/types.common";
+import { getDay } from "../commons/date.common";
 
 interface MinimalBlogPostCardProps {
   blog: BlogStructureType;
@@ -25,7 +25,7 @@ const MinimalBlogPostCard: React.FC<MinimalBlogPostCardProps> = ({
     >
       {/* Index */}
       <h1 className="blog-index">
-        {index < 10 - 1 ? '0' + (index + 1) : index + 1}
+        {index < 10 - 1 ? "0" + (index + 1) : index + 1}
       </h1>
 
       <div>

@@ -2,11 +2,11 @@ import axios from "axios";
 
 import useHomeBlogStore from "../states/home-blog.state";
 import type {
-  FetchBlogsPropsType,
-  GenerateStructureType,
-} from "../../../backend/src/utils/types.util";
+  FetchLoadPropsType,
+  GenerateToLoadStructureType,
+} from "../commons/types.common";
 
-import { FormatData } from "../commons/generate.common";
+import { FormatDataForLoadMoreOrLess } from "../commons/generate.common";
 import useAuthorProfileStore from "../states/author-profile.state";
 
 const useUserFetch = () => {
@@ -20,14 +20,14 @@ const useUserFetch = () => {
     query,
     page = 1,
     state = "initial",
-  }: FetchBlogsPropsType) => {
+  }: FetchLoadPropsType) => {
     const requestURL = USER_SERVER_ROUTE + "/query-related-users";
 
     await axios
       .post(requestURL, { query, page })
       .then(async ({ data }) => {
         if (data.queryUsers) {
-          const formattedData = await FormatData({
+          const formattedData = await FormatDataForLoadMoreOrLess({
             prevArr: queryUsers,
             fetchData: data.queryUsers,
             page,
@@ -37,7 +37,7 @@ const useUserFetch = () => {
             state,
           });
 
-          setQueryUsers(formattedData as GenerateStructureType);
+          setQueryUsers(formattedData as GenerateToLoadStructureType);
         }
       })
       .catch((error) => {

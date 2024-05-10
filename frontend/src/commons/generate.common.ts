@@ -1,48 +1,48 @@
-import axios from 'axios';
+import axios from "axios";
 
-import type { FormatBlogDataProps } from '../../../backend/src/utils/types.util';
+import type { FormattedBlogDataProps } from "../commons/types.common";
 
 // Generate fetch data from blog and user
-export const FormatData = async ({
+export const FormatDataForLoadMoreOrLess = async ({
   prevArr,
   fetchData,
   page,
   countRoute,
-  fetchRoute = 'blog',
+  fetchRoute = "blog",
   data_to_send,
-  state = 'initial',
-}: FormatBlogDataProps) => {
+  state = "initial",
+}: FormattedBlogDataProps) => {
   let obj;
 
   const SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + `/${fetchRoute}`;
 
   // Loadmore
-  if (state === 'loadmore' && prevArr !== null) {
+  if (state === "loadmore" && prevArr !== null) {
     obj = {
       ...prevArr,
-      results: 'results' in prevArr &&
+      results: "results" in prevArr &&
         fetchData && [...prevArr.results, ...fetchData],
       page: page,
-      prevLoadNum: 'prevLoadNum' in prevArr && [
+      prevLoadNum: "prevLoadNum" in prevArr && [
         ...prevArr.prevLoadNum,
         fetchData?.length,
       ],
     };
   }
   // Loadless
-  else if (state === 'loadless' && prevArr !== null && page > 1) {
+  else if (state === "loadless" && prevArr !== null && page > 1) {
     // 每一次都取 prevArr 中 prevLoadNum 的最後一個數字，同時刪除它
     // 這樣就可以知道要減少多少筆數據
     const reduceNum =
-      ('prevLoadNum' in prevArr && prevArr.prevLoadNum.pop()) || 0;
+      ("prevLoadNum" in prevArr && prevArr.prevLoadNum.pop()) || 0;
 
     obj = {
       ...prevArr,
-      results: 'results' in prevArr && [
+      results: "results" in prevArr && [
         ...prevArr.results.slice(0, prevArr.results.length - reduceNum),
       ],
       page: page - 1,
-      prevLoadNum: 'prevLoadNum' in prevArr && prevArr.prevLoadNum,
+      prevLoadNum: "prevLoadNum" in prevArr && prevArr.prevLoadNum,
     };
   }
   // Initial

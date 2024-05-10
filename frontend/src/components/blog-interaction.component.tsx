@@ -1,20 +1,22 @@
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import toast from "react-hot-toast";
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
-import useAuthStore from "../states/user-auth.state";
-import useTargetBlogStore from "../states/target-blog.state";
-import useBlogLikedStore from "../states/blog-liked.state";
+import useAuthStore from '../states/user-auth.state';
+import useTargetBlogStore from '../states/target-blog.state';
+import useBlogLikedStore from '../states/blog-liked.state';
 
-import { FlatIcons } from "../icons/flaticons";
-import useLikedFetch from "../fetchs/liked.fetch";
+import { FlatIcons } from '../icons/flaticons';
+import useLikedFetch from '../fetchs/liked.fetch';
 
-import type { BlogStructureType } from "../../../backend/src/utils/types.util";
+import type { BlogStructureType } from '../commons/types.common';
+import useBlogCommentStore from '../states/blog-comment.state';
 
 const BlogInteraction = () => {
   const { authUser } = useAuthStore();
   const { targetBlogInfo, setTargetBlogInfo } = useTargetBlogStore();
   const { isLikedByUser, setIsLikedByUser } = useBlogLikedStore();
+  const { commentsWrapper, setCommentsWrapper } = useBlogCommentStore();
   const {
     _id,
     title,
@@ -45,20 +47,24 @@ const BlogInteraction = () => {
       });
 
       UpdateLikeStatusOfBlog({
-        blogObjectID: _id,
+        blogObjectId: _id,
         isLikedByUser: !isLikedByUser,
       });
     } else {
       // 如果還沒登入，當然就不能按讚
       // 因為之後需要用戶資料記錄是哪位用戶按讚
-      toast.error("Please login first to like this blog");
+      toast.error('Please login first to like this blog');
     }
+  };
+
+  const handleComment = () => {
+    setCommentsWrapper(!commentsWrapper);
   };
 
   // Get Like Status of Blog from beginning
   useEffect(() => {
     if (authUser?.access_token) {
-      GetLikeStatusOfBlog({ blogObjectID: _id });
+      GetLikeStatusOfBlog({ blogObjectId: _id });
     }
   }, [_id]);
 
@@ -108,11 +114,11 @@ const BlogInteraction = () => {
                         bg-red-custom/20
                         text-red-custom
                       `
-                    : "bg-grey-custom/80"
+                    : 'bg-grey-custom/80'
                 }
               `}
             >
-              <FlatIcons name={`fi fi-${isLikedByUser ? "sr" : "rr"}-heart`} />
+              <FlatIcons name={`fi fi-${isLikedByUser ? 'sr' : 'rr'}-heart`} />
             </button>
             <p>{total_likes}</p>
           </div>
@@ -126,6 +132,7 @@ const BlogInteraction = () => {
             "
           >
             <button
+              onClick={handleComment}
               className="
                 w-10
                 h-10

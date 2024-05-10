@@ -1,16 +1,16 @@
-import NoDataMessage from './blog-nodata.component';
-import Loader from './loader.component';
-import AnimationWrapper from './page-animation.component';
-import UserCard from './user-card.component';
-import LoadOptions from './load-options.components';
+import NoDataMessage from "./blog-nodata.component";
+import Loader from "./loader.component";
+import AnimationWrapper from "./page-animation.component";
+import UserCard from "./user-card.component";
+import LoadOptions from "./load-options.components";
 
-import useHomeBlogStore from '../states/home-blog.state';
+import useHomeBlogStore from "../states/home-blog.state";
 
 import type {
   AuthorStructureType,
-  GenerateStructureType,
-} from '../../../backend/src/utils/types.util';
-import useUserFetch from '../fetchs/user.fetch';
+  GenerateToLoadStructureType,
+} from "../commons/types.common";
+import useUserFetch from "../fetchs/user.fetch";
 
 interface UserCardWrapperProps {
   query: string;
@@ -24,7 +24,7 @@ const UserCardWrapper: React.FC<UserCardWrapperProps> = ({ query }) => {
     <>
       {queryUsers === null ? (
         <Loader loader={{ speed: 1, size: 50 }} />
-      ) : 'results' in queryUsers && queryUsers.results.length ? (
+      ) : "results" in queryUsers && queryUsers.results.length ? (
         <div>
           {queryUsers.results.map((user, i) => (
             <AnimationWrapper
@@ -40,7 +40,7 @@ const UserCardWrapper: React.FC<UserCardWrapperProps> = ({ query }) => {
           {/* Load Operation */}
           <LoadOptions
             id="queryUsers"
-            data={queryUsers as GenerateStructureType}
+            data={queryUsers as GenerateToLoadStructureType}
             loadLimit={loadUsersLimit}
             loadFunction={GetRelatedBlogsAuthorByQuery}
             query={query}

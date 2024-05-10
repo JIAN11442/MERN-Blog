@@ -6,18 +6,19 @@ import createHttpError from 'http-errors';
 import BlogSchema from '../schemas/blog.schema';
 import NotificationSchema from '../schemas/notification.schema';
 
+// 取得用戶對該 blog 的按贊狀態
 export const getLikeStatusByUserId: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
-    const { blogObjectID } = req.body;
+    const { blogObjectId } = req.body;
 
     // 如果沒有 blogObjectID，就回傳錯誤
-    if (!blogObjectID) {
+    if (!blogObjectId) {
       throw createHttpError('Please provide blog objectId from client');
     }
 
     // 檢查登入用戶是否曾經按贊了博客
-    const isLikedExistByUserId = await NotificationSchema.exists({ type: 'like', user: userId, blog: blogObjectID });
+    const isLikedExistByUserId = await NotificationSchema.exists({ type: 'like', user: userId, blog: blogObjectId });
 
     // 如果查詢失敗，會返回 null，所以這裏要轉換成 boolean，讓 null 變成 false
     res.status(200).json({ result: Boolean(isLikedExistByUserId) });
@@ -27,13 +28,14 @@ export const getLikeStatusByUserId: RequestHandler = async (req, res, next) => {
   }
 };
 
+// 更新用戶對該 blog 的按贊狀態
 export const updateTotalLikesByUserId: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
-    const { blogObjectID, isLikedByUser } = req.body;
+    const { blogObjectId, isLikedByUser } = req.body;
 
     // 如果沒有 blogObjectID，就回傳錯誤
-    if (!blogObjectID) {
+    if (!blogObjectId) {
       throw createHttpError('Please provide blog objectId from client');
     }
 
@@ -47,7 +49,7 @@ export const updateTotalLikesByUserId: RequestHandler = async (req, res, next) =
 
     // 更新 blog 的 total_likes
     const updateTotalLikesOfBlog = await BlogSchema.findOneAndUpdate(
-      { _id: blogObjectID },
+      { _id: blogObjectId },
       { $inc: { 'activity.total_likes': incrementVal } },
     );
 
@@ -61,7 +63,7 @@ export const updateTotalLikesByUserId: RequestHandler = async (req, res, next) =
       // 如果 isLikedByUser 是 true，就創建通知
       const newNotification = await NotificationSchema.create({
         type: 'like',
-        blog: blogObjectID,
+        blog: blogObjectId,
         notification_for: updateTotalLikesOfBlog.author,
         user: userId,
       });
@@ -75,7 +77,7 @@ export const updateTotalLikesByUserId: RequestHandler = async (req, res, next) =
       // 如果 isLikedByUser 是 false，則刪除通知
       const deleteNotification = await NotificationSchema.findOneAndDelete({
         type: 'like',
-        blog: blogObjectID,
+        blog: blogObjectId,
         user: userId,
       });
 

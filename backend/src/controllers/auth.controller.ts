@@ -14,7 +14,7 @@ import UserSchema from '../schemas/user.schema';
 
 import { ValidateForSignIn, ValidateForSignUp } from '../utils/validateController.util';
 import { genarateUsername, formatDatatoSend } from '../utils/generate.util';
-import { SignUpBody, SignInBody } from '../utils/types.util';
+import { SignUpReqBody, SignInReqBody } from '../utils/types.util';
 import ErrorsHandle from '../utils/errors.util';
 import env from '../utils/validateEnv.util';
 
@@ -82,7 +82,7 @@ export const jwtAuthentication: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const signup: RequestHandler<unknown, unknown, SignUpBody, unknown> = async (req, res, next) => {
+export const signup: RequestHandler<unknown, unknown, SignUpReqBody, unknown> = async (req, res, next) => {
   const validateResult = ValidateForSignUp(req.body);
   const { fullname, email, password } = req.body;
 
@@ -116,7 +116,7 @@ export const signup: RequestHandler<unknown, unknown, SignUpBody, unknown> = asy
   }
 };
 
-export const signin: RequestHandler<unknown, unknown, SignInBody, unknown> = async (req, res, next) => {
+export const signin: RequestHandler<unknown, unknown, SignInReqBody, unknown> = async (req, res, next) => {
   try {
     const validateResult = ValidateForSignIn(req.body);
     const { email, password } = req.body;

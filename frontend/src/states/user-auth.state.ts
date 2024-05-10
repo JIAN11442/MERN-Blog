@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { GenerateAuthDataType } from '../../../backend/src/utils/types.util';
+import { create } from "zustand";
+import { GenerateAuthDataType } from "../commons/types.common";
 
 interface AuthProps {
   authUser: GenerateAuthDataType | null;

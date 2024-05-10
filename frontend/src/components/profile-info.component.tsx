@@ -1,12 +1,14 @@
-import { Link } from 'react-router-dom';
-import { twMerge } from 'tailwind-merge';
-import type { AuthorProfileStructureType } from '../../../backend/src/utils/types.util';
-import { FlatIcons } from '../icons/flaticons';
-import { getFullDay } from '../commons/date.common';
+import { Link } from "react-router-dom";
+import { twMerge } from "tailwind-merge";
+
+import { FlatIcons } from "../icons/flaticons";
+
+import { getFullDay } from "../commons/date.common";
+import type { AuthorProfileStructureType } from "../commons/types.common";
 
 interface AuthorProfileInfoProps {
   bio: string;
-  social_links: AuthorProfileStructureType['social_links'];
+  social_links: AuthorProfileStructureType["social_links"];
   createdAt: string;
   className?: string;
 }
@@ -20,15 +22,15 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
   return (
     <div className={twMerge(`md:w-[90%]`, className)}>
       {/* Bio */}
-      <p className={`text-md leading-7 ${!bio.length && 'text-grey-dark/50'}`}>
-        {bio.length ? bio : 'Nothing to read here'}
+      <p className={`text-md leading-7 ${!bio.length && "text-grey-dark/50"}`}>
+        {bio.length ? bio : "Nothing to read here"}
       </p>
 
       {/* Social links */}
       <div
         className={`
           ${
-            Object.values(social_links).some((link) => link !== '')
+            Object.values(social_links).some((link) => link !== "")
               ? `
                   flex
                   flex-wrap
@@ -38,7 +40,7 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
                   items-center
                   text-grey-dark
                 `
-              : 'my-5'
+              : "my-5"
           }
         `}
       >
@@ -51,7 +53,7 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
               <Link key={key} to={link} target="_blank">
                 <FlatIcons
                   name={`${
-                    key !== 'website' ? `fi-brands-${key}` : 'fi-rr-globe'
+                    key !== "website" ? `fi-brands-${key}` : "fi-rr-globe"
                   }`}
                   className="text-xl hover:text-black-custom transition"
                 />

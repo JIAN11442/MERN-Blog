@@ -1,21 +1,25 @@
-import { twMerge } from 'tailwind-merge';
+import { twMerge } from "tailwind-merge";
 
-import LoadLessBtn from './load-less.component';
-import LoadMoreBtn from './load-more.component';
-import HandyToolsBtn from './handy-tool.component';
+import LoadLessBtn from "./load-less.component";
+import LoadMoreBtn from "./load-more.component";
+import HandyToolsBtn from "./handy-tool.component";
 
 import {
-  GenerateStructureType,
-  type FunctionPropsType,
-} from '../../../backend/src/utils/types.util';
+  GenerateToLoadStructureType,
+  type LoadFunctionPropsType,
+} from "../commons/types.common";
 
 interface LoadOptionsProps {
   id: string;
-  data: GenerateStructureType;
+  data: GenerateToLoadStructureType;
   loadLimit: number;
   query?: string;
   authorId?: string;
-  loadFunction: ({ page, state, authorId }: FunctionPropsType) => Promise<void>;
+  loadFunction: ({
+    page,
+    state,
+    authorId,
+  }: LoadFunctionPropsType) => Promise<void>;
   className?: string;
 }
 

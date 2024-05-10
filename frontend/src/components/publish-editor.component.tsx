@@ -1,18 +1,25 @@
 import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
 
 import Tag from "./tag.component";
 import AnimationWrapper from "./page-animation.component";
 
 import useEditorBlogStore from "../states/editor-blog.state";
+
 import { FlatIcons } from "../icons/flaticons";
+
 import useBlogFetch from "../fetchs/blog.fetch";
-import { useParams } from "react-router-dom";
 
 const PublishEditor = () => {
   const { blogId: paramsBlogId } = useParams();
   const { PublishCompleteBlog } = useBlogFetch();
-  const { blog, characterLimit, tagsLimit, setBlog, setEditorState } =
-    useEditorBlogStore();
+  const {
+    editorBlog,
+    characterLimit,
+    tagsLimit,
+    setEditorBlog,
+    setEditorState,
+  } = useEditorBlogStore();
 
   const handleCloseEvent = () => {
     setEditorState("editor");
@@ -20,12 +27,12 @@ const PublishEditor = () => {
   const handleBlogTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
 
-    setBlog({ ...blog, title: input.value });
+    setEditorBlog({ ...editorBlog, title: input.value });
   };
   const handleBlogDesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const input = e.target;
 
-    setBlog({ ...blog, des: input.value });
+    setEditorBlog({ ...editorBlog, des: input.value });
   };
   const handleDesKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
@@ -38,10 +45,10 @@ const PublishEditor = () => {
 
       const tag = (e.target as HTMLInputElement).value;
 
-      if (blog.tags && blog.tags.length < tagsLimit) {
+      if (editorBlog.tags && editorBlog.tags.length < tagsLimit) {
         if (tag.length) {
-          if (!blog.tags.includes(tag)) {
-            setBlog({ ...blog, tags: [...blog.tags, tag] });
+          if (!editorBlog.tags.includes(tag)) {
+            setEditorBlog({ ...editorBlog, tags: [...editorBlog.tags, tag] });
           } else {
             toast.error("Tag already exists.");
           }
@@ -109,7 +116,7 @@ const PublishEditor = () => {
               mt-4
             "
           >
-            <img src={blog.banner} />
+            <img src={editorBlog.banner} />
           </div>
 
           {/* Preview title */}
@@ -123,7 +130,7 @@ const PublishEditor = () => {
               line-clamp-2
             "
           >
-            {blog.title}
+            {editorBlog.title}
           </h1>
 
           {/* Preview description */}
@@ -136,7 +143,7 @@ const PublishEditor = () => {
               mt-4
             "
           >
-            {blog.des}
+            {editorBlog.des}
           </p>
         </div>
 
@@ -154,7 +161,7 @@ const PublishEditor = () => {
             <input
               type="text"
               placeholder="Blog Title"
-              defaultValue={blog.title}
+              defaultValue={editorBlog.title}
               onChange={(e) => handleBlogTitleChange(e)}
               className="input-box pl-4"
             />
@@ -167,7 +174,7 @@ const PublishEditor = () => {
             </p>
             <textarea
               maxLength={characterLimit}
-              defaultValue={blog.des}
+              defaultValue={editorBlog.des}
               onChange={(e) => handleBlogDesChange(e)}
               onKeyDown={(e) => handleDesKeyDown(e)}
               className="
@@ -181,7 +188,7 @@ const PublishEditor = () => {
 
             {/* Description character limit */}
             <p className="mt-1 text-grey-dark text-sm text-right">
-              {characterLimit - (blog.des?.length ?? 0)} characters left
+              {characterLimit - (editorBlog.des?.length ?? 0)} characters left
             </p>
           </div>
 
@@ -214,14 +221,14 @@ const PublishEditor = () => {
                   mb-3
                 "
               />
-              {blog.tags?.map((tag, index) => {
+              {editorBlog.tags?.map((tag, index) => {
                 return <Tag key={index} tag={tag} index={index} />;
               })}
             </div>
 
             {/* Tags Limit */}
             <p className="mt-1 mb-4 text-grey-dark text-sm text-right">
-              {tagsLimit - (blog.tags?.length ?? 0)} Tags left
+              {tagsLimit - (editorBlog.tags?.length ?? 0)} Tags left
             </p>
           </div>
 
