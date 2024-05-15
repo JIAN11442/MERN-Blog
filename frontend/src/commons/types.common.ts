@@ -1,4 +1,4 @@
-import { OutputData } from "@editorjs/editorjs";
+import { OutputData } from '@editorjs/editorjs';
 
 export interface GenerateAuthDataType {
   access_token: string;
@@ -37,7 +37,7 @@ export interface BlogStructureType {
   tags?: string[];
   author?: { _id?: string; personal_info: PersonalInfoStructureType };
   activity?: ActivityStructureType;
-  comments?: { results: string[] };
+  comments?: { results: GenerateCommentStructureType[] };
   draft?: boolean;
   publishedAt?: string;
 }
@@ -128,6 +128,8 @@ export interface CommentStructureType {
 
 export interface GenerateCommentStructureType extends CommentStructureType {
   childrenLevel: number;
+  commentedAt?: string;
+  updatedAt?: string;
 }
 
 export interface FetchCommentPropsType {

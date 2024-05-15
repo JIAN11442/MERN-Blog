@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface BlogCommentProps {
   commentsWrapper: boolean;
@@ -14,7 +14,8 @@ interface BlogCommentProps {
 const useBlogCommentStore = create<BlogCommentProps>((set) => ({
   commentsWrapper: false,
   totalParentCommentsLoaded: 0,
-  comment: '',
+  comment: "",
+  comments: [],
 
   setCommentsWrapper: (state) => set({ commentsWrapper: state }),
   setTotalParentCommentsLoaded: (state) =>

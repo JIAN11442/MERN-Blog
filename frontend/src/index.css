@@ -227,9 +227,17 @@
 }
 
 /* 定义滚动条的宽度 */
-/* .ce-code__textarea::-webkit-scrollbar {
+
+.cstm-scrollbar-hidden::-webkit-scrollbar {
   @apply w-0 h-0;
-} */
+}
+
+.cstm-scrollbar::-webkit-scrollbar {
+  @apply w-1 h-2;
+}
+.cstm-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-grey-dark/20 rounded-full;
+}
 
 /* ------------ 關於 @bomdi/codebox -------------- */
 

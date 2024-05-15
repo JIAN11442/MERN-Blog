@@ -28,7 +28,7 @@ export const getCommentsByBlogId: RequestHandler = async (req, res, next) => {
       .populate('commented_by', 'personal_info.username personal_info.fullname personal_info.profile_img')
       .skip(skip)
       .limit(commentMaxLimit)
-      .sort({ commentedAt: -1 });
+      .sort({ commentedAt: 1 });
 
     if (!comments) {
       throw createHttpError(404, 'No comments found in this blog');
