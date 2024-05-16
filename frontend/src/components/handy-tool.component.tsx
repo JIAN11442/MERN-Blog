@@ -29,7 +29,7 @@ const HandyToolBtn: React.FC<HandyToolBtnProps> = ({
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   };
 
-  if (!scrollbarVisible) return;
+  if (!scrollbarVisible.visible) return;
 
   // Back to top button with text
   if (name === names[0] && type === types[0]) {

@@ -1,38 +1,101 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from 'react';
 
-import BlogCommentField from "./blog-comment-field.component";
-import NoDataMessage from "./blog-nodata.component";
-import AnimationWrapper from "./page-animation.component";
-import BlogCommentCard from "./blog-comment-card.component";
+import BlogCommentField from './blog-comment-field.component';
+import NoDataMessage from './blog-nodata.component';
+import AnimationWrapper from './page-animation.component';
+import BlogCommentCard from './blog-comment-card.component';
 
-import useTargetBlogStore from "../states/target-blog.state";
-import useBlogCommentStore from "../states/blog-comment.state";
+import useTargetBlogStore from '../states/target-blog.state';
+import useBlogCommentStore from '../states/blog-comment.state';
 
-import { FlatIcons } from "../icons/flaticons";
+import { FlatIcons } from '../icons/flaticons';
 
-import type { BlogStructureType } from "../commons/types.common";
+import type { BlogStructureType } from '../commons/types.common';
+import useCommentFetch from '../fetchs/comment.fetch';
 
 const BlogCommentContainer = () => {
-  const { commentsWrapper, setCommentsWrapper } = useBlogCommentStore();
-  const { targetBlogInfo } = useTargetBlogStore();
+  const commentContainerRef = useRef<HTMLDivElement | null>(null);
+  const commentsDivRef = useRef<HTMLDivElement>(null);
+
+  const { targetBlogInfo, setTargetBlogInfo } = useTargetBlogStore();
+  const {
+    commentsWrapper,
+    isCommented,
+    totalParentCommentsLoaded,
+    modalRefStore,
+    setCommentsWrapper,
+    setTotalParentCommentsLoaded,
+  } = useBlogCommentStore();
 
   const {
     title,
+    activity: { total_parent_comments },
     comments: { results: commentArr },
   } = targetBlogInfo as Required<BlogStructureType>;
 
+  const { GetAndGenerateCommentsData } = useCommentFetch();
+
+  // 關閉留言區塊
   const handleCloseCommentContainer = () => {
     setCommentsWrapper(false);
   };
 
+  // 載入更多留言
+  const handleLoadmoreComments = async () => {
+    // 取得新的留言(skip 掉原本就 load 的 comments 數量)
+    const newCommentArr = await GetAndGenerateCommentsData({
+      skip: totalParentCommentsLoaded,
+      blogObjectId: targetBlogInfo?._id,
+      commentArray: commentArr,
+    });
+
+    setTargetBlogInfo({
+      ...targetBlogInfo,
+      comments: newCommentArr,
+    });
+
+    setTotalParentCommentsLoaded(newCommentArr.results.length);
+  };
+
+  // 當留言時，自動捲動到最底部(最新留言處)
   useEffect(() => {
-    if (commentArr) {
-      console.log(commentArr);
+    if (commentsDivRef.current && isCommented) {
+      commentsDivRef.current.scrollTop = commentsDivRef.current.scrollHeight;
     }
-  }, [commentArr]);
+  }, [commentArr, isCommented]);
+
+  // 當點擊畫面其他地方時，關閉留言視窗
+  useEffect(() => {
+    if (commentsWrapper) {
+      const containerRef = commentContainerRef.current;
+      const modalRef = modalRefStore.current;
+
+      const handleOnBlur = (e: MouseEvent) => {
+        // 當 [警告視窗] 不存在，即 modelRef 為 null，
+        // 且點擊的地方不是在 [留言視窗] 內，就關閉 [留言視窗]
+        if (
+          !modalRef &&
+          containerRef &&
+          !containerRef.contains(e.target as Node)
+        ) {
+          setCommentsWrapper(false);
+        }
+      };
+
+      const timeoutId = setTimeout(() => {
+        document.addEventListener('click', handleOnBlur);
+      }, 0);
+
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener('click', handleOnBlur);
+      };
+    }
+  }, [commentsWrapper, commentContainerRef, modalRefStore]);
 
   return (
     <div
+      ref={commentContainerRef}
       className={`
         fixed
         w-[40%]
@@ -44,7 +107,7 @@ const BlogCommentContainer = () => {
         h-full
         bg-white-custom
         shadow-2xl
-        z-50
+        z-30
         duration-700
         overflow-hidden
         ${
@@ -115,21 +178,22 @@ const BlogCommentContainer = () => {
       {/* Comment */}
       {commentArr.length ? (
         <div
-          className="
+          ref={commentsDivRef}
+          className={`
             max-h-[75%]
             pl-8
             mr-8
             pr-4
             overflow-y-auto
             cstm-scrollbar
-          "
+          `}
         >
           {commentArr.map((data, i) => (
             <AnimationWrapper
               key={i}
               initial={{ opacity: 0 }}
               animate={{ opacity: commentsWrapper ? 1 : 0 }}
-              transition={{ duration: 0.5, delay: 0.1 * i }}
+              transition={{ duration: 0.5 }}
             >
               <BlogCommentCard
                 index={i}
@@ -139,11 +203,30 @@ const BlogCommentContainer = () => {
             </AnimationWrapper>
           ))}
 
+          {/* Load more button */}
+          {totalParentCommentsLoaded < (total_parent_comments ?? 0) && (
+            <button
+              onClick={handleLoadmoreComments}
+              className="
+                flex
+                my-3
+                center
+                text-grey-dark/40
+                hover:text-grey-dark/50
+                transition
+              "
+            >
+              Load more
+            </button>
+          )}
+
           {/* Separate Line */}
           <hr className="mt-8 border-grey-custom" />
         </div>
       ) : (
-        <NoDataMessage message="No comments" />
+        <div className="px-8">
+          <NoDataMessage message="No comments" />
+        </div>
       )}
 
       {/* Comment Field */}

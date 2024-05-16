@@ -102,3 +102,54 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteCommentById: RequestHandler = async (req, res, next) => {
+  try {
+    const { commentObjectId, blogObjectId } = req.body;
+
+    if (!commentObjectId) {
+      throw createHttpError(400, 'Please provide comment id from client');
+    }
+
+    if (!blogObjectId) {
+      throw createHttpError(400, 'Please provide blog id from client');
+    }
+
+    const commentExistInBlog = await BlogSchema.findOne({ _id: blogObjectId, comments: commentObjectId });
+
+    if (!commentExistInBlog) {
+      throw createHttpError(404, 'Comment not found in this blog');
+    }
+
+    const deleteComment = await CommentSchema.findByIdAndDelete(commentObjectId);
+
+    if (!deleteComment) {
+      throw createHttpError(500, 'Failed to delete comment');
+    }
+
+    const deleteNotification = await NotificationSchema.findOneAndDelete({ type: 'comment', comment: commentObjectId });
+
+    if (!deleteNotification) {
+      throw createHttpError(500, 'Failed to delete comment notification');
+    }
+
+    const descrementVal = -1;
+
+    const updateBlogInfo = await BlogSchema.findOneAndUpdate(
+      { _id: blogObjectId },
+      {
+        $inc: { 'activity.total_comments': descrementVal, 'activity.total_parent_comments': descrementVal },
+        $pull: { comments: commentObjectId },
+      },
+    );
+
+    if (!updateBlogInfo) {
+      throw createHttpError(500, 'Failed to update blog comments info and activity info');
+    }
+
+    res.status(200).json({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};

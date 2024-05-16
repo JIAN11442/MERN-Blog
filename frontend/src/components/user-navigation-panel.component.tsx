@@ -1,18 +1,18 @@
-import { Link } from "react-router-dom";
-import toast from "react-hot-toast";
+import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
-import { FlatIcons } from "../icons/flaticons";
-import useAuthStore from "../states/user-auth.state";
-import AnimationWrapper from "./page-animation.component";
+import { FlatIcons } from '../icons/flaticons';
+import useAuthStore from '../states/user-auth.state';
+import AnimationWrapper from './page-animation.component';
 
 const UserNavigationPanel = () => {
   const { authUser, setAuthUser } = useAuthStore();
 
   // Sign out function
   const handleSignOut = () => {
-    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem('access_token');
     setAuthUser(null);
-    toast.success("Signed out successfully!");
+    toast.success('Signed out successfully!');
   };
 
   return (
@@ -23,7 +23,7 @@ const UserNavigationPanel = () => {
       className="
         absolute
         right-0
-        z-50
+        z-20
         shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
         shadow-grey-dark/15
         rounded-md

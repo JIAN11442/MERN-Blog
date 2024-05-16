@@ -127,6 +127,7 @@ export interface CommentStructureType {
 }
 
 export interface GenerateCommentStructureType extends CommentStructureType {
+  _id?: string;
   childrenLevel: number;
   commentedAt?: string;
   updatedAt?: string;
@@ -134,8 +135,9 @@ export interface GenerateCommentStructureType extends CommentStructureType {
 
 export interface FetchCommentPropsType {
   blogObjectId?: string;
+  commentObjectId?: string;
   skip?: number;
-  commentArray?: string[] | null;
+  commentArray?: GenerateCommentStructureType[] | null;
   comment?: string;
   blog_author?: string;
 }

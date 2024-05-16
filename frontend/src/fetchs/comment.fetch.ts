@@ -1,14 +1,14 @@
-import axios from "axios";
-import toast from "react-hot-toast";
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
-import useAuthStore from "../states/user-auth.state";
-import useBlogCommentStore from "../states/blog-comment.state";
-import useTargetBlogStore from "../states/target-blog.state";
+import useAuthStore from '../states/user-auth.state';
+import useBlogCommentStore from '../states/blog-comment.state';
+import useTargetBlogStore from '../states/target-blog.state';
 
 import {
   GenerateCommentStructureType,
   FetchCommentPropsType,
-} from "../commons/types.common";
+} from '../commons/types.common';
 
 const useCommentFetch = () => {
   const { authUser } = useAuthStore();
@@ -18,24 +18,21 @@ const useCommentFetch = () => {
   const { comments, activity } = targetBlogInfo ?? {};
   const { total_comments, total_parent_comments } = activity ?? {};
 
-  const {
-    setTotalParentCommentsLoaded,
-    setComment,
-    totalParentCommentsLoaded,
-  } = useBlogCommentStore();
+  const { setTotalParentCommentsLoaded, totalParentCommentsLoaded } =
+    useBlogCommentStore();
 
   axios.defaults.headers.common[
-    "Authorization"
+    'Authorization'
   ] = `Bearer ${authUser?.access_token}`;
 
-  const COMMENT_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/comment";
+  const COMMENT_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + '/comment';
 
   // 取得目標 blog 的所有未回復留言
   const GetCommentsByBlogId = async ({
     blogObjectId,
     skip,
   }: FetchCommentPropsType) => {
-    const requestURL = COMMENT_SERVER_ROUTE + "/get-blog-comments";
+    const requestURL = COMMENT_SERVER_ROUTE + '/get-blog-comments';
 
     return await axios
       .post(requestURL, { blogObjectId, skip })
@@ -79,7 +76,7 @@ const useCommentFetch = () => {
     comment,
     blog_author,
   }: FetchCommentPropsType) => {
-    const requestURL = COMMENT_SERVER_ROUTE + "/create-new-comment";
+    const requestURL = COMMENT_SERVER_ROUTE + '/create-new-comment';
 
     await axios
       .post(requestURL, { blogObjectId, comment, blog_author })
@@ -94,9 +91,11 @@ const useCommentFetch = () => {
             personal_info: { username, fullname, profile_img },
           };
 
+          data.blog_id = blogObjectId;
+
           // 將創建的新留言資料加入到目標 blog 的 comments 資料中
           const newCommentArr =
-            comments && "results" in comments
+            comments && 'results' in comments
               ? [...comments.results, data]
               : [data];
 
@@ -126,9 +125,6 @@ const useCommentFetch = () => {
           setTotalParentCommentsLoaded(
             totalParentCommentsLoaded + parentCommentIncrementVal
           );
-
-          // 清空留言輸入框
-          setComment("");
         }
       })
       .catch((error) => {
@@ -138,16 +134,56 @@ const useCommentFetch = () => {
         } else if (error.request) {
           // 請求發出但沒有收到回應
           console.log(error.request);
-          toast.error("Request made but no response received");
+          toast.error('Request made but no response received');
         } else {
           // 在設定請求時出現錯誤
           console.log(error.message);
-          toast.error("Request setup error: ", error.message);
+          toast.error('Request setup error: ', error.message);
         }
       });
   };
 
-  return { GetCommentsByBlogId, GetAndGenerateCommentsData, AddCommentToBlog };
+  // 刪除目標留言
+  const DeleteTargetComment = async ({
+    commentObjectId,
+    blogObjectId,
+  }: FetchCommentPropsType) => {
+    const requestURL = COMMENT_SERVER_ROUTE + '/delete-target-comment';
+
+    await axios
+      .post(requestURL, { commentObjectId, blogObjectId })
+      .then(({ data }) => {
+        if (data) {
+          // 更新本地 zustand 管理的目標 blog 的 comments 資料和 activity 資料
+          setTargetBlogInfo({
+            ...targetBlogInfo,
+            comments: {
+              ...comments,
+              results:
+                comments?.results.filter(
+                  (comment: GenerateCommentStructureType) =>
+                    comment._id !== commentObjectId
+                ) ?? [],
+            },
+            activity: {
+              ...activity,
+              total_comments: (activity?.total_comments ?? 0) - 1,
+              total_parent_comments: (activity?.total_parent_comments ?? 0) - 1,
+            },
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  return {
+    GetCommentsByBlogId,
+    GetAndGenerateCommentsData,
+    AddCommentToBlog,
+    DeleteTargetComment,
+  };
 };
 
 export default useCommentFetch;

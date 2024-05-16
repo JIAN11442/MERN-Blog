@@ -1,27 +1,45 @@
-import { create } from "zustand";
+import { create } from 'zustand';
+import type { GenerateCommentStructureType } from '../commons/types.common';
 
 interface BlogCommentProps {
   commentsWrapper: boolean;
   totalParentCommentsLoaded: number;
   comment: string;
+  isCommented: boolean;
+  deletedComment: {
+    state: boolean;
+    comment: GenerateCommentStructureType | null;
+  };
+  modalRefStore: React.RefObject<HTMLDivElement>;
 
   setCommentsWrapper: (state: boolean) => void;
   setTotalParentCommentsLoaded: (state: number) => void;
   initialCommentState: () => void;
   setComment: (text: string) => void;
+  setIsCommented: (state: boolean) => void;
+  setDeletedComment: (status: {
+    state: boolean;
+    comment: GenerateCommentStructureType | null;
+  }) => void;
+  setModalRefStore: (ref: React.RefObject<HTMLDivElement>) => void;
 }
 
 const useBlogCommentStore = create<BlogCommentProps>((set) => ({
   commentsWrapper: false,
   totalParentCommentsLoaded: 0,
-  comment: "",
-  comments: [],
+  isCommented: false,
+  comment: '',
+  deletedComment: { state: false, comment: null },
+  modalRefStore: { current: null },
 
   setCommentsWrapper: (state) => set({ commentsWrapper: state }),
   setTotalParentCommentsLoaded: (state) =>
     set({ totalParentCommentsLoaded: state }),
   initialCommentState: () => set({ commentsWrapper: false }),
-  setComment: (text: string) => set({ comment: text }),
+  setComment: (text) => set({ comment: text }),
+  setIsCommented: (state) => set({ isCommented: state }),
+  setDeletedComment: (status) => set({ deletedComment: status }),
+  setModalRefStore: (ref) => set({ modalRefStore: ref }),
 }));
 
 export default useBlogCommentStore;

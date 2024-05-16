@@ -1,32 +1,34 @@
-import { useEffect, useRef } from "react";
-import { Link, useParams } from "react-router-dom";
-import type { OutputData } from "@editorjs/editorjs";
+import { useEffect, useRef } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import type { OutputData } from '@editorjs/editorjs';
 
-import Loader from "../components/loader.component";
-import BlogInteraction from "../components/blog-interaction.component";
-import BlogPostCard from "../components/blog-card-banner.component";
-import BlogContent from "../components/blog-content.component";
-import HandyToolBtn from "../components/handy-tool.component";
-import AnimationWrapper from "../components/page-animation.component";
-import BlogCommentContainer from "../components/blog-comment-container.component";
+import Loader from '../components/loader.component';
+import BlogInteraction from '../components/blog-interaction.component';
+import BlogPostCard from '../components/blog-card-banner.component';
+import BlogContent from '../components/blog-content.component';
+import HandyToolBtn from '../components/handy-tool.component';
+import AnimationWrapper from '../components/page-animation.component';
+import BlogCommentContainer from '../components/blog-comment-container.component';
+import DeleteWarning from '../dev/delete-warning.component';
 
-import useTargetBlogStore from "../states/target-blog.state";
-import useCollapseStore from "../states/collapse.state";
-import useHomeBlogStore from "../states/home-blog.state";
-import useBlogCommentStore from "../states/blog-comment.state";
+import useTargetBlogStore from '../states/target-blog.state';
+import useCollapseStore from '../states/collapse.state';
+import useHomeBlogStore from '../states/home-blog.state';
+import useBlogCommentStore from '../states/blog-comment.state';
 
-import useBlogFetch from "../fetchs/blog.fetch";
+import useBlogFetch from '../fetchs/blog.fetch';
 
-import { getDay } from "../commons/date.common";
-import type { BlogStructureType } from "../commons/types.common";
+import { getDay } from '../commons/date.common';
+import type { BlogStructureType } from '../commons/types.common';
 
 const BlogPage = () => {
   const { blogId } = useParams();
   const { searchBarVisibility } = useCollapseStore();
+  const { scrollbarVisible } = useHomeBlogStore();
+  const { commentsWrapper, deletedComment, initialCommentState } =
+    useBlogCommentStore();
   const { targetBlogInfo, similarBlogsInfo, initialBlogInfo } =
     useTargetBlogStore();
-  const { scrollbarVisible } = useHomeBlogStore();
-  const { commentsWrapper, initialCommentState } = useBlogCommentStore();
 
   // 因為原本的 BlogStructureType 是可選的，
   // 所以如果要在這裡呼叫所有屬性，typescript 會報錯，因為有可能為 undefined
@@ -76,10 +78,14 @@ const BlogPage = () => {
       {!publishedAt ? (
         <Loader
           loader={{ speed: 1, size: 50 }}
-          className={{ container: "mt-5" }}
+          className={{ container: 'mt-5' }}
         />
       ) : (
         <>
+          {/* DEV - Delete Comment Warning */}
+          {deletedComment.state && deletedComment.comment && (
+            <DeleteWarning data={deletedComment.comment} />
+          )}
           <BlogCommentContainer />
 
           <div
@@ -89,7 +95,7 @@ const BlogPage = () => {
               py-10
               max-lg:px-[5vw]
               ${
-                searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""
+                searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''
               }
             `}
           >
@@ -120,7 +126,9 @@ const BlogPage = () => {
                   "
                 >
                   {/* profile image */}
-                  <img src={profile_img} className="w-12 h-12 rounded-full" />
+                  <Link to={`/user/${author_username}`}>
+                    <img src={profile_img} className="w-12 h-12 rounded-full" />
+                  </Link>
 
                   {/* fullname && username */}
                   <p className="capitalize">
@@ -176,7 +184,7 @@ const BlogPage = () => {
                         );
                       }
                     )
-                  : ""}
+                  : ''}
               </div>
 
               {/* Blog interaction - bottom */}
@@ -237,7 +245,7 @@ const BlogPage = () => {
                   </div>
                 </div>
               ) : (
-                ""
+                ''
               )}
             </div>
 
@@ -247,7 +255,7 @@ const BlogPage = () => {
                 name="BackToTopAndBottom"
                 type="IconBtn"
                 iconBtnContainer={{
-                  position: `${commentsWrapper ? "left" : ""}`,
+                  position: `${commentsWrapper ? 'left' : ''}`,
                 }}
               />
             )}
