@@ -6,7 +6,6 @@ import { FlatIcons } from '../icons/flaticons';
 import BlogCommentCard from '../components/blog-comment-card.component';
 
 import useBlogCommentStore from '../states/blog-comment.state';
-import useAuthStore from '../states/user-auth.state';
 
 import useCommentFetch from '../fetchs/comment.fetch';
 import type { GenerateCommentStructureType } from '../commons/types.common';
@@ -22,7 +21,6 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
 
   const modalRef = useRef<HTMLDivElement | null>(null);
 
-  const { authUser } = useAuthStore();
   const { deletedComment, setDeletedComment, setModalRefStore } =
     useBlogCommentStore();
   const { DeleteTargetComment } = useCommentFetch();
@@ -34,10 +32,6 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
 
   // 刪除留言，再關閉刪除警告視窗
   const handleDelete = () => {
-    if (!authUser?.access_token) {
-      return toast.error('You need to login to delete a comment');
-    }
-
     DeleteTargetComment({ commentObjectId: _id, blogObjectId: blog_id });
 
     setDeletedComment({ ...deletedComment, state: false });
@@ -87,7 +81,6 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
 
   return (
     <div
-      onBlur={() => console.log('blur')}
       className="
         fixed
         inset-0

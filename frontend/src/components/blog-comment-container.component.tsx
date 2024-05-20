@@ -18,6 +18,13 @@ const BlogCommentContainer = () => {
   const commentsDivRef = useRef<HTMLDivElement>(null);
 
   const { targetBlogInfo, setTargetBlogInfo } = useTargetBlogStore();
+
+  const {
+    title,
+    activity: { total_parent_comments },
+    comments: { results: commentsArr },
+  } = targetBlogInfo as Required<BlogStructureType>;
+
   const {
     commentsWrapper,
     isCommented,
@@ -26,12 +33,6 @@ const BlogCommentContainer = () => {
     setCommentsWrapper,
     setTotalParentCommentsLoaded,
   } = useBlogCommentStore();
-
-  const {
-    title,
-    activity: { total_parent_comments },
-    comments: { results: commentArr },
-  } = targetBlogInfo as Required<BlogStructureType>;
 
   const { GetAndGenerateCommentsData } = useCommentFetch();
 
@@ -43,18 +44,18 @@ const BlogCommentContainer = () => {
   // 載入更多留言
   const handleLoadmoreComments = async () => {
     // 取得新的留言(skip 掉原本就 load 的 comments 數量)
-    const newCommentArr = await GetAndGenerateCommentsData({
+    const newCommentsArr = await GetAndGenerateCommentsData({
       skip: totalParentCommentsLoaded,
       blogObjectId: targetBlogInfo?._id,
-      commentArray: commentArr,
+      commentsArray: commentsArr,
     });
 
     setTargetBlogInfo({
       ...targetBlogInfo,
-      comments: newCommentArr,
+      comments: newCommentsArr,
     });
 
-    setTotalParentCommentsLoaded(newCommentArr.results.length);
+    setTotalParentCommentsLoaded(newCommentsArr.results.length);
   };
 
   // 當留言時，自動捲動到最底部(最新留言處)
@@ -62,7 +63,7 @@ const BlogCommentContainer = () => {
     if (commentsDivRef.current && isCommented) {
       commentsDivRef.current.scrollTop = commentsDivRef.current.scrollHeight;
     }
-  }, [commentArr, isCommented]);
+  }, [commentsArr, isCommented]);
 
   // 當點擊畫面其他地方時，關閉留言視窗
   useEffect(() => {
@@ -176,7 +177,7 @@ const BlogCommentContainer = () => {
       </div>
 
       {/* Comment */}
-      {commentArr.length ? (
+      {commentsArr.length ? (
         <div
           ref={commentsDivRef}
           className={`
@@ -188,7 +189,7 @@ const BlogCommentContainer = () => {
             cstm-scrollbar
           `}
         >
-          {commentArr.map((data, i) => (
+          {commentsArr.map((comment, i) => (
             <AnimationWrapper
               key={i}
               initial={{ opacity: 0 }}
@@ -197,8 +198,8 @@ const BlogCommentContainer = () => {
             >
               <BlogCommentCard
                 index={i}
-                commentData={data}
-                leftVal={data.childrenLevel * 4}
+                commentData={comment}
+                leftVal={comment.childrenLevel * 4}
               />
             </AnimationWrapper>
           ))}
@@ -225,7 +226,7 @@ const BlogCommentContainer = () => {
         </div>
       ) : (
         <div className="px-8">
-          <NoDataMessage message="No comments" />
+          <NoDataMessage message="No comments yet" />
         </div>
       )}
 

@@ -14,7 +14,6 @@ interface BlogCommentProps {
 
   setCommentsWrapper: (state: boolean) => void;
   setTotalParentCommentsLoaded: (state: number) => void;
-  initialCommentState: () => void;
   setComment: (text: string) => void;
   setIsCommented: (state: boolean) => void;
   setDeletedComment: (status: {
@@ -22,6 +21,7 @@ interface BlogCommentProps {
     comment: GenerateCommentStructureType | null;
   }) => void;
   setModalRefStore: (ref: React.RefObject<HTMLDivElement>) => void;
+  initialCommentState: () => void;
 }
 
 const useBlogCommentStore = create<BlogCommentProps>((set) => ({
@@ -35,11 +35,11 @@ const useBlogCommentStore = create<BlogCommentProps>((set) => ({
   setCommentsWrapper: (state) => set({ commentsWrapper: state }),
   setTotalParentCommentsLoaded: (state) =>
     set({ totalParentCommentsLoaded: state }),
-  initialCommentState: () => set({ commentsWrapper: false }),
   setComment: (text) => set({ comment: text }),
   setIsCommented: (state) => set({ isCommented: state }),
   setDeletedComment: (status) => set({ deletedComment: status }),
   setModalRefStore: (ref) => set({ modalRefStore: ref }),
+  initialCommentState: () => set({ commentsWrapper: false }),
 }));
 
 export default useBlogCommentStore;

@@ -48,7 +48,7 @@ const useCommentFetch = () => {
   const GetAndGenerateCommentsData = async ({
     skip = 0,
     blogObjectId,
-    commentArray = null,
+    commentsArray = null,
   }: FetchCommentPropsType) => {
     let res;
 
@@ -60,10 +60,10 @@ const useCommentFetch = () => {
 
       setTotalParentCommentsLoaded(totalParentCommentsLoaded + comments.length);
 
-      if (commentArray === null) {
+      if (commentsArray === null) {
         res = { results: comments };
       } else {
-        res = { results: [...commentArray, ...comments] };
+        res = { results: [...commentsArray, ...comments] };
       }
 
       return res;
@@ -75,32 +75,58 @@ const useCommentFetch = () => {
     blogObjectId,
     comment,
     blog_author,
+    replying_to,
+    index,
+    replyState,
   }: FetchCommentPropsType) => {
     const requestURL = COMMENT_SERVER_ROUTE + '/create-new-comment';
 
     await axios
-      .post(requestURL, { blogObjectId, comment, blog_author })
+      .post(requestURL, { blogObjectId, comment, blog_author, replying_to })
       .then(({ data }) => {
         if (data) {
-          // 將創建的新留言資料也重構成符合一開始讀取 comments 時重構的樣子
-          // 比如賦予 childrenLevel 屬性，並將其設為 0
-          data.childrenLevel = 0;
+          let newCommentsArr = [];
 
-          // 再比如賦予 commented_by 屬性，並將其設為當前登入用戶的相關資訊
+          // 讀取目標 blog 時重構的 comments 資料
+          const commentsArr =
+            comments && 'results' in comments ? comments.results : [];
+
+          // 將創建的新留言資料也重構成符合一開始讀取 comments 時重構的樣子
+          // 比如賦予 commented_by 屬性，並將其設為當前登入用戶的相關資訊
           data.commented_by = {
             personal_info: { username, fullname, profile_img },
           };
 
           data.blog_id = blogObjectId;
 
-          // 將創建的新留言資料加入到目標 blog 的 comments 資料中
-          const newCommentArr =
-            comments && 'results' in comments
-              ? [...comments.results, data]
-              : [data];
+          // 如果是回覆留言
+          if (replying_to && index !== undefined) {
+            commentsArr[index].children?.push(data._id);
+
+            data.childrenLevel = commentsArr[index].childrenLevel + 1;
+            data.parentIndex = index;
+
+            commentsArr[index].isReplyLoaded = true;
+
+            commentsArr.splice(index + 1, 0, data);
+
+            console.log(commentsArr);
+
+            newCommentsArr = commentsArr;
+
+            replyState?.setIsReplying(false);
+          }
+          // 如果是頭留言
+          else {
+            // 賦予 childrenLevel 屬性，並將其設為 0
+            data.childrenLevel = 0;
+
+            // 將創建的新留言資料加入到目標 blog 的 comments 資料中
+            newCommentsArr = commentsArr ? [...commentsArr, data] : [data];
+          }
 
           // 要累加的創建頭留言數
-          const parentCommentIncrementVal = 1;
+          const parentCommentIncrementVal = replying_to ? 0 : 1;
 
           // 更新目標 blog 的 comments 資料和 activity 資料
           // 記得 (total_comments ?? 0) + 1 一定要括弧，不然就沒意義了
@@ -111,7 +137,7 @@ const useCommentFetch = () => {
           // 結果會返回原本的 total_comments，這樣就沒意義了
           setTargetBlogInfo({
             ...targetBlogInfo,
-            comments: { ...comments, results: newCommentArr },
+            comments: { ...comments, results: newCommentsArr },
             activity: {
               ...activity,
               total_comments: (total_comments ?? 0) + 1,

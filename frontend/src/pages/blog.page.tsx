@@ -25,8 +25,13 @@ const BlogPage = () => {
   const { blogId } = useParams();
   const { searchBarVisibility } = useCollapseStore();
   const { scrollbarVisible } = useHomeBlogStore();
-  const { commentsWrapper, deletedComment, initialCommentState } =
-    useBlogCommentStore();
+  const {
+    commentsWrapper,
+    deletedComment,
+    totalParentCommentsLoaded,
+    initialCommentState,
+    setTotalParentCommentsLoaded,
+  } = useBlogCommentStore();
   const { targetBlogInfo, similarBlogsInfo, initialBlogInfo } =
     useTargetBlogStore();
 
@@ -48,25 +53,41 @@ const BlogPage = () => {
 
   const previousBlogIdRef = useRef<string | null>(null);
 
-  // Fetch target blog info
+  // 一開始先初始化 totalParentCommentsLoaded
+  // 避免切換不同的 Blog 時，totalParentCommentsLoaded 會保留上一次值的前提下，再加上新的值
+  // 這樣會導致 loadmore 功能失常
   useEffect(() => {
-    // 爲了避免 useEffect 的特性(會運行兩次)，而導致 total_reads 會被加兩次
-    // 所以這裏利用 useRef 來記錄上一次的 blogId
-    // 儅因爲 useEffect 特性而導致的第二次運行時，判斷 blogId 是否等於上一次的 blogId
-    // 如果等於，就不會再次呼叫 GetTargetBlogInfo
-    if (blogId && blogId !== previousBlogIdRef.current) {
-      GetTargetBlogInfo({ blogId });
-
-      previousBlogIdRef.current = blogId;
-    }
-
-    // 當離開這個頁面時，把 targetBlogInfo 重設為初始值
-    // 這樣下次進來這個頁面時，就不會看到上次的資料
-    return () => {
-      initialBlogInfo();
-      initialCommentState();
-    };
+    setTotalParentCommentsLoaded(0);
   }, [blogId]);
+
+  // 當確定 totalParentCommentsLoaded 已初始化後
+  // 再根據 blogId 來取得對應的 Blog 資訊與留言
+  useEffect(() => {
+    if (totalParentCommentsLoaded === 0) {
+      // 爲了避免 useEffect 的特性(會運行兩次)，而導致 total_reads 會被加兩次
+      // 所以這裏利用 useRef 來記錄上一次的 blogId
+      // 儅因爲 useEffect 特性而導致的第二次運行時，判斷 blogId 是否等於上一次的 blogId
+      // 如果等於，就不會再次呼叫 GetTargetBlogInfo
+      if (blogId && blogId !== previousBlogIdRef.current) {
+        GetTargetBlogInfo({ blogId });
+
+        previousBlogIdRef.current = blogId;
+      }
+
+      // 當離開這個頁面時，把 targetBlogInfo 重設為初始值
+      // 這樣下次進來這個頁面時，就不會看到上次的資料
+      return () => {
+        initialBlogInfo();
+        initialCommentState();
+      };
+    }
+  }, [totalParentCommentsLoaded]);
+
+  // useEffect(() => {
+  //   if (targetBlogInfo._id) {
+  //     console.log(targetBlogInfo);
+  //   }
+  // }, [targetBlogInfo]);
 
   return (
     <AnimationWrapper
@@ -86,6 +107,7 @@ const BlogPage = () => {
           {deletedComment.state && deletedComment.comment && (
             <DeleteWarning data={deletedComment.comment} />
           )}
+
           <BlogCommentContainer />
 
           <div

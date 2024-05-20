@@ -129,6 +129,7 @@ export interface CommentStructureType {
 export interface GenerateCommentStructureType extends CommentStructureType {
   _id?: string;
   childrenLevel: number;
+  isReplyLoaded?: boolean;
   commentedAt?: string;
   updatedAt?: string;
 }
@@ -137,7 +138,13 @@ export interface FetchCommentPropsType {
   blogObjectId?: string;
   commentObjectId?: string;
   skip?: number;
-  commentArray?: GenerateCommentStructureType[] | null;
+  commentsArray?: GenerateCommentStructureType[] | null;
   comment?: string;
   blog_author?: string;
+  replying_to?: string;
+  index?: number;
+  replyState?: {
+    isReplying: boolean;
+    setIsReplying: React.Dispatch<React.SetStateAction<boolean>>;
+  };
 }

@@ -41,12 +41,12 @@ export const getCommentsByBlogId: RequestHandler = async (req, res, next) => {
   }
 };
 
-// 創建新的頭留言
+// 創建新的留言(頭留言或回覆留言)
 export const createNewComment: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
 
-    const { blogObjectId, comment: reqComment, blog_author } = req.body;
+    const { blogObjectId, comment: reqComment, blog_author, replying_to } = req.body;
 
     if (!blogObjectId) {
       throw createHttpError(400, 'Please provide blog objectId from client');
@@ -59,12 +59,18 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
       throw createHttpError(400, 'Write something to leave a comment');
     }
 
-    const newComment = await CommentSchema.create({
+    // 如果是回覆留言，replying_to 會有回覆目標留言的 objectId
+    // 如果是頭留言，replying_to 會是 undefined
+    const commentObj = {
       blog_id: blogObjectId,
       blog_author,
       comment: reqComment,
       commented_by: userId,
-    });
+      parent: replying_to || undefined,
+    };
+
+    // 創建新的留言(不管是頭留言還是回覆留言)
+    const newComment = await CommentSchema.create(commentObj);
 
     if (!newComment) {
       throw createHttpError(500, 'Failed to create new comment');
@@ -72,11 +78,13 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
 
     const { comment, commentedAt, children } = newComment as unknown as NewCommentType;
 
+    // 同時更新 blog 的 comments 及 activity 資料
+    // 如果是回覆留言，不會增加 total_parent_comments
     const updateBlogInfo = await BlogSchema.findOneAndUpdate(
       { _id: blogObjectId },
       {
         $push: { comments: newComment._id },
-        $inc: { 'activity.total_comments': 1, 'activity.total_parent_comments': 1 },
+        $inc: { 'activity.total_comments': 1, 'activity.total_parent_comments': replying_to ? 0 : 1 },
       },
     );
 
@@ -84,13 +92,38 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
       throw createHttpError(500, 'Failed to update blog comments info and activity info');
     }
 
-    const newCommentNotification = await NotificationSchema.create({
-      type: 'comment',
+    // 當然每當有新留言，就要創建新的通知
+    // 如果是回覆留言，type 就是 'reply'，反之就是 'comment'
+    // 如果是回覆留言，replied_on_comment 就是被回覆留言的 objectId，反之就是 undefined
+    const notificationObj = {
+      type: replying_to ? 'reply' : 'comment',
       blog: blogObjectId,
       notification_for: blog_author,
       user: userId,
       comment: newComment._id,
-    });
+      replied_on_comment: replying_to || undefined,
+    };
+
+    // 當新增了回覆留言，且 blog 及 notification 都更新成功後，
+    // 就需要將新的回覆留言的 objectId 加入到被回覆留言的 children 中
+    if (replying_to) {
+      const updateRepliedComment = await CommentSchema.findOneAndUpdate(
+        { _id: replying_to },
+        { $push: { children: newComment._id } },
+      );
+
+      if (!updateRepliedComment) {
+        throw createHttpError(500, 'Failed to update replied comment children');
+      }
+
+      // 雖然前面的 notificationObj 設定過了 notification_for，但那是適用於頭留言
+      // 如果是回覆留言，要通知的對象不應該是 blog 的作者，而是被回覆留言的作者，也就是被回覆留言的 commented_by
+      // 所以當更新被回覆留言的 children 成功後，記得要順便以更新後的被回覆留言的 commented_by 來更新 notification_for
+      notificationObj.notification_for = updateRepliedComment?.commented_by;
+    }
+
+    // 最後創建新的通知
+    const newCommentNotification = await NotificationSchema.create(notificationObj);
 
     if (!newCommentNotification) {
       throw createHttpError(500, 'Failed to create new comment notification');

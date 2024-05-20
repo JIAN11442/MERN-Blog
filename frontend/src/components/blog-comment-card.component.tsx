@@ -1,4 +1,9 @@
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+
+import BlogCommentField from './blog-comment-field.component';
+import AnimationWrapper from './page-animation.component';
 
 import useAuthStore from '../states/user-auth.state';
 import useBlogCommentStore from '../states/blog-comment.state';
@@ -6,11 +11,10 @@ import useBlogCommentStore from '../states/blog-comment.state';
 import { getDay } from '../commons/date.common';
 import type {
   AuthorProfileStructureType,
+  BlogStructureType,
   GenerateCommentStructureType,
 } from '../commons/types.common';
-import toast from 'react-hot-toast';
-import { useState } from 'react';
-import BlogCommentField from './blog-comment-field.component';
+import useTargetBlogStore from '../states/target-blog.state';
 
 interface BlogCommentCardProps {
   index: number;
@@ -26,7 +30,12 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
   leftVal,
   options = true,
 }) => {
-  const { comment, commented_by, commentedAt } = commentData;
+  const {
+    _id: commentObjectId,
+    comment,
+    commented_by,
+    commentedAt,
+  } = commentData;
   const {
     personal_info: { username, fullname, profile_img },
   } = commented_by as AuthorProfileStructureType;
@@ -36,27 +45,62 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
   const { authUser } = useAuthStore();
   const { access_token, username: authUsername } = authUser ?? {};
 
+  const { targetBlogInfo, setTargetBlogInfo } = useTargetBlogStore();
+  const {
+    comments: { results: commentsArr },
+  } = targetBlogInfo as Required<BlogStructureType>;
+
   const { setDeletedComment } = useBlogCommentStore();
 
   const handleDeleteWarning = () => {
+    if (!access_token) {
+      return toast.error('You need to login to delete a comment');
+    }
     setDeletedComment({ state: true, comment: commentData });
   };
 
   const handleReply = () => {
     if (!access_token) {
-      toast.error('Please login first to leave a reply');
+      return toast.error('Please login first before reply');
     }
 
     setIsReplying(!isReplying);
   };
 
+  const handleHideReplies = (index: number) => {
+    // 先將隱藏回覆留言功能設為 false
+    commentData.isReplyLoaded = false;
+
+    // 因為我們是點擊 parent comment 的 Hide Replies 按鈕
+    // 所以要取得其下的 children index 的話，自然就是 parent comment 的 index 加上 1
+    // 也就是下一個 index
+    const childrenIndex = index + 1;
+
+    if (commentsArr[childrenIndex]) {
+      // 如果 children comment 的 childrenLevel 大於 parent comment 的 childrenLevel
+      // 自然就要刪除該 children comment
+      // 就這樣一直迴圈刪除，直到碰到下一個 comment 的 childrenLevel 等於本次 parent comment 的 childrenLevel，也就是 0 才停止迴圈
+      // 因為那就代表所有該 parent comment 的 children comment 都已刪除
+      // 完成了 Hide Replies 的功能
+      // 當然還有一種情況是，blog 只有一個 parent comment, 但其下有多個 children comment
+      // 當刪除完所有 comment 後，並不會有下一個 comment 來與本次 parent comment 的 childrenLevel 做比較
+      // 所以在每一次迴圈都需要判斷是否有下一個 comment，也就是這裡的 commentsArr[childrenIndex]，如果沒有就不用再迴圈了
+      while (
+        commentsArr[childrenIndex] &&
+        commentsArr[childrenIndex].childrenLevel > commentData.childrenLevel
+      ) {
+        commentsArr.splice(childrenIndex, 1);
+      }
+    }
+
+    setTargetBlogInfo({
+      ...targetBlogInfo,
+      comments: { results: commentsArr },
+    });
+  };
+
   return (
-    <div
-      className={`
-        w-full
-        pl-[${leftVal * 10}px]
-      `}
-    >
+    <div className="w-full" style={{ paddingLeft: `${leftVal * 10}px` }}>
       <div
         className="
           group
@@ -134,12 +178,56 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
             <div
               className="
                 flex
-                gap-5
                 items-center
+                justify-between
               "
             >
-              <button
-                onClick={handleReply}
+              <div
+                className="
+                  flex
+                  gap-5
+                "
+              >
+                {/* Reply button */}
+                <button
+                  onClick={handleReply}
+                  className="
+                    text-grey-dark/60
+                    hover:text-grey-dark/80
+                    hover:underline
+                    underline-offset-2
+                    transition
+                  "
+                >
+                  Reply
+                </button>
+
+                {/* Delete Button
+                1. deleteBtn 是選擇性參數，是讓使用者決定是否要在 card 中顯示 deletebutton
+                2. 如果有登入，就只在自己的 comment 中顯示 delete button
+                3. 如果沒有登入，就顯示所有的 delete button(但並沒有權限刪除，必須登入後才能刪除)
+              */}
+                {(access_token && authUsername === username) ||
+                !access_token ? (
+                  <button
+                    onClick={handleDeleteWarning}
+                    className="
+                      text-grey-dark/60
+                      hover:text-grey-dark/80
+                      hover:underline
+                      underline-offset-2
+                      transition
+                    "
+                  >
+                    Delete
+                  </button>
+                ) : (
+                  ''
+                )}
+              </div>
+
+              {/* Comments button */}
+              {/* <button
                 className="
                   text-grey-dark/60
                   hover:text-grey-dark/80
@@ -148,28 +236,12 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
                   transition
                 "
               >
-                Reply
-              </button>
+                {commentData?.children?.length} comments
+              </button> */}
 
-              {/* Delete Button
-                1. deleteBtn 是選擇性參數，是讓使用者決定是否要在 card 中顯示 deletebutton
-                2. 如果有登入，就只在自己的 comment 中顯示 delete button
-                3. 如果沒有登入，就顯示所有的 delete button(但並沒有權限刪除，必須登入後才能刪除)
-              */}
-              {(access_token && authUsername === username) || !access_token ? (
-                <button
-                  onClick={handleDeleteWarning}
-                  className="
-                    text-grey-dark/60
-                    hover:text-grey-dark/80
-                    hover:underline
-                    underline-offset-2
-                    transition
-                    opacity-0
-                    group-hover:opacity-100
-                  "
-                >
-                  Delete
+              {commentData.isReplyLoaded ? (
+                <button onClick={() => handleHideReplies(index)}>
+                  Hide Replies
                 </button>
               ) : (
                 ''
@@ -181,11 +253,28 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
         {/* Reply Comment Box */}
         <>
           {isReplying && (
-            <div>
-              <hr className="-mt-3 mb-3 border-grey-custom" />
-
-              <BlogCommentField action="Reply" />
-            </div>
+            <AnimationWrapper
+              key="reply-comment-box"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="
+                flex
+                flex-col
+                gap-6
+              "
+            >
+              <hr className="border-grey-custom" />
+              <BlogCommentField
+                action="Reply"
+                placeholder={`Reply to ${
+                  authUsername === username ? 'yourself' : `@${username}`
+                }`}
+                index={index}
+                replyingTo={commentObjectId}
+                replyState={{ isReplying, setIsReplying }}
+              />
+            </AnimationWrapper>
           )}
         </>
       </div>
