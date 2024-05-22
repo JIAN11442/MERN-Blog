@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 import BlogCommentField from './blog-comment-field.component';
 import AnimationWrapper from './page-animation.component';
@@ -15,6 +15,7 @@ import type {
   GenerateCommentStructureType,
 } from '../commons/types.common';
 import useTargetBlogStore from '../states/target-blog.state';
+import useCommentFetch from '../fetchs/comment.fetch';
 
 interface BlogCommentCardProps {
   index: number;
@@ -48,9 +49,14 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
   const { targetBlogInfo, setTargetBlogInfo } = useTargetBlogStore();
   const {
     comments: { results: commentsArr },
+    author: {
+      personal_info: { username: blogAuthorUsername },
+    },
   } = targetBlogInfo as Required<BlogStructureType>;
 
   const { setDeletedComment } = useBlogCommentStore();
+
+  const { LoadRepliesCommentById } = useCommentFetch();
 
   const handleDeleteWarning = () => {
     if (!access_token) {
@@ -99,8 +105,21 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
     });
   };
 
+  const handleLoadReplies = () => {
+    commentData.isReplyLoaded = true;
+
+    LoadRepliesCommentById({
+      repliedCommentId: commentObjectId,
+      index,
+      commentsArr,
+    });
+  };
+
   return (
-    <div className="w-full" style={{ paddingLeft: `${leftVal * 10}px` }}>
+    <div
+      className="w-full"
+      style={{ paddingLeft: `${options ? `${leftVal * 10}px` : ''}` }}
+    >
       <div
         className="
           group
@@ -172,7 +191,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
           {comment}
         </p>
 
-        {/* Reply && Delete */}
+        {/* Reply && Delete && Comments */}
         <>
           {options && (
             <div
@@ -204,10 +223,12 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
 
                 {/* Delete Button
                 1. deleteBtn 是選擇性參數，是讓使用者決定是否要在 card 中顯示 deletebutton
-                2. 如果有登入，就只在自己的 comment 中顯示 delete button
-                3. 如果沒有登入，就顯示所有的 delete button(但並沒有權限刪除，必須登入後才能刪除)
+                2. 如果有登入，且是該 Blog 的作者，那有權限刪除所有的 comment
+                3. 如果有登入，且是該 comment 的作者，那有權限刪除自己的 comment
+                4. 如果沒有登入，就顯示所有的 delete button(但並沒有權限刪除，必須登入後才能刪除)
               */}
-                {(access_token && authUsername === username) ||
+                {(access_token && authUsername === blogAuthorUsername) ||
+                (access_token && authUsername === username) ||
                 !access_token ? (
                   <button
                     onClick={handleDeleteWarning}
@@ -227,24 +248,32 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
               </div>
 
               {/* Comments button */}
-              {/* <button
-                className="
-                  text-grey-dark/60
-                  hover:text-grey-dark/80
-                  hover:underline
-                  underline-offset-2
-                  transition
-                "
-              >
-                {commentData?.children?.length} comments
-              </button> */}
-
               {commentData.isReplyLoaded ? (
-                <button onClick={() => handleHideReplies(index)}>
+                <button
+                  className="
+                    text-grey-dark/60
+                    hover:text-grey-dark/80
+                    hover:underline
+                    underline-offset-2
+                    transition
+                  "
+                  onClick={() => handleHideReplies(index)}
+                >
                   Hide Replies
                 </button>
               ) : (
-                ''
+                <button
+                  onClick={handleLoadReplies}
+                  className="
+                    text-grey-dark/60
+                    hover:text-grey-dark/80
+                    hover:underline
+                    underline-offset-2
+                    transition
+                  "
+                >
+                  {commentData?.children?.length} comments
+                </button>
               )}
             </div>
           )}

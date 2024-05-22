@@ -66,6 +66,7 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
       blog_author,
       comment: reqComment,
       commented_by: userId,
+      isReply: Boolean(replying_to),
       parent: replying_to || undefined,
     };
 
@@ -136,6 +137,47 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
   }
 };
 
+// 載入回覆留言
+export const loadRepliesByCommentId: RequestHandler = async (req, res, next) => {
+  try {
+    const { repliedCommentId, skip } = req.body;
+
+    if (!repliedCommentId) {
+      throw createHttpError(400, 'Please provide replied comment id from client');
+    }
+
+    if (skip === undefined) {
+      throw createHttpError(400, 'Please provide skip value from client');
+    }
+
+    // 取得被回覆留言下的 maxLimit 筆回覆留言
+    // 並且 populate 其中的 children，以及 children 中的 commented_by
+    // 因為是雙重 populate(第一層是被回覆留言下的 children id；第二層是第一層 populate 後 children 中的 commented_by id)
+    // 所以這裡會用進階的 populate 寫法
+    const repliesComment = await CommentSchema.findOne({ _id: repliedCommentId })
+      .populate({
+        path: 'children',
+        options: { limit: commentMaxLimit, skip: skip, sort: { commentedAt: 1 } },
+        populate: {
+          path: 'commented_by',
+          select: 'personal_info.fullname personal_info.username personal_info.profile_img',
+        },
+        select: '-updatedAt',
+      })
+      .select('children -_id');
+
+    if (!repliesComment?.children.length) {
+      throw createHttpError(404, 'No replies found in this comment');
+    }
+
+    res.status(200).json({ repliesComment: repliesComment.children });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 刪除頭留言
 export const deleteCommentById: RequestHandler = async (req, res, next) => {
   try {
     const { commentObjectId, blogObjectId } = req.body;

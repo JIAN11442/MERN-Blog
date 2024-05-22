@@ -1,5 +1,8 @@
 import { create } from 'zustand';
-import type { GenerateCommentStructureType } from '../commons/types.common';
+import type {
+  GenerateCommentStructureType,
+  ReplyLoadedPropsType,
+} from '../commons/types.common';
 
 interface BlogCommentProps {
   commentsWrapper: boolean;

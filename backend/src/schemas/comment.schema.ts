@@ -20,4 +20,4 @@ export const commentSchema = new Schema(
 
 // type CommentSchemaType = InferSchemaType<typeof commentSchema>;
 
-export default model<CommentSchemaType>('Comment', commentSchema);
+export default model<CommentSchemaType>('comments', commentSchema);

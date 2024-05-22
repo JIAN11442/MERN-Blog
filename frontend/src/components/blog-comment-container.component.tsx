@@ -47,7 +47,7 @@ const BlogCommentContainer = () => {
     const newCommentsArr = await GetAndGenerateCommentsData({
       skip: totalParentCommentsLoaded,
       blogObjectId: targetBlogInfo?._id,
-      commentsArray: commentsArr,
+      commentsArr,
     });
 
     setTargetBlogInfo({

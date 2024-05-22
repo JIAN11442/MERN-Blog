@@ -18,7 +18,7 @@ const useCommentFetch = () => {
   const { comments, activity } = targetBlogInfo ?? {};
   const { total_comments, total_parent_comments } = activity ?? {};
 
-  const { setTotalParentCommentsLoaded, totalParentCommentsLoaded } =
+  const { totalParentCommentsLoaded, setTotalParentCommentsLoaded } =
     useBlogCommentStore();
 
   axios.defaults.headers.common[
@@ -48,7 +48,7 @@ const useCommentFetch = () => {
   const GetAndGenerateCommentsData = async ({
     skip = 0,
     blogObjectId,
-    commentsArray = null,
+    commentsArr = null,
   }: FetchCommentPropsType) => {
     let res;
 
@@ -60,10 +60,10 @@ const useCommentFetch = () => {
 
       setTotalParentCommentsLoaded(totalParentCommentsLoaded + comments.length);
 
-      if (commentsArray === null) {
+      if (commentsArr === null) {
         res = { results: comments };
       } else {
-        res = { results: [...commentsArray, ...comments] };
+        res = { results: [...commentsArr, ...comments] };
       }
 
       return res;
@@ -101,6 +101,9 @@ const useCommentFetch = () => {
 
           // 如果是回覆留言
           if (replying_to && index !== undefined) {
+            const startingPoint =
+              index + (commentsArr[index]?.children?.length ?? 0) + 1;
+
             commentsArr[index].children?.push(data._id);
 
             data.childrenLevel = commentsArr[index].childrenLevel + 1;
@@ -108,9 +111,7 @@ const useCommentFetch = () => {
 
             commentsArr[index].isReplyLoaded = true;
 
-            commentsArr.splice(index + 1, 0, data);
-
-            console.log(commentsArr);
+            commentsArr.splice(startingPoint, 0, data);
 
             newCommentsArr = commentsArr;
 
@@ -169,6 +170,37 @@ const useCommentFetch = () => {
       });
   };
 
+  // 載入目標留言的回覆留言
+  const LoadRepliesCommentById = async ({
+    repliedCommentId,
+    skip = 0,
+    index,
+    commentsArr = null,
+  }: FetchCommentPropsType) => {
+    const requestURL = COMMENT_SERVER_ROUTE + '/load-replies-comment';
+
+    await axios
+      .post(requestURL, { repliedCommentId, skip })
+      .then(({ data: { repliesComment } }) => {
+        if (repliesComment && commentsArr && index !== undefined) {
+          repliesComment.map(
+            (comment: GenerateCommentStructureType) =>
+              (comment.childrenLevel = commentsArr[index].childrenLevel + 1)
+          );
+
+          commentsArr.splice(index + 1, 0, ...repliesComment);
+
+          setTargetBlogInfo({
+            ...targetBlogInfo,
+            comments: { results: commentsArr },
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   // 刪除目標留言
   const DeleteTargetComment = async ({
     commentObjectId,
@@ -208,6 +240,7 @@ const useCommentFetch = () => {
     GetCommentsByBlogId,
     GetAndGenerateCommentsData,
     AddCommentToBlog,
+    LoadRepliesCommentById,
     DeleteTargetComment,
   };
 };

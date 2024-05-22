@@ -18,10 +18,10 @@
 # }
 
 
-POST http://localhost:5000/api/comment/delete-target-comment
+POST http://localhost:5000/api/comment/load-replies-comment
 Content-Type: application/json
 
 {
-    "commentObjectId": "6644ce8a1ccf08d97284edfd",
-    "blogObjectId": "6640959ad791611e7114c541"
+    "repliedCommentId": "66446f255edd8ef6a7924bc0",
+    "skip": 0
 }

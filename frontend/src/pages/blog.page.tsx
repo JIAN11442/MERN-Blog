@@ -83,12 +83,6 @@ const BlogPage = () => {
     }
   }, [totalParentCommentsLoaded]);
 
-  // useEffect(() => {
-  //   if (targetBlogInfo._id) {
-  //     console.log(targetBlogInfo);
-  //   }
-  // }, [targetBlogInfo]);
-
   return (
     <AnimationWrapper
       key="BlogPage"

@@ -138,7 +138,7 @@ export interface FetchCommentPropsType {
   blogObjectId?: string;
   commentObjectId?: string;
   skip?: number;
-  commentsArray?: GenerateCommentStructureType[] | null;
+  commentsArr?: GenerateCommentStructureType[] | null;
   comment?: string;
   blog_author?: string;
   replying_to?: string;
@@ -147,4 +147,5 @@ export interface FetchCommentPropsType {
     isReplying: boolean;
     setIsReplying: React.Dispatch<React.SetStateAction<boolean>>;
   };
+  repliedCommentId?: string;
 }
