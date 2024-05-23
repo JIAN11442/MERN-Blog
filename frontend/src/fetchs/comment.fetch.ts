@@ -16,6 +16,7 @@ const useCommentFetch = () => {
 
   const { setTargetBlogInfo, targetBlogInfo } = useTargetBlogStore();
   const { comments, activity } = targetBlogInfo ?? {};
+  const { results: commentsArr } = comments ?? {};
   const { total_comments, total_parent_comments } = activity ?? {};
 
   const { totalParentCommentsLoaded, setTotalParentCommentsLoaded } =
@@ -101,8 +102,26 @@ const useCommentFetch = () => {
 
           // 如果是回覆留言
           if (replying_to && index !== undefined) {
-            const startingPoint =
-              index + (commentsArr[index]?.children?.length ?? 0) + 1;
+            // 如果被並回覆留言下的子留言剛好也有子留言並且展開了
+            // 那就要找到被回覆留言離下一同層級留言的距離是多少
+            let childrenLayer = 0;
+
+            if (
+              commentsArr[index + 1] &&
+              commentsArr[index + 1].childrenLevel >
+                commentsArr[index].childrenLevel
+            ) {
+              while (
+                commentsArr[index + 1 + childrenLayer].childrenLevel !==
+                commentsArr[index].childrenLevel
+              ) {
+                childrenLayer += 1;
+                if (!commentsArr[index + 1 + childrenLayer]) break;
+              }
+            }
+
+            // 然後將新留言插入到該留言下子留言的最後一個留言後面
+            const startingPoint = index + (childrenLayer ?? 0) + 1;
 
             commentsArr[index].children?.push(data._id);
 
@@ -150,7 +169,7 @@ const useCommentFetch = () => {
           // 將一開始讀取目標 blog 資料並賦予重構讀取的 comments 資料時記錄的 '總頭留言數'
           // 加上創建後的那一個頭留言數 parentCommentIncrementVal，就是新的 '總頭留言數'
           setTotalParentCommentsLoaded(
-            totalParentCommentsLoaded + parentCommentIncrementVal
+            (totalParentCommentsLoaded ?? 0) + parentCommentIncrementVal
           );
         }
       })
@@ -202,32 +221,79 @@ const useCommentFetch = () => {
   };
 
   // 刪除目標留言
+  const deleteCommentFunc = async ({
+    index,
+    commentsArr,
+    totalDeletedCommentNum,
+  }: FetchCommentPropsType) => {
+    if (commentsArr && index !== undefined) {
+      // 目標刪除留言的 parentIndex
+      const parentIndex = commentsArr.findIndex(
+        (comment) => comment._id === commentsArr[index].parent
+      );
+
+      // 如果該留言并未展開其回覆留言
+      if (!commentsArr[index].isReplyLoaded) {
+        // 直接刪除當前留言
+        commentsArr.splice(index, 1);
+        // 並回溯到該留言的母留言，刪除其 children 中的最後一個留言
+        // 如果刪除的目標本就是頭留言，那得到的 parentIndex 就是 -1，commentArr[-1] 會是 undefined，所以不會執行
+        // 反之，如果是回覆留言，那就會刪除其母留言的 children 中的最後一個留言
+
+        if (commentsArr[parentIndex]) {
+          commentsArr[parentIndex].children?.pop();
+        }
+      } else {
+        // 如果展開了其回覆留言
+        // 那就要刪除其下所有的回覆留言
+        while (
+          commentsArr[index + 1].childrenLevel >
+          commentsArr[index].childrenLevel
+        ) {
+          commentsArr.splice(index + 1, 1);
+
+          if (!commentsArr[index + 1]) {
+            break;
+          }
+        }
+
+        // 刪除完所有回覆留言後，再刪除該留言
+        commentsArr.splice(index, 1);
+      }
+
+      // 當母留言的 children 數量為 0 時，將其 isReplyLoaded 設為 false
+      if (commentsArr[parentIndex]?.children?.length === 0) {
+        commentsArr[parentIndex].isReplyLoaded = false;
+      }
+    }
+
+    setTargetBlogInfo({
+      ...targetBlogInfo,
+      comments: { ...comments, results: commentsArr ?? [] },
+      activity: {
+        ...activity,
+        total_comments: (total_comments ?? 0) - (totalDeletedCommentNum ?? 0),
+      },
+    });
+  };
+
   const DeleteTargetComment = async ({
     commentObjectId,
-    blogObjectId,
+    index = 0,
   }: FetchCommentPropsType) => {
     const requestURL = COMMENT_SERVER_ROUTE + '/delete-target-comment';
 
     await axios
-      .post(requestURL, { commentObjectId, blogObjectId })
+      .post(requestURL, { commentObjectId })
       .then(({ data }) => {
         if (data) {
-          // 更新本地 zustand 管理的目標 blog 的 comments 資料和 activity 資料
-          setTargetBlogInfo({
-            ...targetBlogInfo,
-            comments: {
-              ...comments,
-              results:
-                comments?.results.filter(
-                  (comment: GenerateCommentStructureType) =>
-                    comment._id !== commentObjectId
-                ) ?? [],
-            },
-            activity: {
-              ...activity,
-              total_comments: (activity?.total_comments ?? 0) - 1,
-              total_parent_comments: (activity?.total_parent_comments ?? 0) - 1,
-            },
+          // 因為沒辦法直接從前端知道刪除的總留言數
+          // 比如刪除的留言其下可能有很多層的子留言，沒全部展開的話，就不知道有多少個
+          // 因此只能在後端返回刪除的留言數，然後再在前端進行計算
+          deleteCommentFunc({
+            index,
+            commentsArr,
+            totalDeletedCommentNum: data.deletedCommentNum,
           });
         }
       })

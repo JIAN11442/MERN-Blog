@@ -9,7 +9,7 @@ import BlogContent from '../components/blog-content.component';
 import HandyToolBtn from '../components/handy-tool.component';
 import AnimationWrapper from '../components/page-animation.component';
 import BlogCommentContainer from '../components/blog-comment-container.component';
-import DeleteWarning from '../dev/delete-warning.component';
+import DeleteWarning from '../components/delete-warning.component';
 
 import useTargetBlogStore from '../states/target-blog.state';
 import useCollapseStore from '../states/collapse.state';
@@ -53,17 +53,24 @@ const BlogPage = () => {
 
   const previousBlogIdRef = useRef<string | null>(null);
 
-  // 一開始先初始化 totalParentCommentsLoaded
-  // 避免切換不同的 Blog 時，totalParentCommentsLoaded 會保留上一次值的前提下，再加上新的值
-  // 這樣會導致 loadmore 功能失常
+  // 初始化
   useEffect(() => {
-    setTotalParentCommentsLoaded(0);
+    // 一開始先初始化 totalParentCommentsLoaded 為 null
+    // 這裡初始化不能設為 0，因為如果上一篇 Blog 的留言數也是 0 的話，那就不會觸發下面的 useEffect
+    // 初始化目的是為了避免切換不同的 BlogId 時，totalParentCommentsLoaded 會保留上一次值的前提下，再加上新的值
+    // 這樣會導致 loadmore 功能失常
+    setTotalParentCommentsLoaded(null);
+
+    // 當切換 BlogId 時，要重新初始化 Blog 資訊與留言
+    // 避免看到上一篇 Blog 的資訊與留言
+    initialBlogInfo();
+    initialCommentState();
   }, [blogId]);
 
   // 當確定 totalParentCommentsLoaded 已初始化後
   // 再根據 blogId 來取得對應的 Blog 資訊與留言
   useEffect(() => {
-    if (totalParentCommentsLoaded === 0) {
+    if (totalParentCommentsLoaded === null) {
       // 爲了避免 useEffect 的特性(會運行兩次)，而導致 total_reads 會被加兩次
       // 所以這裏利用 useRef 來記錄上一次的 blogId
       // 儅因爲 useEffect 特性而導致的第二次運行時，判斷 blogId 是否等於上一次的 blogId
@@ -73,13 +80,6 @@ const BlogPage = () => {
 
         previousBlogIdRef.current = blogId;
       }
-
-      // 當離開這個頁面時，把 targetBlogInfo 重設為初始值
-      // 這樣下次進來這個頁面時，就不會看到上次的資料
-      return () => {
-        initialBlogInfo();
-        initialCommentState();
-      };
     }
   }, [totalParentCommentsLoaded]);
 
@@ -99,7 +99,10 @@ const BlogPage = () => {
         <>
           {/* DEV - Delete Comment Warning */}
           {deletedComment.state && deletedComment.comment && (
-            <DeleteWarning data={deletedComment.comment} />
+            <DeleteWarning
+              index={deletedComment.index}
+              data={deletedComment.comment}
+            />
           )}
 
           <BlogCommentContainer />

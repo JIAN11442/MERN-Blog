@@ -18,10 +18,9 @@
 # }
 
 
-POST http://localhost:5000/api/comment/load-replies-comment
+POST http://localhost:5000/api/comment/count-comments
 Content-Type: application/json
 
 {
-    "repliedCommentId": "66446f255edd8ef6a7924bc0",
-    "skip": 0
+    "blogObjectId": "664d8f89b12908aca6107da6"
 }

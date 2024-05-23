@@ -148,4 +148,5 @@ export interface FetchCommentPropsType {
     setIsReplying: React.Dispatch<React.SetStateAction<boolean>>;
   };
   repliedCommentId?: string;
+  totalDeletedCommentNum?: number;
 }

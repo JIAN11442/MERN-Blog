@@ -1,26 +1,25 @@
 import { create } from 'zustand';
-import type {
-  GenerateCommentStructureType,
-  ReplyLoadedPropsType,
-} from '../commons/types.common';
+import type { GenerateCommentStructureType } from '../commons/types.common';
 
 interface BlogCommentProps {
   commentsWrapper: boolean;
-  totalParentCommentsLoaded: number;
+  totalParentCommentsLoaded: number | null;
   comment: string;
   isCommented: boolean;
   deletedComment: {
     state: boolean;
+    index: number;
     comment: GenerateCommentStructureType | null;
   };
   modalRefStore: React.RefObject<HTMLDivElement>;
 
   setCommentsWrapper: (state: boolean) => void;
-  setTotalParentCommentsLoaded: (state: number) => void;
+  setTotalParentCommentsLoaded: (state: number | null) => void;
   setComment: (text: string) => void;
   setIsCommented: (state: boolean) => void;
   setDeletedComment: (status: {
     state: boolean;
+    index: number;
     comment: GenerateCommentStructureType | null;
   }) => void;
   setModalRefStore: (ref: React.RefObject<HTMLDivElement>) => void;
@@ -32,7 +31,7 @@ const useBlogCommentStore = create<BlogCommentProps>((set) => ({
   totalParentCommentsLoaded: 0,
   isCommented: false,
   comment: '',
-  deletedComment: { state: false, comment: null },
+  deletedComment: { state: false, index: 0, comment: null },
   modalRefStore: { current: null },
 
   setCommentsWrapper: (state) => set({ commentsWrapper: state }),

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import useCommentFetch from '../fetchs/comment.fetch';
@@ -28,12 +28,15 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
   className,
 }) => {
   const [comment, setComment] = useState('');
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const { authUser } = useAuthStore();
   const { targetBlogInfo } = useTargetBlogStore();
+  const { results: commentsArr } = targetBlogInfo.comments ?? {};
+
   const { setIsCommented } = useBlogCommentStore();
 
-  const { AddCommentToBlog } = useCommentFetch();
+  const { AddCommentToBlog, LoadRepliesCommentById } = useCommentFetch();
 
   // 監聽輸入值並儲存
   // isCommented 也要設為 false, 為下一次留言做準備
@@ -58,10 +61,29 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
 
+      // 如果沒有登入，就不給予留言的權限
       if (!authUser?.access_token) {
         return toast.error(`Please login first before ${action}`);
       }
 
+      // 如果當前是回覆留言模式，且並未展開被回覆留言
+      // 那麼要先展開並加載原回覆留言
+      if (
+        replyingTo &&
+        index !== undefined &&
+        commentsArr &&
+        !commentsArr[index].isReplyLoaded
+      ) {
+        commentsArr[index].isReplyLoaded = true;
+
+        LoadRepliesCommentById({
+          repliedCommentId: replyingTo,
+          index,
+          commentsArr,
+        });
+      }
+
+      // 再加入新留言
       AddCommentToBlog({
         blogObjectId: targetBlogInfo._id,
         comment,
@@ -71,9 +93,10 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
         replyState: replyState,
       });
 
+      // 最後清空留言框
       setComment('');
 
-      // 只有在留言頭留言時才會設定 isCommented 為 true；回覆留言時不會
+      // 另外，只有在留言頭留言時才會設定 isCommented 為 true；回覆留言時不會
       // 因為我只希望在留言頭留言時，留言框可以自動捲動到最底部
       // 而回覆留言時，保留在原地即可
       if (!replyingTo) {
@@ -82,10 +105,17 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (textAreaRef.current) {
+      textAreaRef.current.focus();
+    }
+  }, []);
+
   return (
     <div className={className}>
       {/* Comment Box */}
       <textarea
+        ref={textAreaRef}
         value={comment}
         placeholder={placeholder || 'Leave a comment...'}
         onChange={(e) => handleInput(e)}

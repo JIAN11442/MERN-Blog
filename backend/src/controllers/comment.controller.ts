@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable camelcase */
 /* eslint-disable import/prefer-default-export */
@@ -45,8 +46,11 @@ export const getCommentsByBlogId: RequestHandler = async (req, res, next) => {
 export const createNewComment: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
-
     const { blogObjectId, comment: reqComment, blog_author, replying_to } = req.body;
+
+    if (!userId) {
+      throw createHttpError(401, 'Please login first');
+    }
 
     if (!blogObjectId) {
       throw createHttpError(400, 'Please provide blog objectId from client');
@@ -177,52 +181,143 @@ export const loadRepliesByCommentId: RequestHandler = async (req, res, next) => 
   }
 };
 
-// 刪除頭留言
-export const deleteCommentById: RequestHandler = async (req, res, next) => {
+interface deleteFuncPropsType {
+  commentObjectId: string;
+  deleteNum: number;
+}
+
+// 刪除留言
+const deleteCommentFunc = async ({ commentObjectId, deleteNum }: deleteFuncPropsType) => {
+  let deleteCount = deleteNum;
+
   try {
-    const { commentObjectId, blogObjectId } = req.body;
+    // 找到該留言
+    const comment = await CommentSchema.findOne({ _id: commentObjectId });
+
+    // 如果找不到該留言，自然就不能刪除，就回傳錯誤
+    if (!comment) {
+      throw createHttpError(404, 'Comment not found');
+    }
+
+    // 如果該留言有 children，就要先遞迴刪除該留言的所有 children
+    // 直到抓到最後一層 children 並刪除完畢後，才會回到上一層 children 接著刪除
+    // 等所有 children 都刪除完後，最後才會刪除頭留言
+    if (comment?.children.length) {
+      // 使用 Promise.all 確保所有子評論都被刪除後再繼續
+      // 如果不設定的話，map 會同時執行，這樣就無法保證所有子評論都被刪除
+      await Promise.all(
+        comment.children.map(async (replies) => {
+          // 刪除的同時也要累加返回的 deleteCount，給下一個遞歸使用
+          const childDeleteCount = await deleteCommentFunc({ commentObjectId: replies.toString(), deleteNum: 0 });
+          deleteCount += childDeleteCount;
+        }),
+      );
+    }
+
+    // 如果是回覆留言
+    if (comment?.parent) {
+      // 先確認是否有該 parent comment
+      const parentComment = await CommentSchema.findOne({ _id: comment.parent });
+
+      if (!parentComment) {
+        throw createHttpError(404, 'Parent comment not found');
+      }
+
+      // 記得要回到被回覆留言的 children 中刪除該回覆留言的 objectId
+      const updateParentComment = await CommentSchema.findOneAndUpdate(
+        { _id: comment.parent },
+        { $pull: { children: commentObjectId } },
+        { new: true },
+      );
+
+      if (!updateParentComment) {
+        throw createHttpError(500, 'Failed to delete parent comment children');
+      }
+    }
+
+    // 當然不管是頭留言還是回覆留言，都要刪除該留言的通知
+    const deleteNotification = await NotificationSchema.findOneAndDelete({ comment: commentObjectId });
+
+    // 如果刪除通知失敗，就回傳錯誤
+    if (!deleteNotification) {
+      throw createHttpError(500, 'Failed to delete comment notification');
+    }
+
+    // 與 notification 一樣，
+    // 不管是頭留言還是回覆留言，都要更新 blog 的 comments 及 activity 資料
+    // 更新後，如果該留言有 children，就要遞迴刪除該留言的 children
+    // 這樣才能完全刪除該留言及其所有子留言
+    const updateBlogInfo = await BlogSchema.findOneAndUpdate(
+      { _id: comment?.blog_id },
+      {
+        $pull: { comments: commentObjectId },
+        $inc: { 'activity.total_comments': -1, 'activity.total_parent_comments': comment?.parent ? 0 : -1 },
+      },
+    );
+
+    // 如果更新 blog 資料失敗，就回傳錯誤
+    if (!updateBlogInfo) {
+      throw createHttpError(500, 'Failed to update blog comments info and activity info');
+    }
+
+    // 最後刪除該留言
+    const deleteComment = await CommentSchema.findOneAndDelete({ _id: commentObjectId });
+
+    // 如果刪除留言失敗，就回傳錯誤
+    if (!deleteComment) {
+      throw createHttpError(500, 'Failed to delete comment');
+    }
+
+    // 反之，如果找到該留言並成功刪除，就要增加 deleteCount
+    // 方便後續回傳給前端知道刪除了幾筆留言
+    deleteCount += 1;
+  } catch (error) {
+    console.log(error);
+  }
+
+  return deleteCount;
+};
+
+export const deleteCommentById: RequestHandler = (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { commentObjectId } = req.body;
+
+    const deleteNum = 0;
+
+    if (!userId) {
+      throw createHttpError(401, 'Please login first');
+    }
 
     if (!commentObjectId) {
       throw createHttpError(400, 'Please provide comment id from client');
     }
 
-    if (!blogObjectId) {
-      throw createHttpError(400, 'Please provide blog id from client');
-    }
+    // 首先找出目標留言ID的留言
+    CommentSchema.findOne({ _id: commentObjectId })
+      .then(async (comment) => {
+        let deletedCommentNum;
 
-    const commentExistInBlog = await BlogSchema.findOne({ _id: blogObjectId, comments: commentObjectId });
+        // 再確認該留言是否有刪除的權限
+        // 比如說，只有留言者或是部落格作者才能刪除留言
+        // 這裡需要注意的是，userId 是 string，而 comment.commented_by 是 ObjectId，兩者型別不同
+        // 如果用 '===' 來比較就會報錯，因為 '===' 會一同比較型別及值
+        // 所以這裡要改用 '==' 來比較，因為 '==' 只會比較值，不會比較型別
+        // 當然，objectId 也提供了 equals 方法，接受一個 string 或 objectId 來比較
+        // 如果接受的是 string，就會自動轉換成 objectId 來比較
+        // 因此這裡的 comment?.blog_author?.equals(userId) 才會正確運作
 
-    if (!commentExistInBlog) {
-      throw createHttpError(404, 'Comment not found in this blog');
-    }
+        if (userId == comment?.commented_by || comment?.blog_author?.equals(userId)) {
+          deletedCommentNum = await deleteCommentFunc({ commentObjectId, deleteNum });
+        } else {
+          throw createHttpError(403, 'You are not allowed to delete this comment');
+        }
 
-    const deleteComment = await CommentSchema.findByIdAndDelete(commentObjectId);
-
-    if (!deleteComment) {
-      throw createHttpError(500, 'Failed to delete comment');
-    }
-
-    const deleteNotification = await NotificationSchema.findOneAndDelete({ type: 'comment', comment: commentObjectId });
-
-    if (!deleteNotification) {
-      throw createHttpError(500, 'Failed to delete comment notification');
-    }
-
-    const descrementVal = -1;
-
-    const updateBlogInfo = await BlogSchema.findOneAndUpdate(
-      { _id: blogObjectId },
-      {
-        $inc: { 'activity.total_comments': descrementVal, 'activity.total_parent_comments': descrementVal },
-        $pull: { comments: commentObjectId },
-      },
-    );
-
-    if (!updateBlogInfo) {
-      throw createHttpError(500, 'Failed to update blog comments info and activity info');
-    }
-
-    res.status(200).json({ message: 'Comment deleted successfully' });
+        res.status(200).json({ message: 'Comment deleted successfully', deletedCommentNum });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   } catch (error) {
     console.log(error);
     next(error);

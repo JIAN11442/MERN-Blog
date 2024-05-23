@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 import { FlatIcons } from '../icons/flaticons';
 
-import BlogCommentCard from '../components/blog-comment-card.component';
+import BlogCommentCard from './blog-comment-card.component';
 
 import useBlogCommentStore from '../states/blog-comment.state';
 
@@ -11,13 +11,15 @@ import useCommentFetch from '../fetchs/comment.fetch';
 import type { GenerateCommentStructureType } from '../commons/types.common';
 
 interface DeleteCommentWarningProps {
+  index: number;
   data: GenerateCommentStructureType;
 }
 
 const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
+  index,
   data,
 }) => {
-  const { _id, blog_id } = data;
+  const { _id } = data;
 
   const modalRef = useRef<HTMLDivElement | null>(null);
 
@@ -32,7 +34,7 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
 
   // 刪除留言，再關閉刪除警告視窗
   const handleDelete = () => {
-    DeleteTargetComment({ commentObjectId: _id, blogObjectId: blog_id });
+    DeleteTargetComment({ commentObjectId: _id, index });
 
     setDeletedComment({ ...deletedComment, state: false });
 
@@ -92,8 +94,9 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
         ref={modalRef}
         className="
           absolute
-          max-sm:min-w-[90%]
-          sm:max-w-[600px]
+          max-sm:w-[420px]
+          sm:min-w-[450px]
+          sm:max-w-[650px]
           p-12
           -translate-x-1/2
           -translate-y-1/2
@@ -104,6 +107,7 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
           gap-5
           bg-white-custom
           rounded-md
+          transition
         "
       >
         {/* Warning Icon */}
@@ -134,12 +138,22 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
           {/* Warning Content */}
           <p
             className="
+              mt-2
               text-xl
-              text-grey-dark/50
+              text-red-custom/80
+              line-clamp-2
               center
             "
           >
-            Do you really want to delete this comment?
+            Do you really want to delete this comment{' '}
+            <span className="text-xl">
+              {data?.children?.length
+                ? `
+                and its ${data.children.length} sub-comments
+                `
+                : ''}
+            </span>
+            ?
           </p>
         </div>
 

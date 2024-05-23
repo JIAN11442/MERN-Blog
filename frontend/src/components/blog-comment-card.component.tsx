@@ -16,6 +16,7 @@ import type {
 } from '../commons/types.common';
 import useTargetBlogStore from '../states/target-blog.state';
 import useCommentFetch from '../fetchs/comment.fetch';
+import { FlatIcons } from '../icons/flaticons';
 
 interface BlogCommentCardProps {
   index: number;
@@ -62,7 +63,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
     if (!access_token) {
       return toast.error('You need to login to delete a comment');
     }
-    setDeletedComment({ state: true, comment: commentData });
+    setDeletedComment({ state: true, comment: commentData, index });
   };
 
   const handleReply = () => {
@@ -198,15 +199,47 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
               className="
                 flex
                 items-center
-                justify-between
               "
             >
+              {/* Comment && Reply Buttton */}
               <div
                 className="
                   flex
                   gap-5
                 "
               >
+                {/* Comments button */}
+                <div>
+                  {commentData.isReplyLoaded ? (
+                    <button
+                      className="
+                        text-grey-dark/60
+                        hover:text-grey-dark/80
+                        hover:underline
+                        underline-offset-2
+                        transition
+                      "
+                      onClick={() => handleHideReplies(index)}
+                    >
+                      Hide Comments
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleLoadReplies}
+                      className="
+                        text-grey-dark/60
+                        hover:text-grey-dark/80
+                        transition
+                      "
+                    >
+                      <p className="flex gap-2">
+                        <FlatIcons name="fi fi-rs-comment-dots" />
+                        {commentData?.children?.length} comments
+                      </p>
+                    </button>
+                  )}
+                </div>
+
                 {/* Reply button */}
                 <button
                   onClick={handleReply}
@@ -220,61 +253,36 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
                 >
                   Reply
                 </button>
+              </div>
 
-                {/* Delete Button
-                1. deleteBtn 是選擇性參數，是讓使用者決定是否要在 card 中顯示 deletebutton
-                2. 如果有登入，且是該 Blog 的作者，那有權限刪除所有的 comment
-                3. 如果有登入，且是該 comment 的作者，那有權限刪除自己的 comment
-                4. 如果沒有登入，就顯示所有的 delete button(但並沒有權限刪除，必須登入後才能刪除)
-              */}
+              {/* Delete Button*/}
+              <div className="ml-auto">
+                {/* 1. deleteBtn 是選擇性參數，是讓使用者決定是否要在 card 中顯示 deletebutton
+                    2. 如果有登入，且是該 Blog 的作者，那有權限刪除所有的 comment
+                    3. 如果有登入，且是該 comment 的作者，那有權限刪除自己的 comment
+                    4. 如果沒有登入，就顯示所有的 delete button(但並沒有權限刪除，必須登入後才能刪除) */}
                 {(access_token && authUsername === blogAuthorUsername) ||
                 (access_token && authUsername === username) ||
                 !access_token ? (
                   <button
                     onClick={handleDeleteWarning}
                     className="
+                      p-2
+                      px-3
+                      rounded-md
+                      border
+                      border-grey-custom
                       text-grey-dark/60
-                      hover:text-grey-dark/80
-                      hover:underline
-                      underline-offset-2
-                      transition
+                      hover:bg-red-custom/30
+                      hover:text-red-custom
                     "
                   >
-                    Delete
+                    <FlatIcons name="fi fi-rr-trash" />
                   </button>
                 ) : (
                   ''
                 )}
               </div>
-
-              {/* Comments button */}
-              {commentData.isReplyLoaded ? (
-                <button
-                  className="
-                    text-grey-dark/60
-                    hover:text-grey-dark/80
-                    hover:underline
-                    underline-offset-2
-                    transition
-                  "
-                  onClick={() => handleHideReplies(index)}
-                >
-                  Hide Replies
-                </button>
-              ) : (
-                <button
-                  onClick={handleLoadReplies}
-                  className="
-                    text-grey-dark/60
-                    hover:text-grey-dark/80
-                    hover:underline
-                    underline-offset-2
-                    transition
-                  "
-                >
-                  {commentData?.children?.length} comments
-                </button>
-              )}
             </div>
           )}
         </>
