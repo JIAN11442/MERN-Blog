@@ -45,7 +45,7 @@ const BlogCommentContainer = () => {
   const handleLoadmoreComments = async () => {
     // 取得新的留言(skip 掉原本就 load 的 comments 數量)
     const newCommentsArr = await GetAndGenerateCommentsData({
-      skip: totalParentCommentsLoaded,
+      skip: totalParentCommentsLoaded ?? 0,
       blogObjectId: targetBlogInfo?._id,
       commentsArr,
     });
@@ -205,21 +205,22 @@ const BlogCommentContainer = () => {
           ))}
 
           {/* Load more button */}
-          {totalParentCommentsLoaded < (total_parent_comments ?? 0) && (
-            <button
-              onClick={handleLoadmoreComments}
-              className="
-                flex
-                my-3
-                center
-                text-grey-dark/40
-                hover:text-grey-dark/50
-                transition
-              "
-            >
-              Load more
-            </button>
-          )}
+          {totalParentCommentsLoaded &&
+            totalParentCommentsLoaded < (total_parent_comments ?? 0) && (
+              <button
+                onClick={handleLoadmoreComments}
+                className="
+                  flex
+                  my-3
+                  center
+                  text-grey-dark/40
+                  hover:text-grey-dark/50
+                  transition
+                "
+              >
+                Load more
+              </button>
+            )}
 
           {/* Separate Line */}
           <hr className="mt-8 border-grey-custom" />

@@ -7,6 +7,11 @@ import AnimationWrapper from './page-animation.component';
 
 import useAuthStore from '../states/user-auth.state';
 import useBlogCommentStore from '../states/blog-comment.state';
+import useTargetBlogStore from '../states/target-blog.state';
+
+import useCommentFetch from '../fetchs/comment.fetch';
+
+import { FlatIcons } from '../icons/flaticons';
 
 import { getDay } from '../commons/date.common';
 import type {
@@ -14,9 +19,6 @@ import type {
   BlogStructureType,
   GenerateCommentStructureType,
 } from '../commons/types.common';
-import useTargetBlogStore from '../states/target-blog.state';
-import useCommentFetch from '../fetchs/comment.fetch';
-import { FlatIcons } from '../icons/flaticons';
 
 interface BlogCommentCardProps {
   index: number;
@@ -55,7 +57,15 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
     },
   } = targetBlogInfo as Required<BlogStructureType>;
 
-  const { setDeletedComment } = useBlogCommentStore();
+  const { setDeletedComment, setTotalRepliesLoaded, totalRepliesLoaded } =
+    useBlogCommentStore();
+
+  // 因為 totalRepliesLoaded 是一個陣列，且是隨著每次加載回覆留言而增加
+  // 因此每一個 comment card 如果想要知道自己的母留言加載時記錄在 totalRepliesLoaded 的資訊位置(index)，
+  // 就必須透過各自的 parentIndex 來找到，這一步就是透過 findIndex 來找到
+  const indexOfRepliesLoadedInCurrCommentData = totalRepliesLoaded.findIndex(
+    (item) => item.index === commentData.parentIndex
+  );
 
   const { LoadRepliesCommentById } = useCommentFetch();
 
@@ -104,16 +114,94 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
       ...targetBlogInfo,
       comments: { results: commentsArr },
     });
+
+    // 如果當前打算隱藏的母留言下有子留言，
+    // 那也需要將其在 totalRepliesLoaded 記錄的加載數量歸零
+    // 當然自身也要歸零，所以這裡採用 >= 來處理，而不是 ===
+    setTotalRepliesLoaded(
+      totalRepliesLoaded.map((item) =>
+        item.index >= index ? { ...item, loadedNum: 0 } : item
+      )
+    );
   };
 
+  // 加載回覆留言(有限制)
   const handleLoadReplies = () => {
+    if (commentData.children?.length === 0) {
+      return;
+    }
+
     commentData.isReplyLoaded = true;
 
     LoadRepliesCommentById({
       repliedCommentId: commentObjectId,
-      index,
+      skip: 0,
+      index: index,
       commentsArr,
     });
+  };
+
+  // 加載更多回覆留言
+  const handleLoadMoreReplies = () => {
+    LoadRepliesCommentById({
+      loadmore: true,
+      repliedCommentId: commentsArr[commentData.parentIndex ?? 0]._id,
+      skip: totalRepliesLoaded[indexOfRepliesLoadedInCurrCommentData].loadedNum,
+      index: commentData.parentIndex ?? 0,
+      commentsArr,
+    });
+  };
+
+  // 判斷哪個 comment card 下載可以出現 Load more replies 按鈕
+  const isLoadMoreReplies = () => {
+    // 只有當 comment card 有母留言時(也就是當前是回覆留言)，
+    // 且也已經從 fetch 處將加載留言數記錄在 totalRepliesLoaded 時，才需執行
+    if (
+      (commentData.parent || commentData.parentIndex) &&
+      totalRepliesLoaded.length
+    ) {
+      // 如果該 comment card 的母留言的 children 數量大於 totalRepliesLoaded 記錄的加載數量
+      // 且該 comment card 的 id 等於母留言加載的最後一個留言 id，那就代表該 comment card 的確是母留言的最後一個子留言
+      // 就需要出現 Load more replies 按鈕，返回 true
+
+      // console.log(
+      //   `\n\n留言內容: ${commentData.comment}\n母留言的子留言數量: ${
+      //     commentsArr[commentData.parentIndex ?? 0].children?.length ?? 0
+      //   }\n已記錄母留言展開子留言數: ${
+      //     totalRepliesLoaded[indexOfRepliesLoadedInCurrCommentData].loadedNum
+      //   }\n當前母留言展開的所有ID: ${
+      //     commentsArr[commentData.parentIndex ?? 0].children
+      //   }\n當前母留言展開的最後一個子留言ID: ${
+      //     commentsArr[commentData.parentIndex ?? 0].children?.[
+      //       totalRepliesLoaded[indexOfRepliesLoadedInCurrCommentData]
+      //         .loadedNum - 1
+      //     ]
+      //   }\n當前留言ID: ${commentData._id}\n\n`
+      // );
+
+      if (
+        (commentsArr[commentData.parentIndex ?? 0].children?.length ?? 0) >
+          totalRepliesLoaded[indexOfRepliesLoadedInCurrCommentData].loadedNum &&
+        commentsArr[commentData.parentIndex ?? 0].children?.[
+          totalRepliesLoaded[indexOfRepliesLoadedInCurrCommentData].loadedNum -
+            1
+        ] === commentData._id
+      ) {
+        return true;
+      }
+      // 否則，沒必要出現 Load more replies 按鈕，返回 false
+      return false;
+    }
+
+    // 如果該留言是母留言，那自然也不需要出現 Load more replies 按鈕，直接返回 false
+    return false;
+  };
+
+  // 編輯留言
+  const handleEditComment = () => {
+    if (!access_token) {
+      return toast.error('Please login first before edit');
+    }
   };
 
   return (
@@ -192,7 +280,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
           {comment}
         </p>
 
-        {/* Reply && Delete && Comments */}
+        {/* Reply && Delete && Comments && Edit*/}
         <>
           {options && (
             <div
@@ -201,11 +289,12 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
                 items-center
               "
             >
-              {/* Comment && Reply Buttton */}
+              {/* Comment && Reply Buttton && Edit */}
               <div
                 className="
                   flex
                   gap-5
+                  items-center
                 "
               >
                 {/* Comments button */}
@@ -253,6 +342,27 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
                 >
                   Reply
                 </button>
+
+                {/* Edit button */}
+                <div>
+                  {(access_token && authUsername === username) ||
+                  !access_token ? (
+                    <button
+                      onClick={handleEditComment}
+                      className="
+                        text-grey-dark/60
+                        hover:text-grey-dark/80
+                        hover:underline
+                        underline-offset-2
+                        transition
+                      "
+                    >
+                      Edit
+                    </button>
+                  ) : (
+                    ''
+                  )}
+                </div>
               </div>
 
               {/* Delete Button*/}
@@ -310,11 +420,29 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
                 index={index}
                 replyingTo={commentObjectId}
                 replyState={{ isReplying, setIsReplying }}
+                showButton={true}
               />
             </AnimationWrapper>
           )}
         </>
       </div>
+
+      {/* Loadmore Replies Button */}
+      {isLoadMoreReplies() && (
+        <button
+          onClick={handleLoadMoreReplies}
+          className="
+            flex
+            -mt-2
+            pb-2
+            text-grey-dark/40
+            hover:text-grey-dark/50
+            transition
+          "
+        >
+          Load more replies
+        </button>
+      )}
     </div>
   );
 };

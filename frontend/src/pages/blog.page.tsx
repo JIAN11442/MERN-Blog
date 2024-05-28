@@ -29,8 +29,10 @@ const BlogPage = () => {
     commentsWrapper,
     deletedComment,
     totalParentCommentsLoaded,
+    totalRepliesLoaded,
     initialCommentState,
     setTotalParentCommentsLoaded,
+    setTotalRepliesLoaded,
   } = useBlogCommentStore();
   const { targetBlogInfo, similarBlogsInfo, initialBlogInfo } =
     useTargetBlogStore();
@@ -61,11 +63,18 @@ const BlogPage = () => {
     // 這樣會導致 loadmore 功能失常
     setTotalParentCommentsLoaded(null);
 
+    // 與上述一樣，同樣初始化加載的回覆數
+    setTotalRepliesLoaded([]);
+
     // 當切換 BlogId 時，要重新初始化 Blog 資訊與留言
     // 避免看到上一篇 Blog 的資訊與留言
     initialBlogInfo();
     initialCommentState();
   }, [blogId]);
+
+  useEffect(() => {
+    console.log(...totalRepliesLoaded, targetBlogInfo.comments?.results);
+  }, [targetBlogInfo]);
 
   // 當確定 totalParentCommentsLoaded 已初始化後
   // 再根據 blogId 來取得對應的 Blog 資訊與留言

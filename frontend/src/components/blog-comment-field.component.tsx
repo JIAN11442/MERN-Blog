@@ -16,6 +16,7 @@ interface BlogCommentFieldProps {
     isReplying: boolean;
     setIsReplying: React.Dispatch<React.SetStateAction<boolean>>;
   };
+  showButton?: boolean;
   className?: string;
 }
 
@@ -25,10 +26,12 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
   placeholder,
   replyingTo,
   replyState,
+  showButton = false,
   className,
 }) => {
   const [comment, setComment] = useState('');
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const { authUser } = useAuthStore();
   const { targetBlogInfo } = useTargetBlogStore();
@@ -56,55 +59,77 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
   };
 
   // 上傳留言至數據庫
-  // 設定 isCommented 為 true, 代表已經 Enter 送出留言(為了之後觸發 scrollbar 用)
-  const handleComment = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+  const handleCommentFunc = async () => {
+    // 如果沒有登入，就不給予留言的權限
+    if (!authUser?.access_token) {
+      return toast.error(`Please login first before ${action}`);
+    }
 
-      // 如果沒有登入，就不給予留言的權限
-      if (!authUser?.access_token) {
-        return toast.error(`Please login first before ${action}`);
-      }
+    // 如果當前是回覆留言模式，
+    // 且母留言有回覆留言及並未展開
+    // 那麼要先展開並加載原回覆留言
+    if (
+      replyingTo &&
+      index !== undefined &&
+      commentsArr &&
+      (commentsArr[index].children?.length ?? 0) > 0 &&
+      !commentsArr[index].isReplyLoaded
+    ) {
+      commentsArr[index].isReplyLoaded = true;
 
-      // 如果當前是回覆留言模式，且並未展開被回覆留言
-      // 那麼要先展開並加載原回覆留言
-      if (
-        replyingTo &&
-        index !== undefined &&
-        commentsArr &&
-        !commentsArr[index].isReplyLoaded
-      ) {
-        commentsArr[index].isReplyLoaded = true;
-
-        LoadRepliesCommentById({
-          repliedCommentId: replyingTo,
-          index,
-          commentsArr,
-        });
-      }
-
-      // 再加入新留言
-      AddCommentToBlog({
-        blogObjectId: targetBlogInfo._id,
-        comment,
-        blog_author: targetBlogInfo.author?._id,
-        replying_to: replyingTo,
-        index: index,
-        replyState: replyState,
+      await LoadRepliesCommentById({
+        repliedCommentId: replyingTo,
+        index,
+        commentsArr,
       });
+    }
 
-      // 最後清空留言框
-      setComment('');
+    // 再加入新留言
+    await AddCommentToBlog({
+      blogObjectId: targetBlogInfo._id,
+      comment,
+      blog_author: targetBlogInfo.author?._id,
+      replying_to: replyingTo,
+      index: index,
+      replyState: replyState,
+    });
 
-      // 另外，只有在留言頭留言時才會設定 isCommented 為 true；回覆留言時不會
-      // 因為我只希望在留言頭留言時，留言框可以自動捲動到最底部
-      // 而回覆留言時，保留在原地即可
-      if (!replyingTo) {
-        setIsCommented(true);
-      }
+    // 最後清空留言框
+    setComment('');
+
+    // 另外，只有在留言頭留言時才會設定 isCommented 為 true；回覆留言時不會
+    // 因為我只希望在留言頭留言時，留言框可以自動捲動到最底部
+    // 而回覆留言時，保留在原地即可
+    if (!replyingTo) {
+      setIsCommented(true);
     }
   };
 
+  // 如果是通過 Enter 提交留言
+  const handleEnterSubmit = async (
+    e: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+
+      await handleCommentFunc();
+    }
+  };
+
+  // 如果是通過按鈕提交留言
+  const handleButtonSubmit = async () => {
+    if (buttonRef.current) {
+      // 防止連續點擊
+      buttonRef.current.disabled = true;
+
+      await handleCommentFunc();
+
+      // 恢復按鈕
+      buttonRef.current.disabled = false;
+    }
+  };
+
+  // 當載入組件是，自動 focus 在 textarea 上
   useEffect(() => {
     if (textAreaRef.current) {
       textAreaRef.current.focus();
@@ -119,11 +144,11 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
         value={comment}
         placeholder={placeholder || 'Leave a comment...'}
         onChange={(e) => handleInput(e)}
-        onKeyDown={(e) => handleComment(e)}
+        onKeyDown={(e) => handleEnterSubmit(e)}
         className={`
           input-box
           pl-5
-          placeholder:text-grey-dark
+          placeholder:text-grey-dark/50
           resize-none
           w-full
           overflow-hidden
@@ -133,8 +158,10 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
       ></textarea>
 
       {/* Action button */}
-      {action === 'Reply' && (
+      {showButton && (
         <button
+          ref={buttonRef}
+          onClick={handleButtonSubmit}
           className="
             btn-dark
             mt-3

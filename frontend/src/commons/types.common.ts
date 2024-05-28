@@ -130,6 +130,7 @@ export interface GenerateCommentStructureType extends CommentStructureType {
   _id?: string;
   childrenLevel: number;
   isReplyLoaded?: boolean;
+  parentIndex?: number;
   commentedAt?: string;
   updatedAt?: string;
 }
@@ -149,4 +150,10 @@ export interface FetchCommentPropsType {
   };
   repliedCommentId?: string;
   totalDeletedCommentNum?: number;
+  loadmore?: boolean;
+}
+
+export interface RepliesLoadedPropsType {
+  index: number;
+  loadedNum: number;
 }

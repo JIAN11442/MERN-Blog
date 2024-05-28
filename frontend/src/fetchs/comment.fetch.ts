@@ -19,14 +19,19 @@ const useCommentFetch = () => {
   const { results: commentsArr } = comments ?? {};
   const { total_comments, total_parent_comments } = activity ?? {};
 
-  const { totalParentCommentsLoaded, setTotalParentCommentsLoaded } =
-    useBlogCommentStore();
+  const {
+    totalParentCommentsLoaded,
+    totalRepliesLoaded,
+    setTotalParentCommentsLoaded,
+    setTotalRepliesLoaded,
+  } = useBlogCommentStore();
 
   axios.defaults.headers.common[
     'Authorization'
   ] = `Bearer ${authUser?.access_token}`;
 
   const COMMENT_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + '/comment';
+  const LOAD_COMMENT_LIMIT = import.meta.env.VITE_COMMENTS_LIMIT;
 
   // 取得目標 blog 的所有未回復留言
   const GetCommentsByBlogId = async ({
@@ -102,35 +107,55 @@ const useCommentFetch = () => {
 
           // 如果是回覆留言
           if (replying_to && index !== undefined) {
-            // 如果被並回覆留言下的子留言剛好也有子留言並且展開了
-            // 那就要找到被回覆留言離下一同層級留言的距離是多少
-            let childrenLayer = 0;
-
-            if (
-              commentsArr[index + 1] &&
-              commentsArr[index + 1].childrenLevel >
-                commentsArr[index].childrenLevel
-            ) {
-              while (
-                commentsArr[index + 1 + childrenLayer].childrenLevel !==
-                commentsArr[index].childrenLevel
-              ) {
-                childrenLayer += 1;
-                if (!commentsArr[index + 1 + childrenLayer]) break;
-              }
-            }
+            // 如果該留言下有子留言，那就找到該留言下子留言的最後一個留言的 index + 1
+            // 如果沒有子留言，那就直接插入到該留言的下一個位置(找不到直接返回 acc 的初始值，即 index)
+            const startingPoint =
+              commentsArr.reduce(
+                (acc, comment, i) =>
+                  comment.childrenLevel === commentsArr[index].childrenLevel + 1
+                    ? i
+                    : acc,
+                index
+              ) + 1;
 
             // 然後將新留言插入到該留言下子留言的最後一個留言後面
-            const startingPoint = index + (childrenLayer ?? 0) + 1;
-
             commentsArr[index].children?.push(data._id);
 
             data.childrenLevel = commentsArr[index].childrenLevel + 1;
+            data.parent = commentsArr[index]._id;
             data.parentIndex = index;
 
             commentsArr[index].isReplyLoaded = true;
 
-            commentsArr.splice(startingPoint, 0, data);
+            // 如果原留言的子留言數還沒到限制數量，
+            if (
+              (commentsArr[index]?.children?.length ?? 0) <= LOAD_COMMENT_LIMIT
+            ) {
+              let newTotalRepliesLoaded = totalRepliesLoaded;
+
+              // 就要看是否已經有記錄過該留言的載入回覆留言數
+              // 如果沒有記錄過，那就新增一個記錄
+              if (!totalRepliesLoaded[index]) {
+                newTotalRepliesLoaded = [
+                  ...totalRepliesLoaded,
+                  { index, loadedNum: 1 },
+                ];
+              }
+              // 如果有記錄過，那就累加載入的回覆留言數
+              else {
+                newTotalRepliesLoaded = totalRepliesLoaded.map((item) =>
+                  item.index === index
+                    ? { ...item, loadedNum: item.loadedNum + 1 }
+                    : item
+                );
+              }
+
+              // 接著更新 totalRepliesLoaded
+              setTotalRepliesLoaded(newTotalRepliesLoaded);
+
+              // 最後，將新留言插入到母留言的最後一個子留言後面
+              commentsArr.splice(startingPoint, 0, data);
+            }
 
             newCommentsArr = commentsArr;
 
@@ -191,6 +216,7 @@ const useCommentFetch = () => {
 
   // 載入目標留言的回覆留言
   const LoadRepliesCommentById = async ({
+    loadmore = false,
     repliedCommentId,
     skip = 0,
     index,
@@ -202,12 +228,70 @@ const useCommentFetch = () => {
       .post(requestURL, { repliedCommentId, skip })
       .then(({ data: { repliesComment } }) => {
         if (repliesComment && commentsArr && index !== undefined) {
-          repliesComment.map(
-            (comment: GenerateCommentStructureType) =>
-              (comment.childrenLevel = commentsArr[index].childrenLevel + 1)
+          // 先找到當前要載入回覆留言的母留言的 index
+          // 是否已經在 totalRepliesLoaded 中有記錄
+
+          const indexInTotalRepliesLoaded = totalRepliesLoaded.findIndex(
+            (item) => item.index === index
           );
 
-          commentsArr.splice(index + 1, 0, ...repliesComment);
+          // 如果有記錄過，那就累加載入的回覆留言數
+          if (indexInTotalRepliesLoaded !== -1) {
+            setTotalRepliesLoaded(
+              totalRepliesLoaded.map((item) =>
+                item.index === index
+                  ? {
+                      ...item,
+                      loadedNum: item.loadedNum + repliesComment.length,
+                    }
+                  : item
+              )
+            );
+          }
+          // 否則就新增一個記錄
+          else {
+            setTotalRepliesLoaded([
+              ...totalRepliesLoaded,
+              { index: index, loadedNum: repliesComment.length },
+            ]);
+          }
+
+          repliesComment.map((comment: GenerateCommentStructureType) => {
+            comment.childrenLevel = commentsArr[index].childrenLevel + 1;
+            // 為了方便之後前端判斷是否加入[載入更多留言 button 功能]而設定的屬性
+            comment.parentIndex = index;
+          });
+
+          // 如果不是 loadmore 模式，那就是正常展開回覆留言模式
+          // 那就將載入的回覆留言插入到當前留言(母留言)的下一個位置
+          if (!loadmore) {
+            commentsArr.splice(index + 1, 0, ...repliesComment);
+          } else {
+            // 如果當前是 loadmore 模式，
+            // 那就要將載入的回覆留言插入到當前留言(母留言)的最後一個回覆留言後面
+            // 這裡使用 reduce 來找，其中 acc 是返回的值，comment 是當前值，i 是當前值的 index
+            // 當現迴圈符合判斷條件，就返回 i 給下一次的 acc；反之，返回原本的 acc，即下一次的 acc 與本次的 acc 一樣
+            // 而這裡的條件是，當迴圈留言的 childrenLevel 等於當前展開留言的 childrenLevel + 1，即迴圈留言是展開留言的回覆留言，
+            // 或是迴圈留言的母留言的 childrenLevel 等於當前展開留言的 childrenLevel + 1，即迴圈留言的母留言是展開留言的回覆留言，
+            // 那就返回 i 給 acc，代表找到了符合條件的留言，這個迴圈留言的 index 就是我們要跳過的位置
+            // 反之，繼續返回 acc，也就是初始值 index,
+            // 如果一直都沒有找到符合條件的，最後當然 acc 就不會變，還是原來的初始值 index，
+            // 那麼就算找到了該展開留言的最後一個回覆留言，最後再加 1，就是要插入的位置
+            const startingPoint =
+              commentsArr.reduce(
+                (acc, comment, i) =>
+                  comment.childrenLevel ===
+                    commentsArr[index].childrenLevel + 1 ||
+                  (comment.parentIndex &&
+                    commentsArr[comment.parentIndex].childrenLevel ===
+                      commentsArr[index].childrenLevel + 1)
+                    ? i
+                    : acc,
+                index
+              ) + 1;
+
+            commentsArr.splice(startingPoint, 0, ...repliesComment);
+          }
 
           setTargetBlogInfo({
             ...targetBlogInfo,
@@ -227,25 +311,28 @@ const useCommentFetch = () => {
     totalDeletedCommentNum,
   }: FetchCommentPropsType) => {
     if (commentsArr && index !== undefined) {
-      // 目標刪除留言的 parentIndex
-      const parentIndex = commentsArr.findIndex(
-        (comment) => comment._id === commentsArr[index].parent
-      );
+      const parentIndex = commentsArr[index].parentIndex ?? -1;
 
-      // 如果該留言并未展開其回覆留言
-      if (!commentsArr[index].isReplyLoaded) {
-        // 直接刪除當前留言
-        commentsArr.splice(index, 1);
-        // 並回溯到該留言的母留言，刪除其 children 中的最後一個留言
-        // 如果刪除的目標本就是頭留言，那得到的 parentIndex 就是 -1，commentArr[-1] 會是 undefined，所以不會執行
-        // 反之，如果是回覆留言，那就會刪除其母留言的 children 中的最後一個留言
+      // 如果刪除的是回覆留言，
+      if (parentIndex >= 0) {
+        // 先一步刪除其母留言的 children 中的對應刪除目標留言 ID
+        // 這樣一來留言數也會一併減少
+        commentsArr[parentIndex].children = commentsArr[
+          parentIndex
+        ].children?.filter((child) => child !== commentsArr[index]._id);
 
-        if (commentsArr[parentIndex]) {
-          commentsArr[parentIndex].children?.pop();
-        }
-      } else {
-        // 如果展開了其回覆留言
-        // 那就要刪除其下所有的回覆留言
+        // 再將母留言對應的 totalRepliesLoaded 中的 loadedNum 減 1
+        setTotalRepliesLoaded(
+          totalRepliesLoaded.map((item) =>
+            item.index === parentIndex
+              ? { ...item, loadedNum: item.loadedNum - 1 }
+              : item
+          )
+        );
+      }
+
+      // 如果有展開，那就要刪除其下所有回覆留言
+      if (commentsArr[index].isReplyLoaded) {
         while (
           commentsArr[index + 1].childrenLevel >
           commentsArr[index].childrenLevel
@@ -257,24 +344,40 @@ const useCommentFetch = () => {
           }
         }
 
-        // 刪除完所有回覆留言後，再刪除該留言
+        // 再刪除自己本身
+        commentsArr.splice(index, 1);
+      }
+      // 如果沒展開，那不管是頭留言還是回覆留言，都直接刪除自己
+      else {
         commentsArr.splice(index, 1);
       }
 
-      // 當母留言的 children 數量為 0 時，將其 isReplyLoaded 設為 false
+      // 如果有記錄過該留言的載入回覆留言數，那就要刪除
+      // 避免刪除後，如果剛好同個 index 留言被展開，loadedNum 就會累加而不是創建新的
+      if (totalRepliesLoaded[index]) {
+        setTotalRepliesLoaded(
+          totalRepliesLoaded.filter((item) => item.index !== index)
+        );
+      }
+
+      // 最後，當母留言的 children 數量為 0 時，將其 isReplyLoaded 設為 false
       if (commentsArr[parentIndex]?.children?.length === 0) {
         commentsArr[parentIndex].isReplyLoaded = false;
       }
-    }
 
-    setTargetBlogInfo({
-      ...targetBlogInfo,
-      comments: { ...comments, results: commentsArr ?? [] },
-      activity: {
-        ...activity,
-        total_comments: (total_comments ?? 0) - (totalDeletedCommentNum ?? 0),
-      },
-    });
+      setTargetBlogInfo({
+        ...targetBlogInfo,
+        comments: { ...comments, results: commentsArr },
+        activity: {
+          ...activity,
+          total_comments: (total_comments ?? 0) - (totalDeletedCommentNum ?? 0),
+          total_parent_comments:
+            parentIndex === -1
+              ? (total_parent_comments ?? 0) - 1
+              : total_parent_comments,
+        },
+      });
+    }
   };
 
   const DeleteTargetComment = async ({
