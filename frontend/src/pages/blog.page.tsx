@@ -29,7 +29,6 @@ const BlogPage = () => {
     commentsWrapper,
     deletedComment,
     totalParentCommentsLoaded,
-    totalRepliesLoaded,
     initialCommentState,
     setTotalParentCommentsLoaded,
     setTotalRepliesLoaded,
@@ -71,10 +70,6 @@ const BlogPage = () => {
     initialBlogInfo();
     initialCommentState();
   }, [blogId]);
-
-  useEffect(() => {
-    console.log(...totalRepliesLoaded, targetBlogInfo.comments?.results);
-  }, [targetBlogInfo]);
 
   // 當確定 totalParentCommentsLoaded 已初始化後
   // 再根據 blogId 來取得對應的 Blog 資訊與留言

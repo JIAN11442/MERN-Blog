@@ -1,4 +1,4 @@
-import { OutputData } from '@editorjs/editorjs';
+import { OutputData } from "@editorjs/editorjs";
 
 export interface GenerateAuthDataType {
   access_token: string;
@@ -156,4 +156,11 @@ export interface FetchCommentPropsType {
 export interface RepliesLoadedPropsType {
   index: number;
   loadedNum: number;
+}
+
+export interface AdjustContainerWidthPropsType {
+  maxChildrenLevel: number;
+  commentCardWidth: number;
+  incrementVal: number;
+  adjustWidth: boolean;
 }

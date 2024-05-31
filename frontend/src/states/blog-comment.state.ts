@@ -1,8 +1,9 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 import type {
+  AdjustContainerWidthPropsType,
   GenerateCommentStructureType,
   RepliesLoadedPropsType,
-} from '../commons/types.common';
+} from "../commons/types.common";
 
 interface BlogCommentProps {
   commentsWrapper: boolean;
@@ -16,6 +17,8 @@ interface BlogCommentProps {
   };
   modalRefStore: React.RefObject<HTMLDivElement>;
   totalRepliesLoaded: RepliesLoadedPropsType[];
+  maxChildrenLevel: number;
+  adjustContainerWidth: AdjustContainerWidthPropsType;
 
   setCommentsWrapper: (state: boolean) => void;
   setTotalParentCommentsLoaded: (state: number | null) => void;
@@ -28,6 +31,9 @@ interface BlogCommentProps {
   }) => void;
   setModalRefStore: (ref: React.RefObject<HTMLDivElement>) => void;
   setTotalRepliesLoaded: (state: RepliesLoadedPropsType[]) => void;
+  setMaxChildrenLevel: (level: number) => void;
+  setAdjustContainerWidth: (state: AdjustContainerWidthPropsType) => void;
+
   initialCommentState: () => void;
 }
 
@@ -35,10 +41,17 @@ const useBlogCommentStore = create<BlogCommentProps>((set) => ({
   commentsWrapper: false,
   totalParentCommentsLoaded: 0,
   isCommented: false,
-  comment: '',
+  comment: "",
   deletedComment: { state: false, index: 0, comment: null },
   modalRefStore: { current: null },
   totalRepliesLoaded: [],
+  maxChildrenLevel: 0,
+  adjustContainerWidth: {
+    maxChildrenLevel: 0,
+    commentCardWidth: 0,
+    incrementVal: 0,
+    adjustWidth: false,
+  },
 
   setCommentsWrapper: (state) => set({ commentsWrapper: state }),
   setTotalParentCommentsLoaded: (state) =>
@@ -48,6 +61,9 @@ const useBlogCommentStore = create<BlogCommentProps>((set) => ({
   setDeletedComment: (status) => set({ deletedComment: status }),
   setModalRefStore: (ref) => set({ modalRefStore: ref }),
   setTotalRepliesLoaded: (state) => set({ totalRepliesLoaded: state }),
+  setMaxChildrenLevel: (level) => set({ maxChildrenLevel: level }),
+  setAdjustContainerWidth: (state) => set({ adjustContainerWidth: state }),
+
   initialCommentState: () => set({ commentsWrapper: false }),
 }));
 

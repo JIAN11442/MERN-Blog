@@ -1,21 +1,25 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import BlogCommentField from './blog-comment-field.component';
-import NoDataMessage from './blog-nodata.component';
-import AnimationWrapper from './page-animation.component';
-import BlogCommentCard from './blog-comment-card.component';
+import BlogCommentField from "./blog-comment-field.component";
+import NoDataMessage from "./blog-nodata.component";
+import AnimationWrapper from "./page-animation.component";
+import BlogCommentCard from "./blog-comment-card.component";
 
-import useTargetBlogStore from '../states/target-blog.state';
-import useBlogCommentStore from '../states/blog-comment.state';
+import useTargetBlogStore from "../states/target-blog.state";
+import useBlogCommentStore from "../states/blog-comment.state";
 
-import { FlatIcons } from '../icons/flaticons';
+import { FlatIcons } from "../icons/flaticons";
 
-import type { BlogStructureType } from '../commons/types.common';
-import useCommentFetch from '../fetchs/comment.fetch';
+import type { BlogStructureType } from "../commons/types.common";
+import useCommentFetch from "../fetchs/comment.fetch";
 
 const BlogCommentContainer = () => {
   const commentContainerRef = useRef<HTMLDivElement | null>(null);
   const commentsDivRef = useRef<HTMLDivElement>(null);
+
+  const [paddingLeftIncrementVal, setPaddingLeftIncrementVal] = useState(10);
+  const [optionsCollapse, setOptionsCollapse] = useState(false);
+  const [allowLoadMoreReplies, setAllowLoadMoreReplies] = useState(true);
 
   const { targetBlogInfo, setTargetBlogInfo } = useTargetBlogStore();
 
@@ -30,8 +34,11 @@ const BlogCommentContainer = () => {
     isCommented,
     totalParentCommentsLoaded,
     modalRefStore,
+    adjustContainerWidth,
     setCommentsWrapper,
     setTotalParentCommentsLoaded,
+    setMaxChildrenLevel,
+    setAdjustContainerWidth,
   } = useBlogCommentStore();
 
   const { GetAndGenerateCommentsData } = useCommentFetch();
@@ -84,22 +91,124 @@ const BlogCommentContainer = () => {
       };
 
       const timeoutId = setTimeout(() => {
-        document.addEventListener('click', handleOnBlur);
+        document.addEventListener("click", handleOnBlur);
       }, 0);
 
       return () => {
         clearTimeout(timeoutId);
-        document.removeEventListener('click', handleOnBlur);
+        document.removeEventListener("click", handleOnBlur);
       };
     }
   }, [commentsWrapper, commentContainerRef, modalRefStore]);
+
+  // 計算最大子留言層數
+  useEffect(() => {
+    if (commentsArr) {
+      const maxLevel = commentsArr.reduce(
+        (acc, comment) =>
+          comment.childrenLevel > acc ? comment.childrenLevel : acc,
+        0
+      );
+
+      setMaxChildrenLevel(maxLevel);
+    }
+  }, [targetBlogInfo, commentsArr]);
+
+  // 調整留言版面寬度
+  useEffect(() => {
+    // 如果有 comment card 小於能接受的最小寬度，即 adjustWidth 為 true
+    if (adjustContainerWidth.adjustWidth) {
+      // 取得當前留言版面的寬度
+      const containerWidth = commentContainerRef.current?.offsetWidth;
+
+      // 在原有的寬度上增加 incrementVal
+      // 就是要調整的新寬度
+      const resizeWidth =
+        (containerWidth ?? 0) + adjustContainerWidth.incrementVal;
+
+      if (commentContainerRef.current) {
+        // 如果當前留言版面寬度大於等於 640px，即 tailwindcss 中的 sm
+        // 且新增的寬度是小於游覽器寬度的，那就調整留言版面寬度
+        if (window.innerWidth >= 640 && resizeWidth < window.innerWidth) {
+          // console.log(`sm: ${containerWidth} 調整為 ${resizeWidth} `);
+
+          commentContainerRef.current.style.width = `${resizeWidth}px`;
+        }
+        // 反之，如果當前留言版面寬度小於 640px，即 tailwindcss 中的 max:sm
+        // 或是新增的寬度大於游覽器寬度，
+        else {
+          // 直接將寬度調整為 100%
+          commentContainerRef.current.style.width = `100%`;
+
+          // 那就看 paddingLeftIncrementVal 還有沒有空間可以縮小
+          // 如果有，那就利用 paddingLeftIncrementVal 來調整 padding-left
+          // 來達到另類的擴展留言版面的效果
+          if (paddingLeftIncrementVal - 1 > 1) {
+            const newIncrementVal = paddingLeftIncrementVal - 1;
+
+            // console.log(
+            //   `max-sm: ${paddingLeftIncrementVal} 調整為 ${newIncrementVal}`
+            // );
+
+            setPaddingLeftIncrementVal(newIncrementVal);
+          }
+          // 如果 paddingLeftIncrementVal 已經達到最小值，
+          // 且當前留言版面寬度大於 140px
+          // 那就調整 icon 顯示方式來達到另類的擴展留言版面的效果
+          else {
+            if (adjustContainerWidth.commentCardWidth > 140) {
+              // console.log(
+              //   `padding-left 已達最小值，轉而調整 icon 顯示方式，當前留言卡寬度為 ${adjustContainerWidth.commentCardWidth}`
+              // );
+
+              setOptionsCollapse(true);
+            }
+            // 如果當前留言版面寬度小於 140px，那就强制暫停載入，
+            // 直到游覽器寬度增加，進而觸發下面的 useEffect 監聽
+            else {
+              // console.log(`應强制暫停載入，除非自行增加游覽器寬度`);
+
+              setAllowLoadMoreReplies(false);
+            }
+          }
+        }
+
+        setAdjustContainerWidth({
+          ...adjustContainerWidth,
+          adjustWidth: false,
+        });
+      }
+    }
+  }, [adjustContainerWidth]);
+
+  // 這是爲了 max:sm 經過調整留言版面、留言退縮距離、操作圖標化這三步后
+  // 還是無法容納留言卡時，就强制暫停載入
+  // 直到游覽器寬度增加，才能繼續載入
+  useEffect(() => {
+    let previousWidth = window.innerWidth;
+
+    const handleResize = () => {
+      const currentWidth = window.innerWidth;
+      if (currentWidth > previousWidth) {
+        // console.log("游覽器寬度增加，允許載入更多留言");
+        setAllowLoadMoreReplies(true);
+      }
+      previousWidth = currentWidth;
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <div
       ref={commentContainerRef}
       className={`
         fixed
-        w-[40%]
+        w-[50%]
         min-w-[450px]
         max-sm:w-full
         max-sm:right-0
@@ -200,6 +309,9 @@ const BlogCommentContainer = () => {
                 index={i}
                 commentData={comment}
                 leftVal={comment.childrenLevel * 4}
+                paddingLeftIncrementVal={paddingLeftIncrementVal}
+                optionsCollapse={optionsCollapse}
+                allowLoadMoreReplies={allowLoadMoreReplies}
               />
             </AnimationWrapper>
           ))}

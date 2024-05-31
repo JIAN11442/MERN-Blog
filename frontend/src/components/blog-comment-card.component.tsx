@@ -1,38 +1,44 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
-import BlogCommentField from './blog-comment-field.component';
-import AnimationWrapper from './page-animation.component';
+import BlogCommentField from "./blog-comment-field.component";
+import AnimationWrapper from "./page-animation.component";
 
-import useAuthStore from '../states/user-auth.state';
-import useBlogCommentStore from '../states/blog-comment.state';
-import useTargetBlogStore from '../states/target-blog.state';
+import useAuthStore from "../states/user-auth.state";
+import useBlogCommentStore from "../states/blog-comment.state";
+import useTargetBlogStore from "../states/target-blog.state";
 
-import useCommentFetch from '../fetchs/comment.fetch';
+import useCommentFetch from "../fetchs/comment.fetch";
 
-import { FlatIcons } from '../icons/flaticons';
+import { FlatIcons } from "../icons/flaticons";
 
-import { getDay } from '../commons/date.common';
+import { getDay } from "../commons/date.common";
 import type {
   AuthorProfileStructureType,
   BlogStructureType,
   GenerateCommentStructureType,
-} from '../commons/types.common';
+} from "../commons/types.common";
+import CommentCardOptionsPanel from "./comment-card-panel.component";
 
 interface BlogCommentCardProps {
   index: number;
   commentData: GenerateCommentStructureType;
   leftVal: number;
+  paddingLeftIncrementVal: number;
   options?: boolean;
-  ref?: React.Ref<HTMLDivElement>;
+  optionsCollapse?: boolean;
+  allowLoadMoreReplies?: boolean;
 }
 
 const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
   index,
   commentData,
   leftVal,
+  paddingLeftIncrementVal,
   options = true,
+  optionsCollapse = false,
+  allowLoadMoreReplies = true,
 }) => {
   const {
     _id: commentObjectId,
@@ -44,7 +50,11 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
     personal_info: { username, fullname, profile_img },
   } = commented_by as AuthorProfileStructureType;
 
+  const commentCardRef = useRef<HTMLDivElement>(null);
+  const commentOptionsRef = useRef<HTMLDivElement>(null);
+
   const [isReplying, setIsReplying] = useState(false);
+  const [isCollapse, setIsCollapse] = useState(false);
 
   const { authUser } = useAuthStore();
   const { access_token, username: authUsername } = authUser ?? {};
@@ -57,8 +67,14 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
     },
   } = targetBlogInfo as Required<BlogStructureType>;
 
-  const { setDeletedComment, setTotalRepliesLoaded, totalRepliesLoaded } =
-    useBlogCommentStore();
+  const {
+    totalRepliesLoaded,
+    maxChildrenLevel,
+    adjustContainerWidth,
+    setDeletedComment,
+    setTotalRepliesLoaded,
+    setAdjustContainerWidth,
+  } = useBlogCommentStore();
 
   // 因為 totalRepliesLoaded 是一個陣列，且是隨著每次加載回覆留言而增加
   // 因此每一個 comment card 如果想要知道自己的母留言加載時記錄在 totalRepliesLoaded 的資訊位置(index)，
@@ -69,21 +85,24 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
 
   const { LoadRepliesCommentById } = useCommentFetch();
 
+  // 顯示刪除留言警告
   const handleDeleteWarning = () => {
     if (!access_token) {
-      return toast.error('You need to login to delete a comment');
+      return toast.error("You need to login to delete a comment");
     }
     setDeletedComment({ state: true, comment: commentData, index });
   };
 
+  // 回覆留言(出現留言框)
   const handleReply = () => {
     if (!access_token) {
-      return toast.error('Please login first before reply');
+      return toast.error("Please login first before reply");
     }
 
     setIsReplying(!isReplying);
   };
 
+  // 隱藏回覆留言
   const handleHideReplies = (index: number) => {
     // 先將隱藏回覆留言功能設為 false
     commentData.isReplyLoaded = false;
@@ -131,6 +150,12 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
       return;
     }
 
+    if (!allowLoadMoreReplies) {
+      return toast.error(
+        "Please increase the browser width to load more replies"
+      );
+    }
+
     commentData.isReplyLoaded = true;
 
     LoadRepliesCommentById({
@@ -163,22 +188,6 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
       // 如果該 comment card 的母留言的 children 數量大於 totalRepliesLoaded 記錄的加載數量
       // 且該 comment card 的 id 等於母留言加載的最後一個留言 id，那就代表該 comment card 的確是母留言的最後一個子留言
       // 就需要出現 Load more replies 按鈕，返回 true
-
-      // console.log(
-      //   `\n\n留言內容: ${commentData.comment}\n母留言的子留言數量: ${
-      //     commentsArr[commentData.parentIndex ?? 0].children?.length ?? 0
-      //   }\n已記錄母留言展開子留言數: ${
-      //     totalRepliesLoaded[indexOfRepliesLoadedInCurrCommentData].loadedNum
-      //   }\n當前母留言展開的所有ID: ${
-      //     commentsArr[commentData.parentIndex ?? 0].children
-      //   }\n當前母留言展開的最後一個子留言ID: ${
-      //     commentsArr[commentData.parentIndex ?? 0].children?.[
-      //       totalRepliesLoaded[indexOfRepliesLoadedInCurrCommentData]
-      //         .loadedNum - 1
-      //     ]
-      //   }\n當前留言ID: ${commentData._id}\n\n`
-      // );
-
       if (
         (commentsArr[commentData.parentIndex ?? 0].children?.length ?? 0) >
           totalRepliesLoaded[indexOfRepliesLoadedInCurrCommentData].loadedNum &&
@@ -197,19 +206,80 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
     return false;
   };
 
+  // 手動控制選項框的顯示與隱藏
+  const handleOptionsPanelCollapse = () => {
+    setIsCollapse(!isCollapse);
+  };
+
+  // 當 CommentCardOptionsPanel 失焦時，隱藏選項框
+  const handleOptionsPanelOnBlur = () => {
+    setTimeout(() => {
+      setIsCollapse(false);
+    }, 200);
+  };
+
   // 編輯留言
   const handleEditComment = () => {
     if (!access_token) {
-      return toast.error('Please login first before edit');
+      return toast.error("Please login first before edit");
     }
   };
+
+  // 根據留言卡寬度決定是否調整留言版面寬度
+  useEffect(() => {
+    // 如果當前留言卡的 childrenLevel 等於最大 childrenLevel
+    if (commentData.childrenLevel === maxChildrenLevel) {
+      const minCommentCardLimit = 250;
+
+      // 就看留言卡的寬度是否小於等於能接受的最小寬度(minCommentCardLimit)
+      // 這裏用 setTimeout 來延遲時間，讓 ref 有足夠的時間取得留言卡的寬度
+      setTimeout(() => {
+        const cardRef = commentCardRef.current;
+
+        if (cardRef) {
+          const cardWidth = cardRef.offsetWidth ?? 0;
+
+          // 如果小於 minCommentCardLimit，
+          // 就設定 adjustWidth 為 true，順帶記錄當前留言卡的寬度
+          // incrementVal 是當前留言卡寬度與 minCommentCardLimit 的差值
+          // 這樣每一次調整留言版面寬度都會是固定的差值
+          // 且如果取消調整，也能恢復調整前的寬度(因爲這時候的差值也會變化)
+          if (cardWidth < minCommentCardLimit) {
+            setAdjustContainerWidth({
+              ...adjustContainerWidth,
+              maxChildrenLevel,
+              commentCardWidth: cardWidth,
+              incrementVal: minCommentCardLimit - cardWidth,
+              adjustWidth: true,
+            });
+          }
+          // 如果是大於，還是得記錄當前留言卡的寬度
+          // 因爲我們需要讓 adjustContainerWidth 有變化，這樣才能觸發 container.component 的 useEffect
+          // 進而調整留言版面的寬度
+          else {
+            setAdjustContainerWidth({
+              ...adjustContainerWidth,
+              maxChildrenLevel,
+              commentCardWidth: cardWidth,
+              incrementVal: minCommentCardLimit - cardWidth,
+            });
+          }
+        }
+      }, 100);
+    }
+  }, [maxChildrenLevel]);
 
   return (
     <div
       className="w-full"
-      style={{ paddingLeft: `${options ? `${leftVal * 10}px` : ''}` }}
+      style={{
+        paddingLeft: `${
+          options ? `${leftVal * paddingLeftIncrementVal}px` : ""
+        }`,
+      }}
     >
       <div
+        ref={commentCardRef}
         className="
           group
           flex
@@ -228,7 +298,6 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
             flex
             gap-5
             items-center
-            justify-between
           "
         >
           {/* Avatar && Fullname */}
@@ -260,11 +329,12 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
           {/* Date */}
           <p
             className="
-              text-nowrap
+              ml-auto
+              line-clamp-1
               text-grey-dark/60
             "
           >
-            {getDay(commentedAt ?? '')}
+            {getDay(commentedAt ?? "")}
           </p>
         </div>
 
@@ -274,6 +344,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
             ml-3
             text-lg
             font-gelasio
+            truncate
             whitespace-pre-wrap
           "
         >
@@ -284,115 +355,151 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
         <>
           {options && (
             <div
+              ref={commentOptionsRef}
               className="
                 flex
                 items-center
               "
             >
-              {/* Comment && Reply Buttton && Edit */}
-              <div
-                className="
-                  flex
-                  gap-5
-                  items-center
-                "
-              >
-                {/* Comments button */}
-                <div>
-                  {commentData.isReplyLoaded ? (
-                    <button
-                      className="
-                        text-grey-dark/60
-                        hover:text-grey-dark/80
-                        hover:underline
-                        underline-offset-2
-                        transition
-                      "
-                      onClick={() => handleHideReplies(index)}
-                    >
-                      Hide Comments
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleLoadReplies}
-                      className="
-                        text-grey-dark/60
-                        hover:text-grey-dark/80
-                        transition
-                      "
-                    >
-                      <p className="flex gap-2">
-                        <FlatIcons name="fi fi-rs-comment-dots" />
-                        {commentData?.children?.length} comments
-                      </p>
-                    </button>
-                  )}
-                </div>
-
-                {/* Reply button */}
-                <button
-                  onClick={handleReply}
-                  className="
-                    text-grey-dark/60
-                    hover:text-grey-dark/80
-                    hover:underline
-                    underline-offset-2
-                    transition
-                  "
-                >
-                  Reply
-                </button>
-
-                {/* Edit button */}
-                <div>
-                  {(access_token && authUsername === username) ||
-                  !access_token ? (
-                    <button
-                      onClick={handleEditComment}
-                      className="
-                        text-grey-dark/60
-                        hover:text-grey-dark/80
-                        hover:underline
-                        underline-offset-2
-                        transition
-                      "
-                    >
-                      Edit
-                    </button>
-                  ) : (
-                    ''
-                  )}
-                </div>
+              {/* Comments button */}
+              <div className="flex mr-5">
+                {commentData.isReplyLoaded ? (
+                  <button
+                    className="
+                      text-grey-dark/60
+                      hover:text-grey-dark/80
+                      hover:underline
+                      underline-offset-2
+                      transition
+                    "
+                    onClick={() => handleHideReplies(index)}
+                  >
+                    Hide
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleLoadReplies}
+                    className="
+                      flex
+                      gap-2
+                      text-grey-dark/60
+                      hover:text-grey-dark/80
+                      transition
+                    "
+                  >
+                    <FlatIcons name="fi fi-rs-comment-dots" />
+                    {commentData?.children?.length}
+                  </button>
+                )}
               </div>
 
-              {/* Delete Button*/}
-              <div className="ml-auto">
-                {/* 1. deleteBtn 是選擇性參數，是讓使用者決定是否要在 card 中顯示 deletebutton
+              {/* Reply Button && Edit Button && Delete Button */}
+              {optionsCollapse ? (
+                // ReplyBtn && EditBtn && DeleteBtn (particular situation)
+                <>
+                  <div className="relative ml-auto">
+                    <button
+                      onBlur={handleOptionsPanelOnBlur}
+                      onClick={handleOptionsPanelCollapse}
+                      className="
+                        px-3
+                        text-grey-dark/60
+                        hover:text-grey-dark/80
+                        transition
+                      "
+                    >
+                      <FlatIcons name="fi fi-sr-menu-dots-vertical" />
+                    </button>
+
+                    {isCollapse && (
+                      <CommentCardOptionsPanel
+                        access_token={access_token}
+                        authUsername={authUsername}
+                        commentUsername={username}
+                        blogAuthorUsername={blogAuthorUsername}
+                        handleReply={handleReply}
+                        handleEditComment={handleEditComment}
+                        handleDeleteWarning={handleDeleteWarning}
+                      />
+                    )}
+                  </div>
+                </>
+              ) : (
+                // ReplyBtn && EditBtn && DeleteBtn (normal situation)
+                <>
+                  <div
+                    className="
+                      flex
+                      gap-5
+                      items-center
+                    "
+                  >
+                    {/* Reply button */}
+                    <button
+                      onClick={handleReply}
+                      className="
+                        text-grey-dark/60
+                        hover:text-grey-dark/80
+                        hover:underline
+                        underline-offset-2
+                        transition
+                      "
+                    >
+                      Reply
+                    </button>
+
+                    {/* Edit button */}
+                    <div>
+                      {(access_token && authUsername === username) ||
+                      !access_token ? (
+                        <button
+                          onClick={handleEditComment}
+                          className="
+                            text-grey-dark/60
+                            hover:text-grey-dark/80
+                            hover:underline
+                            underline-offset-2
+                            transition
+                          "
+                        >
+                          Edit
+                        </button>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Delete Button*/}
+                  <div className="ml-auto">
+                    {/* 1. deleteBtn 是選擇性參數，是讓使用者決定是否要在 card 中顯示 deletebutton
                     2. 如果有登入，且是該 Blog 的作者，那有權限刪除所有的 comment
                     3. 如果有登入，且是該 comment 的作者，那有權限刪除自己的 comment
                     4. 如果沒有登入，就顯示所有的 delete button(但並沒有權限刪除，必須登入後才能刪除) */}
-                {(access_token && authUsername === blogAuthorUsername) ||
-                (access_token && authUsername === username) ||
-                !access_token ? (
-                  <button
-                    onClick={handleDeleteWarning}
-                    className="
-                      p-2
-                      px-3
-                      rounded-md
-                      border
-                      border-grey-custom
-                      text-grey-dark/60
-                      hover:bg-red-custom/30
-                      hover:text-red-custom
-                    "
-                  >
-                    <FlatIcons name="fi fi-rr-trash" />
-                  </button>
-                ) : (
-                  ''
-                )}
-              </div>
+                    {(access_token && authUsername === blogAuthorUsername) ||
+                    (access_token && authUsername === username) ||
+                    !access_token ? (
+                      <button
+                        onClick={handleDeleteWarning}
+                        className="
+                          p-2
+                          px-3
+                          rounded-md
+                          border
+                          border-grey-custom
+                          text-grey-dark/60
+                          hover:bg-red-custom/30
+                          hover:text-red-custom
+                        "
+                      >
+                        <FlatIcons name="fi fi-rr-trash" />
+                      </button>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </>
@@ -415,7 +522,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
               <BlogCommentField
                 action="Reply"
                 placeholder={`Reply to ${
-                  authUsername === username ? 'yourself' : `@${username}`
+                  authUsername === username ? "yourself" : `@${username}`
                 }`}
                 index={index}
                 replyingTo={commentObjectId}
