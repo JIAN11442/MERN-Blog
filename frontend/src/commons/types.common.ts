@@ -121,7 +121,7 @@ export interface CommentStructureType {
   blog_author?: string;
   comment?: string;
   children?: string[];
-  commented_by?: { personal_info: PersonalInfoStructureType };
+  commented_by?: { personal_info: PersonalInfoStructureType; _id?: string };
   isReply?: boolean;
   parent?: string;
 }
@@ -151,6 +151,7 @@ export interface FetchCommentPropsType {
   repliedCommentId?: string;
   totalDeletedCommentNum?: number;
   loadmore?: boolean;
+  newCommentContent?: string;
 }
 
 export interface RepliesLoadedPropsType {
@@ -163,4 +164,9 @@ export interface AdjustContainerWidthPropsType {
   commentCardWidth: number;
   incrementVal: number;
   adjustWidth: boolean;
+}
+
+export interface DeleteBtnRefPropsType {
+  index: number;
+  ref: React.RefObject<HTMLButtonElement>;
 }

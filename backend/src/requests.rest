@@ -18,9 +18,10 @@
 # }
 
 
-POST http://localhost:5000/api/comment/count-comments
+POST http://localhost:5000/api/comment/update-comment
 Content-Type: application/json
 
 {
-    "blogObjectId": "664d8f89b12908aca6107da6"
+    "commentObjectId": "665ee2b17d306794595d2f08",
+    "newComment": "This is a new comment"
 }

@@ -25,7 +25,7 @@ interface BlogCommentCardProps {
   index: number;
   commentData: GenerateCommentStructureType;
   leftVal: number;
-  paddingLeftIncrementVal: number;
+  paddingLeftIncrementVal?: number;
   options?: boolean;
   optionsCollapse?: boolean;
   allowLoadMoreReplies?: boolean;
@@ -35,7 +35,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
   index,
   commentData,
   leftVal,
-  paddingLeftIncrementVal,
+  paddingLeftIncrementVal = 1,
   options = true,
   optionsCollapse = false,
   allowLoadMoreReplies = true,
@@ -71,9 +71,12 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
     totalRepliesLoaded,
     maxChildrenLevel,
     adjustContainerWidth,
+    deleteBtnDisabled,
     setDeletedComment,
     setTotalRepliesLoaded,
     setAdjustContainerWidth,
+    setDeleteBtnDisabled,
+    setEditComment,
   } = useBlogCommentStore();
 
   // 因為 totalRepliesLoaded 是一個陣列，且是隨著每次加載回覆留言而增加
@@ -90,7 +93,11 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
     if (!access_token) {
       return toast.error("You need to login to delete a comment");
     }
+    // 設定要刪除的留言資訊
     setDeletedComment({ state: true, comment: commentData, index });
+
+    // 並將刪除按鈕設為 disabled
+    setDeleteBtnDisabled(true);
   };
 
   // 回覆留言(出現留言框)
@@ -213,9 +220,13 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
 
   // 當 CommentCardOptionsPanel 失焦時，隱藏選項框
   const handleOptionsPanelOnBlur = () => {
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       setIsCollapse(false);
-    }, 200);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   };
 
   // 編輯留言
@@ -223,6 +234,12 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
     if (!access_token) {
       return toast.error("Please login first before edit");
     }
+
+    if (username !== authUsername) {
+      return toast.error("You not allowed to edit this comment");
+    }
+
+    setEditComment({ status: true, data: commentData });
   };
 
   // 根據留言卡寬度決定是否調整留言版面寬度
@@ -233,7 +250,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
 
       // 就看留言卡的寬度是否小於等於能接受的最小寬度(minCommentCardLimit)
       // 這裏用 setTimeout 來延遲時間，讓 ref 有足夠的時間取得留言卡的寬度
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         const cardRef = commentCardRef.current;
 
         if (cardRef) {
@@ -266,6 +283,10 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
           }
         }
       }, 100);
+
+      return () => {
+        clearTimeout(timeout);
+      };
     }
   }, [maxChildrenLevel]);
 
@@ -290,7 +311,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
           rounded-md
           border
           border-grey-custom
-        "
+          "
       >
         {/* Comment user info */}
         <div
@@ -480,6 +501,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
                     (access_token && authUsername === username) ||
                     !access_token ? (
                       <button
+                        disabled={deleteBtnDisabled}
                         onClick={handleDeleteWarning}
                         className="
                           p-2
@@ -520,7 +542,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
             >
               <hr className="border-grey-custom" />
               <BlogCommentField
-                action="Reply"
+                action="reply"
                 placeholder={`Reply to ${
                   authUsername === username ? "yourself" : `@${username}`
                 }`}

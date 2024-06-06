@@ -1,21 +1,21 @@
-import { useEffect, useRef } from 'react';
-import toast from 'react-hot-toast';
+import { useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 
-import { FlatIcons } from '../icons/flaticons';
+import { FlatIcons } from "../icons/flaticons";
 
-import BlogCommentCard from './blog-comment-card.component';
+import BlogCommentCard from "./blog-comment-card.component";
 
-import useBlogCommentStore from '../states/blog-comment.state';
+import useBlogCommentStore from "../states/blog-comment.state";
 
-import useCommentFetch from '../fetchs/comment.fetch';
-import type { GenerateCommentStructureType } from '../commons/types.common';
+import useCommentFetch from "../fetchs/comment.fetch";
+import type { GenerateCommentStructureType } from "../commons/types.common";
 
 interface DeleteCommentWarningProps {
   index: number;
   data: GenerateCommentStructureType;
 }
 
-const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
+const DeleteCommentWarningModal: React.FC<DeleteCommentWarningProps> = ({
   index,
   data,
 }) => {
@@ -23,22 +23,36 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
 
   const modalRef = useRef<HTMLDivElement | null>(null);
 
-  const { deletedComment, setDeletedComment, setModalRefStore } =
-    useBlogCommentStore();
+  const {
+    deletedComment,
+    setDeletedComment,
+    setModalStoreRef,
+    setDeleteBtnDisabled,
+  } = useBlogCommentStore();
+
   const { DeleteTargetComment } = useCommentFetch();
 
   // 取消刪除，關閉刪除警告視窗
   const handleCancel = () => {
+    // 將刪除按鈕設為可用
+    setDeleteBtnDisabled(false);
+
+    // 最後再關閉刪除警告視窗
     setDeletedComment({ ...deletedComment, state: false });
   };
 
   // 刪除留言，再關閉刪除警告視窗
   const handleDelete = () => {
+    // 刪除數據庫中的目標留言
     DeleteTargetComment({ commentObjectId: _id, index });
 
+    // 再讓刪除按鈕設為可用
+    setDeleteBtnDisabled(false);
+
+    // 最後再關閉刪除警告視窗
     setDeletedComment({ ...deletedComment, state: false });
 
-    toast.success('Comment deleted successfully');
+    toast.success("Comment deleted successfully");
   };
 
   // 當點擊其他非 modalRef 的地方，就關閉刪除警告視窗
@@ -51,17 +65,21 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
   useEffect(() => {
     const handleOnBlur = (e: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+        // 將刪除按鈕設為可用
+        setDeleteBtnDisabled(false);
+
+        // 最後再關閉刪除警告視窗
         setDeletedComment({ ...deletedComment, state: false });
       }
     };
 
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('click', handleOnBlur);
+    const timeout = setTimeout(() => {
+      document.addEventListener("click", handleOnBlur);
     }, 0);
 
     return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener('click', handleOnBlur);
+      clearTimeout(timeout);
+      document.removeEventListener("click", handleOnBlur);
     };
   }, []);
 
@@ -73,11 +91,11 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
   // 而當 [警告視窗] 存在時，就不會觸發 [留言視窗] 的 onBlur 關閉功能(這一步看 ..comment-container.component)
   useEffect(() => {
     if (modalRef) {
-      setModalRefStore(modalRef);
+      setModalStoreRef(modalRef);
     }
 
     return () => {
-      setModalRefStore({ current: null });
+      setModalStoreRef({ current: null });
     };
   }, [modalRef]);
 
@@ -145,13 +163,13 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
               center
             "
           >
-            Do you really want to delete this comment{' '}
+            Do you really want to delete this comment{" "}
             <span className="text-xl">
               {data?.children?.length
                 ? `
                 and its ${data.children.length} sub-comments
                 `
-                : ''}
+                : ""}
             </span>
             ?
           </p>
@@ -166,7 +184,6 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
         />
 
         {/* Buttons */}
-
         <div
           className="
             flex
@@ -204,4 +221,4 @@ const DeleteCommentWarning: React.FC<DeleteCommentWarningProps> = ({
   );
 };
 
-export default DeleteCommentWarning;
+export default DeleteCommentWarningModal;

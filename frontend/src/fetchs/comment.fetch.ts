@@ -1,14 +1,14 @@
-import axios from 'axios';
-import toast from 'react-hot-toast';
+import axios from "axios";
+import toast from "react-hot-toast";
 
-import useAuthStore from '../states/user-auth.state';
-import useBlogCommentStore from '../states/blog-comment.state';
-import useTargetBlogStore from '../states/target-blog.state';
+import useAuthStore from "../states/user-auth.state";
+import useBlogCommentStore from "../states/blog-comment.state";
+import useTargetBlogStore from "../states/target-blog.state";
 
 import {
   GenerateCommentStructureType,
   FetchCommentPropsType,
-} from '../commons/types.common';
+} from "../commons/types.common";
 
 const useCommentFetch = () => {
   const { authUser } = useAuthStore();
@@ -27,10 +27,10 @@ const useCommentFetch = () => {
   } = useBlogCommentStore();
 
   axios.defaults.headers.common[
-    'Authorization'
+    "Authorization"
   ] = `Bearer ${authUser?.access_token}`;
 
-  const COMMENT_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + '/comment';
+  const COMMENT_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/comment";
   const LOAD_COMMENT_LIMIT = import.meta.env.VITE_COMMENTS_LIMIT;
 
   // 取得目標 blog 的所有未回復留言
@@ -38,7 +38,7 @@ const useCommentFetch = () => {
     blogObjectId,
     skip,
   }: FetchCommentPropsType) => {
-    const requestURL = COMMENT_SERVER_ROUTE + '/get-blog-comments';
+    const requestURL = COMMENT_SERVER_ROUTE + "/get-blog-comments";
 
     return await axios
       .post(requestURL, { blogObjectId, skip })
@@ -85,7 +85,7 @@ const useCommentFetch = () => {
     index,
     replyState,
   }: FetchCommentPropsType) => {
-    const requestURL = COMMENT_SERVER_ROUTE + '/create-new-comment';
+    const requestURL = COMMENT_SERVER_ROUTE + "/create-new-comment";
 
     await axios
       .post(requestURL, { blogObjectId, comment, blog_author, replying_to })
@@ -95,7 +95,7 @@ const useCommentFetch = () => {
 
           // 讀取目標 blog 時重構的 comments 資料
           const commentsArr =
-            comments && 'results' in comments ? comments.results : [];
+            comments && "results" in comments ? comments.results : [];
 
           // 將創建的新留言資料也重構成符合一開始讀取 comments 時重構的樣子
           // 比如賦予 commented_by 屬性，並將其設為當前登入用戶的相關資訊
@@ -205,11 +205,11 @@ const useCommentFetch = () => {
         } else if (error.request) {
           // 請求發出但沒有收到回應
           console.log(error.request);
-          toast.error('Request made but no response received');
+          toast.error("Request made but no response received");
         } else {
           // 在設定請求時出現錯誤
           console.log(error.message);
-          toast.error('Request setup error: ', error.message);
+          toast.error("Request setup error: ", error.message);
         }
       });
   };
@@ -222,7 +222,7 @@ const useCommentFetch = () => {
     index,
     commentsArr = null,
   }: FetchCommentPropsType) => {
-    const requestURL = COMMENT_SERVER_ROUTE + '/load-replies-comment';
+    const requestURL = COMMENT_SERVER_ROUTE + "/load-replies-comment";
 
     await axios
       .post(requestURL, { repliedCommentId, skip })
@@ -384,7 +384,7 @@ const useCommentFetch = () => {
     commentObjectId,
     index = 0,
   }: FetchCommentPropsType) => {
-    const requestURL = COMMENT_SERVER_ROUTE + '/delete-target-comment';
+    const requestURL = COMMENT_SERVER_ROUTE + "/delete-target-comment";
 
     await axios
       .post(requestURL, { commentObjectId })
@@ -405,12 +405,50 @@ const useCommentFetch = () => {
       });
   };
 
+  // 更新目標留言
+  const UpdateTargetCommentContent = async ({
+    commentObjectId,
+    newCommentContent,
+  }: FetchCommentPropsType) => {
+    if (!newCommentContent?.length) {
+      return toast.error("Comment content cannot be empty");
+    }
+
+    const requestURL = COMMENT_SERVER_ROUTE + "/update-comment";
+
+    await axios
+      .post(requestURL, { commentObjectId, newCommentContent })
+      .then(({ data }) => {
+        if (data) {
+          // 根據前端傳遞的 commentObjectId 找到對應的留言在 commentsArr 中的 index
+          const index = commentsArr?.findIndex(
+            (comment) => comment._id === commentObjectId
+          );
+
+          if (commentsArr && index !== undefined && index >= 0) {
+            // 根據 index 找到對應的留言，並更新其 comment 屬性
+            commentsArr[index].comment = newCommentContent;
+
+            // 最後更新 zustand 中的 comments 資料
+            setTargetBlogInfo({
+              ...targetBlogInfo,
+              comments: { ...comments, results: commentsArr },
+            });
+          }
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   return {
     GetCommentsByBlogId,
     GetAndGenerateCommentsData,
     AddCommentToBlog,
     LoadRepliesCommentById,
     DeleteTargetComment,
+    UpdateTargetCommentContent,
   };
 };
 

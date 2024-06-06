@@ -33,19 +33,28 @@ const BlogCommentContainer = () => {
     commentsWrapper,
     isCommented,
     totalParentCommentsLoaded,
-    modalRefStore,
+    modalStoreRef,
     adjustContainerWidth,
+    editComment,
+    isEditedComment,
     setCommentsWrapper,
     setTotalParentCommentsLoaded,
     setMaxChildrenLevel,
     setAdjustContainerWidth,
+    setEditComment,
+    setIsEditWarning,
+    setDeleteBtnDisabled,
   } = useBlogCommentStore();
 
   const { GetAndGenerateCommentsData } = useCommentFetch();
 
   // 關閉留言區塊
   const handleCloseCommentContainer = () => {
+    // 關閉留言視窗
     setCommentsWrapper(false);
+
+    // 最後將刪除按鈕設為可用
+    setDeleteBtnDisabled(false);
   };
 
   // 載入更多留言
@@ -76,7 +85,7 @@ const BlogCommentContainer = () => {
   useEffect(() => {
     if (commentsWrapper) {
       const containerRef = commentContainerRef.current;
-      const modalRef = modalRefStore.current;
+      const modalRef = modalStoreRef.current;
 
       const handleOnBlur = (e: MouseEvent) => {
         // 當 [警告視窗] 不存在，即 modelRef 為 null，
@@ -86,20 +95,36 @@ const BlogCommentContainer = () => {
           containerRef &&
           !containerRef.contains(e.target as Node)
         ) {
-          setCommentsWrapper(false);
+          // 如果已編輯，即編輯框内容與原留言不同，
+          // 就顯示警告視窗
+          // 之後是否關閉留言視窗，就看警告視窗的選項
+          if (isEditedComment) {
+            setIsEditWarning(true);
+          }
+          // 反之，就是正常關閉留言視窗
+          else {
+            // 關閉留言視窗
+            setCommentsWrapper(false);
+
+            // 初始化編輯留言記錄
+            setEditComment({ status: false, data: null });
+
+            // 最後將刪除按鈕設為可用
+            setDeleteBtnDisabled(false);
+          }
         }
       };
 
-      const timeoutId = setTimeout(() => {
+      const timeout = setTimeout(() => {
         document.addEventListener("click", handleOnBlur);
       }, 0);
 
       return () => {
-        clearTimeout(timeoutId);
+        clearTimeout(timeout);
         document.removeEventListener("click", handleOnBlur);
       };
     }
-  }, [commentsWrapper, commentContainerRef, modalRefStore]);
+  }, [commentsWrapper, commentContainerRef, modalStoreRef, isEditedComment]);
 
   // 計算最大子留言層數
   useEffect(() => {
@@ -285,74 +310,103 @@ const BlogCommentContainer = () => {
         <hr className="mt-8 mb-2 border-grey-custom" />
       </div>
 
-      {/* Comment */}
-      {commentsArr.length ? (
-        <div
-          ref={commentsDivRef}
-          className={`
-            max-h-[75%]
-            pl-8
-            mr-8
-            pr-4
-            overflow-y-auto
-            cstm-scrollbar
-          `}
-        >
-          {commentsArr.map((comment, i) => (
-            <AnimationWrapper
-              key={i}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: commentsWrapper ? 1 : 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <BlogCommentCard
-                index={i}
-                commentData={comment}
-                leftVal={comment.childrenLevel * 4}
-                paddingLeftIncrementVal={paddingLeftIncrementVal}
-                optionsCollapse={optionsCollapse}
-                allowLoadMoreReplies={allowLoadMoreReplies}
-              />
-            </AnimationWrapper>
-          ))}
-
-          {/* Load more button */}
-          {totalParentCommentsLoaded &&
-            totalParentCommentsLoaded < (total_parent_comments ?? 0) && (
-              <button
-                onClick={handleLoadmoreComments}
-                className="
-                  flex
-                  my-3
-                  center
-                  text-grey-dark/40
-                  hover:text-grey-dark/50
-                  transition
-                "
+      {/* Comments */}
+      <>
+        {commentsArr.length ? (
+          <div
+            ref={commentsDivRef}
+            className={`
+              max-h-[75%]
+              pl-8
+              mr-8
+              pr-4
+              overflow-y-auto
+              cstm-scrollbar
+            `}
+          >
+            {commentsArr.map((comment, i) => (
+              <AnimationWrapper
+                key={i}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: commentsWrapper ? 1 : 0 }}
+                transition={{ duration: 0.5 }}
               >
-                Load more
-              </button>
-            )}
+                <BlogCommentCard
+                  index={i}
+                  commentData={comment}
+                  leftVal={comment.childrenLevel * 4}
+                  paddingLeftIncrementVal={paddingLeftIncrementVal}
+                  optionsCollapse={optionsCollapse}
+                  allowLoadMoreReplies={allowLoadMoreReplies}
+                />
+              </AnimationWrapper>
+            ))}
 
-          {/* Separate Line */}
-          <hr className="mt-8 border-grey-custom" />
-        </div>
-      ) : (
-        <div className="px-8">
-          <NoDataMessage message="No comments yet" />
-        </div>
-      )}
+            {/* Load more button */}
+            {totalParentCommentsLoaded &&
+              totalParentCommentsLoaded < (total_parent_comments ?? 0) && (
+                <button
+                  onClick={handleLoadmoreComments}
+                  className="
+                    flex
+                    my-3
+                    center
+                    text-grey-dark/40
+                    hover:text-grey-dark/50
+                    transition
+                  "
+                >
+                  Load more
+                </button>
+              )}
+
+            {/* Separate Line */}
+            <hr className="mt-8 border-grey-custom" />
+          </div>
+        ) : (
+          <div className="px-8">
+            <NoDataMessage message="No comments yet" />
+          </div>
+        )}
+      </>
 
       {/* Comment Field */}
       <div
-        className="
+        className={`
           absolute
-          bottom-5
-          w-full
-          px-8
-        "
+          ${
+            editComment.status
+              ? `
+                  top-0
+                  w-full
+                  h-full
+                  bg-black-custom/20
+                `
+              : `
+                  bottom-5
+                  w-full
+                  px-8
+                `
+          }
+        `}
       >
-        <BlogCommentField action="comment" />
+        {editComment.status ? (
+          <div
+            className="
+              absolute
+              bottom-0
+              w-full
+              px-8
+              pb-7
+              pt-5
+              bg-white-custom
+            "
+          >
+            <BlogCommentField action="edit" showButton={true} />
+          </div>
+        ) : (
+          <BlogCommentField action="comment" />
+        )}
       </div>
     </div>
   );

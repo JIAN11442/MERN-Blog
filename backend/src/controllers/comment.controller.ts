@@ -323,3 +323,43 @@ export const deleteCommentById: RequestHandler = (req, res, next) => {
     next(error);
   }
 };
+
+// 更新留言
+export const updateCommentById: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { commentObjectId, newCommentContent } = req.body;
+
+    if (!userId) {
+      throw createHttpError(401, 'Please login first');
+    }
+
+    if (!commentObjectId) {
+      throw createHttpError(400, 'Please provide comment id from client');
+    }
+
+    if (!newCommentContent || !newCommentContent.length) {
+      throw createHttpError(400, 'Please write something or provide new comment from client');
+    }
+
+    const targetCommentExist = await CommentSchema.findOne({ _id: commentObjectId, commented_by: userId });
+
+    if (!targetCommentExist) {
+      throw createHttpError(403, 'You are not allowed to update this comment');
+    }
+
+    const updateComment = await CommentSchema.findOneAndUpdate(
+      { _id: commentObjectId, commented_by: userId },
+      { comment: newCommentContent },
+    );
+
+    if (!updateComment) {
+      throw createHttpError(500, 'Failed to update comment');
+    }
+
+    res.status(200).json({ message: 'Comment updated successfully', updateComment: updateComment });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};

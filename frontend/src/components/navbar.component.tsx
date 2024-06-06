@@ -48,9 +48,13 @@ const Navbar = () => {
 
   // 控制 NavigationPanel 在失焦後隱藏
   const handlePanelBlur = () => {
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       setPanelCollapsed(false);
-    }, 200);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   };
 
   // 點擊 Logo 返回首頁
