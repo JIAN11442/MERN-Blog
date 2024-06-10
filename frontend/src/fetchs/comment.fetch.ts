@@ -107,16 +107,19 @@ const useCommentFetch = () => {
 
           // 如果是回覆留言
           if (replying_to && index !== undefined) {
-            // 如果該留言下有子留言，那就找到該留言下子留言的最後一個留言的 index + 1
-            // 如果沒有子留言，那就直接插入到該留言的下一個位置(找不到直接返回 acc 的初始值，即 index)
-            const startingPoint =
-              commentsArr.reduce(
-                (acc, comment, i) =>
-                  comment.childrenLevel === commentsArr[index].childrenLevel + 1
-                    ? i
-                    : acc,
-                index
-              ) + 1;
+            // 找到與當前留言同層的留言的 index
+            // 那就是我們要插入新留言的位置
+            let startingPoint = commentsArr.findIndex(
+              (comment, i) =>
+                i > index &&
+                comment.childrenLevel <= commentsArr[index].childrenLevel
+            );
+
+            // 但如果沒有找到，那就代表當前 blog 只有一個留言，也就是現在要回覆的頭留言
+            // 那就直接插入到最後一個位置即可
+            if (startingPoint === -1) {
+              startingPoint = commentsArr.length;
+            }
 
             // 然後將新留言插入到該留言下子留言的最後一個留言後面
             commentsArr[index].children?.push(data._id);
@@ -125,20 +128,28 @@ const useCommentFetch = () => {
             data.parent = commentsArr[index]._id;
             data.parentIndex = index;
 
-            commentsArr[index].isReplyLoaded = true;
-
             // 如果原留言的子留言數還沒到限制數量，
             if (
               (commentsArr[index]?.children?.length ?? 0) <= LOAD_COMMENT_LIMIT
             ) {
               let newTotalRepliesLoaded = totalRepliesLoaded;
 
+              const isRecordedRepliesLoadedIndex = totalRepliesLoaded.findIndex(
+                (item) => item.index === index
+              );
+
               // 就要看是否已經有記錄過該留言的載入回覆留言數
               // 如果沒有記錄過，那就新增一個記錄
-              if (!totalRepliesLoaded[index]) {
+              if (
+                isRecordedRepliesLoadedIndex === -1 ||
+                totalRepliesLoaded[isRecordedRepliesLoadedIndex].loadedNum === 0
+              ) {
                 newTotalRepliesLoaded = [
                   ...totalRepliesLoaded,
-                  { index, loadedNum: 1 },
+                  {
+                    index,
+                    loadedNum: commentsArr[index].children?.length ?? 0,
+                  },
                 ];
               }
               // 如果有記錄過，那就累加載入的回覆留言數
@@ -267,28 +278,35 @@ const useCommentFetch = () => {
           if (!loadmore) {
             commentsArr.splice(index + 1, 0, ...repliesComment);
           } else {
-            // 如果當前是 loadmore 模式，
-            // 那就要將載入的回覆留言插入到當前留言(母留言)的最後一個回覆留言後面
-            // 這裡使用 reduce 來找，其中 acc 是返回的值，comment 是當前值，i 是當前值的 index
-            // 當現迴圈符合判斷條件，就返回 i 給下一次的 acc；反之，返回原本的 acc，即下一次的 acc 與本次的 acc 一樣
-            // 而這裡的條件是，當迴圈留言的 childrenLevel 等於當前展開留言的 childrenLevel + 1，即迴圈留言是展開留言的回覆留言，
-            // 或是迴圈留言的母留言的 childrenLevel 等於當前展開留言的 childrenLevel + 1，即迴圈留言的母留言是展開留言的回覆留言，
-            // 那就返回 i 給 acc，代表找到了符合條件的留言，這個迴圈留言的 index 就是我們要跳過的位置
-            // 反之，繼續返回 acc，也就是初始值 index,
-            // 如果一直都沒有找到符合條件的，最後當然 acc 就不會變，還是原來的初始值 index，
-            // 那麼就算找到了該展開留言的最後一個回覆留言，最後再加 1，就是要插入的位置
-            const startingPoint =
-              commentsArr.reduce(
-                (acc, comment, i) =>
-                  comment.childrenLevel ===
-                    commentsArr[index].childrenLevel + 1 ||
-                  (comment.parentIndex &&
-                    commentsArr[comment.parentIndex].childrenLevel ===
-                      commentsArr[index].childrenLevel + 1)
-                    ? i
-                    : acc,
-                index
-              ) + 1;
+            // 如果當前是 loadmore replies 模式,
+            // 那我們要找到當前母留言的最後一個子留言的 index + 1 的位置(要考慮到有可能有多層子留言的情況)
+            // 這裡可以有兩種做法，一個是用 for 迴圈；一個是用 findIndex，時間複雜度都是 O(n)
+
+            // 這是用 findIndex 的做法
+            let startingPoint = commentsArr.findIndex(
+              (comment, i) =>
+                i > index &&
+                comment.childrenLevel <= commentsArr[index].childrenLevel
+            );
+
+            if (startingPoint === -1) {
+              startingPoint = commentsArr.length;
+            }
+
+            // 這是用 for 迴圈的做法
+            // let startingPoint = index + 1;
+
+            // for (let i = index + 1; i < commentsArr.length; i++) {
+            //   if (
+            //     commentsArr[i].childrenLevel > commentsArr[index].childrenLevel
+            //   ) {
+            //     console.log(i, commentsArr[i].comment);
+            //     startingPoint = i;
+            //   } else {
+            //     startingPoint = startingPoint + 1;
+            //     break;
+            //   }
+            // }
 
             commentsArr.splice(startingPoint, 0, ...repliesComment);
           }

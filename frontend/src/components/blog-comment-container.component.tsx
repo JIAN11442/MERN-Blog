@@ -40,7 +40,6 @@ const BlogCommentContainer = () => {
     setCommentsWrapper,
     setTotalParentCommentsLoaded,
     setMaxChildrenLevel,
-    setAdjustContainerWidth,
     setEditComment,
     setIsEditWarning,
     setDeleteBtnDisabled,
@@ -198,10 +197,10 @@ const BlogCommentContainer = () => {
           }
         }
 
-        setAdjustContainerWidth({
-          ...adjustContainerWidth,
-          adjustWidth: false,
-        });
+        // setAdjustContainerWidth({
+        //   ...adjustContainerWidth,
+        //   adjustWidth: false,
+        // });
       }
     }
   }, [adjustContainerWidth]);

@@ -84,20 +84,21 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
     // 如果當前是回覆留言模式，
     // 且母留言有回覆留言及並未展開
     // 那麼要先展開並加載原回覆留言
-    if (
-      replyingTo &&
-      index !== undefined &&
-      commentsArr &&
-      (commentsArr[index].children?.length ?? 0) > 0 &&
-      !commentsArr[index].isReplyLoaded
-    ) {
-      commentsArr[index].isReplyLoaded = true;
+    if (replyingTo && index !== undefined && commentsArr) {
+      if (
+        (commentsArr[index].children?.length ?? 0) > 0 &&
+        !commentsArr[index].isReplyLoaded
+      ) {
+        await LoadRepliesCommentById({
+          repliedCommentId: replyingTo,
+          index,
+          commentsArr,
+        });
+      }
 
-      await LoadRepliesCommentById({
-        repliedCommentId: replyingTo,
-        index,
-        commentsArr,
-      });
+      // 如果是第一次留言，則不需要加載回覆留言，但需要設定為已加載(因為新留言會出現)
+      // 如果不是第一次留言，則需要加載回覆留言，同時一樣得設定為已加載(加載後再植入新留言)
+      commentsArr[index].isReplyLoaded = true;
     }
 
     // 在開始更新或新增留言前，就禁用留言框
@@ -156,6 +157,7 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
 
   // 如果是通過按鈕提交留言
   const handleButtonSubmit = async () => {
+    console.log("click");
     if (buttonRef.current) {
       // 防止連續點擊
       buttonRef.current.disabled = true;
@@ -312,6 +314,7 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
         {showButton ? (
           editComment.status && action === "edit" ? (
             <button
+              ref={buttonRef}
               onClick={handleButtonSubmit}
               disabled={!isEditedComment}
               className="

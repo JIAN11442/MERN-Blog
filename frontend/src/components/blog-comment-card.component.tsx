@@ -174,8 +174,8 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
   };
 
   // 加載更多回覆留言
-  const handleLoadMoreReplies = () => {
-    LoadRepliesCommentById({
+  const handleLoadMoreReplies = async () => {
+    await LoadRepliesCommentById({
       loadmore: true,
       repliedCommentId: commentsArr[commentData.parentIndex ?? 0]._id,
       skip: totalRepliesLoaded[indexOfRepliesLoadedInCurrCommentData].loadedNum,
