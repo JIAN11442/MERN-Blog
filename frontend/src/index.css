@@ -127,11 +127,25 @@
   }
 
   .sidebar-link {
-    @apply flex gap-4 items-center py-5 text-grey-dark hover:text-black-custom;
+    @apply flex
+    p-5
+    mb-2
+    max-md:mr-10
+    gap-4 
+    items-center 
+    text-grey-dark
+    hover:text-black-custom
+    hover:bg-grey-custom/50
+    rounded-md
+    transition;
   }
 
   .sidebar-link.active {
-    @apply text-black-custom border-r-2 border-black-custom pl-6 bg-grey-custom/50 -ml-6 md:rounded-tl-lg md:rounded-bl-lg max-md:border-none;
+    @apply text-black-custom
+    md:border-r-2
+    border-black-custom
+    bg-grey-custom/50
+    rounded-r-none;
   }
 
   #textEditor h1 {
