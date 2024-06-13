@@ -1,8 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect, useRef } from 'react';
-import useHomeBlogStore from '../states/home-blog.state';
+import { useEffect, useRef } from "react";
+import useHomeBlogStore from "../states/home-blog.state";
 
 interface InpageNavigationProps {
   routes: string[];
@@ -98,10 +98,10 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
                 capitalize
                 ${
                   i === inPageNavIndex
-                    ? 'text-black-custom'
-                    : 'text-grey-dark/50'
+                    ? "text-black-custom"
+                    : "text-grey-dark/50"
                 }
-                ${i === defaultHiddenIndex && 'md:hidden'}
+                ${i === defaultHiddenIndex && "md:hidden"}
                 transition
               `}
             >
@@ -118,7 +118,7 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
             bottom-0
             duration-300
             border-black-custom
-            ${inPageNavIndex === defaultHiddenIndex && 'md:hidden'}
+            ${inPageNavIndex === defaultHiddenIndex && "md:hidden"}
           `}
         />
       </div>

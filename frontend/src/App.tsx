@@ -12,6 +12,7 @@ import PageNotFound from "./pages/404.page";
 import ProfilePage from "./pages/profile.page";
 import BlogPage from "./pages/blog.page";
 import SideNavbar from "./components/side-navbar.component";
+import ChangePasswordPage from "./pages/change-password.page";
 
 function App() {
   const { GetAuthUserWithToken } = useAuthFetch();
@@ -34,10 +35,7 @@ function App() {
             path="edit-profile"
             element={<h1>This is a edit profile page</h1>}
           />
-          <Route
-            path="change-password"
-            element={<h1>This is a change password page</h1>}
-          />
+          <Route path="change-password" element={<ChangePasswordPage />} />
         </Route>
 
         <Route path="signin" element={<UserAuthPage type="sign-in" />} />

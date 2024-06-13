@@ -5,6 +5,7 @@ export interface GenerateAuthDataType {
   profile_img: string;
   username: string;
   fullname: string;
+  google_auth: boolean;
 }
 
 export interface PersonalInfoStructureType {
@@ -169,4 +170,14 @@ export interface AdjustContainerWidthPropsType {
 export interface DeleteBtnRefPropsType {
   index: number;
   ref: React.RefObject<HTMLButtonElement>;
+}
+
+export interface FetchSettingPropsType {
+  formData?: {
+    currPassword?: string;
+    newPassword?: string;
+  };
+  e?: React.FormEvent<HTMLButtonElement>;
+  currPasswordInputRef?: React.RefObject<HTMLInputElement>;
+  newPasswordInputRef?: React.RefObject<HTMLInputElement>;
 }

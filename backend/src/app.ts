@@ -15,6 +15,7 @@ import blogRoute from './routers/blog.route';
 import userRoute from './routers/user.route';
 import likedRoute from './routers/liked.route';
 import commentRoute from './routers/comment.route';
+import settingRoute from './routers/setting.route';
 
 import ErrorsHandle from './utils/errors.util';
 import env from './utils/validateEnv.util';
@@ -52,6 +53,7 @@ app.use('/api/blog', blogRoute);
 app.use('/api/user', userRoute);
 app.use('/api/liked', likedRoute);
 app.use('/api/comment', commentRoute);
+app.use('/api/setting', settingRoute);
 
 // Error handling
 app.use((req, res, next) => {

@@ -3,6 +3,7 @@ import { NavLink, Navigate, Outlet } from "react-router-dom";
 
 import useAuthStore from "../states/user-auth.state";
 import { FlatIcons } from "../icons/flaticons";
+import toast from "react-hot-toast";
 
 const SideNavbar = () => {
   const pathName = location.pathname.split("/")[2];
@@ -18,7 +19,22 @@ const SideNavbar = () => {
   const { access_token } = authUser ?? {};
 
   const handleNavigatePage = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const { innerText } = e.currentTarget;
+
+    // 如果目前點擊的是 Change Password 且使用者是透過 Google 登入的話，
+    // 出現警告訊息，且不給予更改密碼的權限
+    if (innerText === "Change Password" && authUser?.google_auth) {
+      return toast.error(
+        "You can't change account's password because you logged in through Google account."
+      );
+    }
+    // 反之，只要不是 Change Password 那就正常導向
     setPageState(e.currentTarget.innerText);
+    setSideBarVisible(false);
+
+    if (pageStateBtnRef.current) {
+      pageStateBtnRef.current.click();
+    }
   };
 
   const changePageState = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -127,7 +143,7 @@ const SideNavbar = () => {
                 bg-white
                 overflow-y-auto
                 md:sticky
-                md:pr-3
+                md:pr-0
                 md:border-grey-custom
                 md:border-r
                 max-md:absolute
@@ -219,9 +235,26 @@ const SideNavbar = () => {
 
                 {/* Change Password */}
                 <NavLink
-                  to="/settings/change-password"
+                  to={`${
+                    authUser?.google_auth ? "#" : "/settings/change-password"
+                  }`}
                   onClick={(e) => handleNavigatePage(e)}
-                  className="sidebar-link"
+                  className={`
+                    ${
+                      authUser?.google_auth
+                        ? `
+                            flex
+                            p-5
+                            mb-2
+                            max-md:mr-10
+                            gap-4 
+                            items-center 
+                          text-grey-dark/30  
+                        
+                          `
+                        : "sidebar-link"
+                    }
+                  `}
                 >
                   <FlatIcons name="fi fi-rr-lock" />
                   <p className="truncate">Change Password</p>

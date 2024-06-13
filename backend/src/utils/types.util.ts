@@ -35,3 +35,8 @@ export interface BlogReqBody {
   des?: string;
   draft?: boolean;
 }
+
+export interface ChangePasswordReqBody {
+  currPassword: string;
+  newPassword: string;
+}

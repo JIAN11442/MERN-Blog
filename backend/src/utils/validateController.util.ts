@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 
-import { SignUpReqBody, SignInReqBody, BlogReqBody } from './types.util';
+import { SignUpReqBody, SignInReqBody, BlogReqBody, ChangePasswordReqBody } from './types.util';
 import env from './validateEnv.util';
 
 const emailRegex = /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*(\.[A-Za-z]+)+$/;
@@ -73,6 +73,33 @@ export const ValidateForPublishBlog = (RequestBody: BlogReqBody) => {
     if (!tags?.length || tags.length > tagsLimit) {
       return { statusCode: 403, message: `Provide tags in order to publish the blog, Maximum ${tagsLimit}.` };
     }
+  }
+
+  return true;
+};
+
+export const ValidateChangePassword = (RequestBody: ChangePasswordReqBody) => {
+  const { currPassword, newPassword } = RequestBody;
+
+  if (!currPassword || !newPassword) {
+    return {
+      statusCode: 400,
+      message: 'Parameters missing',
+    };
+  }
+
+  if (!passwordRegex.test(currPassword) || !passwordRegex.test(newPassword)) {
+    return {
+      statusCode: 403,
+      message: 'Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase letters',
+    };
+  }
+
+  if (currPassword === newPassword) {
+    return {
+      statusCode: 400,
+      message: 'New password cannot be the same as the current password',
+    };
   }
 
   return true;

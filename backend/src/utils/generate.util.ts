@@ -34,6 +34,7 @@ export const formatDatatoSend = (user: UserRequestType) => {
       profile_img: user.personal_info?.profile_img,
       username: user.personal_info?.username,
       fullname: user.personal_info?.fullname,
+      google_auth: user.google_auth,
     };
   } catch (error) {
     console.log(error);

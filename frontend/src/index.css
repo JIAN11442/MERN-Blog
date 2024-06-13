@@ -87,7 +87,7 @@
     @apply w-[100%]
       rounded-md
       p-4
-      pl-12
+      pl-[4rem]
       bg-grey-custom
       border
       border-grey-custom
