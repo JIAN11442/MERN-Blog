@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 import useHomeBlogStore from "../states/home-blog.state";
-import useEditorBlogStore from "../states/editor-blog.state";
+import useEditorBlogStore from "../states/blog-editor.state";
 import useAuthStore from "../states/user-auth.state";
 import useTargetBlogStore from "../states/target-blog.state";
 

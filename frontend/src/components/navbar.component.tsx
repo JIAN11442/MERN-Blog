@@ -10,7 +10,7 @@ import UserNavigationPanel from "./user-navigation-panel.component";
 
 import useAuthStore from "../states/user-auth.state";
 import useCollapseStore from "../states/collapse.state";
-import useEditorBlogStore from "../states/editor-blog.state";
+import useEditorBlogStore from "../states/blog-editor.state";
 
 const Navbar = () => {
   const currPath = useLocation().pathname;

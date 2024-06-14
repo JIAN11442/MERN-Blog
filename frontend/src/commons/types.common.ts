@@ -181,3 +181,14 @@ export interface FetchSettingPropsType {
   currPasswordInputRef?: React.RefObject<HTMLInputElement>;
   newPasswordInputRef?: React.RefObject<HTMLInputElement>;
 }
+
+export interface GenerateEditProfilePropsType {
+  username?: string;
+  bio?: string;
+  facebook?: string;
+  github?: string;
+  instagram?: string;
+  twitter?: string;
+  website?: string;
+  youtube?: string;
+}

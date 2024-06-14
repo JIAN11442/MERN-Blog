@@ -11,11 +11,27 @@ interface InputBoxProps {
   placeholder: string;
   icon: string;
   className?: string;
+  disabled?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
-  ({ id, type, name, value, placeholder, icon, className, onChange }, ref) => {
+  (
+    {
+      id,
+      type,
+      name,
+      value,
+      placeholder,
+      icon,
+      className,
+      disabled = false,
+      onChange,
+      onBlur,
+    },
+    ref
+  ) => {
     const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
     const [passwordValue, setPasswordValue] = useState<string>("");
 
@@ -41,17 +57,25 @@ const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
             name={name}
             defaultValue={value}
             placeholder={placeholder}
+            disabled={disabled}
             onChange={(e) => {
               setPasswordValue(e.target.value);
               onChange && onChange(e);
             }}
+            onBlur={onBlur}
             className="input-box"
           />
         </div>
 
         {/* Input Icon */}
         <div>
-          <FlatIcons name={icon} className="input-icon" />
+          <FlatIcons
+            name={icon}
+            className={`
+              input-icon
+              ${disabled && "opacity-50"}
+            `}
+          />
         </div>
 
         {/* Password Visible Icon */}

@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import { FlatIcons } from "../icons/flaticons";
 
-import useEditorBlogStore from "../states/editor-blog.state";
+import useEditorBlogStore from "../states/blog-editor.state";
 
 interface TagProps {
   tag: string;

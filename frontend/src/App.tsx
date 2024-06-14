@@ -4,7 +4,7 @@ import { Route, Routes } from "react-router-dom";
 import Navbar from "./components/navbar.component";
 
 import UserAuthPage from "./pages/auth.page";
-import Editor from "./pages/editor.page";
+import BlogEditorPage from "./pages/blog-editor.page";
 import Homepage from "./pages/home.page";
 import useAuthFetch from "./fetchs/auth.fetch";
 import SearchPage from "./pages/search.page";
@@ -13,6 +13,7 @@ import ProfilePage from "./pages/profile.page";
 import BlogPage from "./pages/blog.page";
 import SideNavbar from "./components/side-navbar.component";
 import ChangePasswordPage from "./pages/change-password.page";
+import EditProfilePage from "./pages/edit-profile.page";
 
 function App() {
   const { GetAuthUserWithToken } = useAuthFetch();
@@ -24,17 +25,14 @@ function App() {
 
   return (
     <Routes>
-      <Route path="editor" element={<Editor />} />
-      <Route path="editor/:blogId" element={<Editor />} />
+      <Route path="editor" element={<BlogEditorPage />} />
+      <Route path="editor/:blogId" element={<BlogEditorPage />} />
       <Route path="/" element={<Navbar />}>
         {/* index 為 true 的路由 route 將預設為父路由下的子路由，建議只指定一個*/}
         <Route index element={<Homepage />} />
 
         <Route path="settings" element={<SideNavbar />}>
-          <Route
-            path="edit-profile"
-            element={<h1>This is a edit profile page</h1>}
-          />
+          <Route path="edit-profile" element={<EditProfilePage />} />
           <Route path="change-password" element={<ChangePasswordPage />} />
         </Route>
 

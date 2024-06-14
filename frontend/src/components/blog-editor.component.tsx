@@ -11,9 +11,10 @@ import defaultBanner from "../imgs/banner-2.png";
 import AnimationWrapper from "./page-animation.component";
 import tools from "./tools.component";
 
-import useEditorBlogStore from "../states/editor-blog.state";
-import useBlogFetch from "../fetchs/blog.fetch";
 import useAwsFetch from "../fetchs/aws.fetch";
+import useBlogFetch from "../fetchs/blog.fetch";
+
+import useEditorBlogStore from "../states/blog-editor.state";
 
 const BlogEditor = () => {
   const { blogId: paramsBlogId } = useParams();

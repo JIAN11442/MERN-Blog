@@ -8,10 +8,11 @@ import PublishEditor from "../components/publish-editor.component";
 import Loader from "../components/loader.component";
 
 import useAuthStore from "../states/user-auth.state";
-import useEditorBlogStore from "../states/editor-blog.state";
+import useEditorBlogStore from "../states/blog-editor.state";
+
 import useBlogFetch from "../fetchs/blog.fetch";
 
-const Editor = () => {
+const BlogEditorPage = () => {
   const { blogId } = useParams();
   const { authUser } = useAuthStore();
   const { editorState } = useEditorBlogStore();
@@ -54,4 +55,4 @@ const Editor = () => {
   );
 };
 
-export default Editor;
+export default BlogEditorPage;

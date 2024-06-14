@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import Tag from "./tag.component";
 import AnimationWrapper from "./page-animation.component";
 
-import useEditorBlogStore from "../states/editor-blog.state";
+import useEditorBlogStore from "../states/blog-editor.state";
 
 import { FlatIcons } from "../icons/flaticons";
 

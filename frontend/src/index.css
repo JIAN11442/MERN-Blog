@@ -92,7 +92,7 @@
       border
       border-grey-custom
       focus:bg-transparent
-      placeholder:text-black-custom
+      placeholder:text-grey-dark/40
       focus:placeholder:text-transparent;
   }
 
