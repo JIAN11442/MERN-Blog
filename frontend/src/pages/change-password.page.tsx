@@ -32,7 +32,7 @@ const ChangePasswordPage = () => {
 
       UpdateAuthPassword({
         formData,
-        e,
+        form_e: e,
         currPasswordInputRef,
         newPasswordInputRef,
       });

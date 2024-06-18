@@ -1,4 +1,5 @@
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
+import useToastLoadingStore from "../states/toast-loading.state";
 // import useEditorBlogStore from '../states/blog.state';
 
 interface ToasterProviderProps {
@@ -7,6 +8,7 @@ interface ToasterProviderProps {
 
 const ToasterProvider: React.FC<ToasterProviderProps> = ({ children }) => {
   // const { editorState } = useEditorBlogStore();
+  const { toastLoading } = useToastLoadingStore();
   return (
     <>
       <Toaster
@@ -14,8 +16,8 @@ const ToasterProvider: React.FC<ToasterProviderProps> = ({ children }) => {
         //   top: `${editorState === 'publish' ? '20px' : '100px'}`,
         // }}
         toastOptions={{
-          position: 'top-center',
-          duration: 2000,
+          position: "top-center",
+          duration: toastLoading ? undefined : 2000, //除了 loading 之外的 toast 2 秒後消失
         }}
       />
       {children}

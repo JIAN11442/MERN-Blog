@@ -177,9 +177,12 @@ export interface FetchSettingPropsType {
     currPassword?: string;
     newPassword?: string;
   };
-  e?: React.FormEvent<HTMLButtonElement>;
+  form_e?: React.FormEvent<HTMLButtonElement>;
   currPasswordInputRef?: React.RefObject<HTMLInputElement>;
   newPasswordInputRef?: React.RefObject<HTMLInputElement>;
+  imgFile?: File;
+  uploadImg_e?: React.MouseEvent<HTMLButtonElement>;
+  setUpdatedProfileImg?: React.Dispatch<React.SetStateAction<File | null>>;
 }
 
 export interface GenerateEditProfilePropsType {

@@ -14,6 +14,7 @@ import type {
 } from "../commons/types.common";
 import useCommentFetch from "./comment.fetch";
 import { FormatDataForLoadMoreOrLess } from "../commons/generate.common";
+import useToastLoadingStore from "../states/toast-loading.state";
 
 const useBlogFetch = () => {
   const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/blog";
@@ -32,8 +33,9 @@ const useBlogFetch = () => {
     queryBlogs,
   } = useHomeBlogStore();
 
-  const { setTargetBlogInfo, setSimilarBlogsInfo } = useTargetBlogStore();
   const { setEditorBlog } = useEditorBlogStore();
+  const { setToastLoading } = useToastLoadingStore();
+  const { setTargetBlogInfo, setSimilarBlogsInfo } = useTargetBlogStore();
 
   const { GetAndGenerateCommentsData } = useCommentFetch();
 
@@ -314,6 +316,8 @@ const useBlogFetch = () => {
     // 如果完整，則啟動 loading toast，表示正在發布
     const loadingToast = toast.loading("Publishing....");
 
+    setToastLoading(true);
+
     // 同時，將按鈕 disable，避免重複點擊
     (target as HTMLButtonElement).classList.add("disable");
 
@@ -340,6 +344,8 @@ const useBlogFetch = () => {
 
           // 關閉 loading toast
           toast.dismiss(loadingToast);
+          setToastLoading(false);
+
           toast.success(data.message);
 
           // 移動到首頁
@@ -354,6 +360,7 @@ const useBlogFetch = () => {
 
         // 關閉 loading toast
         toast.dismiss(loadingToast);
+        setToastLoading(false);
 
         return toast.error(error.response.data.errorMessage);
       });
@@ -380,6 +387,8 @@ const useBlogFetch = () => {
 
     // 反之，顯示 loading toast 表示開始保存草稿
     const loadingToast = toast.loading("Saving Draft....");
+
+    setToastLoading(true);
 
     // 同時，將按鈕設置為 disable 狀態，避免重複點擊
     (e.target as HTMLButtonElement).classList.add("disable");
@@ -415,6 +424,8 @@ const useBlogFetch = () => {
 
               // 關閉 loading toast 並顯示成功訊息
               toast.dismiss(loadingToast);
+              setToastLoading(false);
+
               toast.success("Draft saved successfully.");
 
               // 0.5秒后移動到首頁
@@ -429,6 +440,7 @@ const useBlogFetch = () => {
 
             // 關閉 loading toast
             toast.dismiss(loadingToast);
+            setToastLoading(false);
 
             return toast.error(error.response.data.errorMessage);
           });

@@ -15,6 +15,7 @@ import useAwsFetch from "../fetchs/aws.fetch";
 import useBlogFetch from "../fetchs/blog.fetch";
 
 import useEditorBlogStore from "../states/blog-editor.state";
+import useToastLoadingStore from "../states/toast-loading.state";
 
 const BlogEditor = () => {
   const { blogId: paramsBlogId } = useParams();
@@ -29,25 +30,29 @@ const BlogEditor = () => {
     setTextEditor,
     setEditorState,
   } = useEditorBlogStore();
+  const { setToastLoading } = useToastLoadingStore();
+
   const { UploadImageToAWS } = useAwsFetch();
   const { UploadSaveDraftBlog } = useBlogFetch();
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       // Get the image file
-      const img = e.target.files[0];
+      const imgFile = e.target.files[0];
 
       // Check the file type
-      if (!img.type.startsWith("image/")) {
+      if (!imgFile.type.startsWith("image/")) {
         return toast.error("Please upload an image type file.");
       }
 
-      if (img) {
+      if (imgFile) {
         // Show loading toast
         const loadingToast = toast.loading("Uploading...");
 
+        setToastLoading(true);
+
         // Upload the image to S3
-        UploadImageToAWS(img)
+        UploadImageToAWS(imgFile)
           .then((url) => {
             if (url && blogBannerRef.current) {
               // Set the image url to the blog banner
@@ -57,12 +62,16 @@ const BlogEditor = () => {
               blogBannerRef.current.onload = () => {
                 // Dismiss the loading toast and show success toast
                 toast.dismiss(loadingToast);
+                setToastLoading(false);
+
                 toast.success("Uploaded successfully");
               };
             }
           })
           .catch((err) => {
             toast.dismiss(loadingToast);
+            setToastLoading(false);
+
             toast.error(err);
           });
       }

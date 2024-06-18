@@ -8,6 +8,7 @@ import UserSchema from '../schemas/user.schema';
 
 import { ValidateChangePassword } from '../utils/validateController.util';
 
+// 修改用戶密碼
 export const changePassword: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
@@ -66,6 +67,33 @@ export const changePassword: RequestHandler = async (req, res, next) => {
     }
 
     res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 修改用戶頭像照片
+export const updateUserAvatar: RequestHandler = async (req, res, next) => {
+  const { userId } = req;
+  const { imgUrl } = req.body;
+
+  console.log(imgUrl);
+
+  try {
+    if (!imgUrl) {
+      throw createHttpError(400, 'Please provide a image url');
+    }
+    const updateUserProfileImg = await UserSchema.findOneAndUpdate(
+      { _id: userId },
+      { 'personal_info.profile_img': imgUrl },
+    );
+
+    if (!updateUserProfileImg) {
+      throw createHttpError(500, 'Failed to update user profile image');
+    }
+
+    res.status(200).json({ message: 'User profile image updated successfully', imgUrl });
   } catch (error) {
     console.log(error);
     next(error);

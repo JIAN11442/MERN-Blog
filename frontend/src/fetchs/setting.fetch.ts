@@ -1,25 +1,38 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-import { FetchSettingPropsType } from "../commons/types.common";
+import {
+  FetchSettingPropsType,
+  GenerateAuthDataType,
+} from "../commons/types.common";
+import useToastLoadingStore from "../states/toast-loading.state";
+import useAwsFetch from "./aws.fetch";
+import useAuthStore from "../states/user-auth.state";
 
 const useSettingFetch = () => {
+  const { authUser, setAuthUser } = useAuthStore();
+  const { setToastLoading } = useToastLoadingStore();
+
+  const { UploadImageToAWS } = useAwsFetch();
+
   const SETTING_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/setting";
 
   // 更新用戶密碼
   const UpdateAuthPassword = async ({
     formData,
-    e,
+    form_e,
     currPasswordInputRef,
     newPasswordInputRef,
   }: FetchSettingPropsType) => {
     // 之所以特別將 e.currentTarget 存在 target 變數中，
     // 是因為 e.currentTarget 在執行過程中可能會被清除，比如 catch 時會變成 null
-    const target = e?.currentTarget;
+    const target = form_e?.currentTarget;
     const requestURL = SETTING_SERVER_ROUTE + "/change-password";
 
     // 顯示 Loading
     const toastLoading = toast.loading("Updating...");
+
+    setToastLoading(true);
 
     // 將按鈕設為不可用，防止用戶多次點擊
     target?.setAttribute("disabled", "true");
@@ -29,6 +42,7 @@ const useSettingFetch = () => {
       .then(({ data }) => {
         // 如果成功更新，那就關閉 Loading
         toast.dismiss(toastLoading);
+        setToastLoading(false);
 
         // 接著將按鈕設為可用
         target?.removeAttribute("disabled");
@@ -45,6 +59,7 @@ const useSettingFetch = () => {
       .catch((error) => {
         // 如果失敗，也一樣要停止 Loading
         toast.dismiss(toastLoading);
+        setToastLoading(false);
 
         // 接著將按鈕恢復可用
         target?.removeAttribute("disabled");
@@ -65,7 +80,84 @@ const useSettingFetch = () => {
       });
   };
 
-  return { UpdateAuthPassword };
+  // 更新用戶頭像
+  const UpdateAuthAvatarImg = async ({
+    imgFile,
+    uploadImg_e,
+    setUpdatedProfileImg,
+  }: FetchSettingPropsType) => {
+    const target = uploadImg_e?.currentTarget;
+    const toastLoading = toast.loading("Uploading...");
+
+    // 另外也要設定 Toast Loading 狀態，
+    // 為了讓 toaster 的 duration 不受到 2000ms 的影響
+    setToastLoading(true);
+
+    // 將按鈕設為不可用，防止用戶多次點擊
+    // 另外也要將按鈕的透明度設為 80%，示意按鈕已被按下
+    if (target) {
+      target.setAttribute("disabled", "true");
+      target.classList.add("opacity-80");
+    }
+
+    if (imgFile) {
+      // 上傳圖片到 AWS 並取得圖片 URL
+      UploadImageToAWS(imgFile).then(async (imgUrl) => {
+        // 接著將確定的圖片 URL 上傳到 MongoDB
+        const requestURL = SETTING_SERVER_ROUTE + "/change-avatar";
+
+        await axios
+          .post(requestURL, { imgUrl })
+          .then(({ data }) => {
+            if (data) {
+              // 更新 zustand 中的用戶資料
+              const newAuthUser = {
+                ...authUser,
+                profile_img: data.imgUrl,
+              } as GenerateAuthDataType;
+
+              setAuthUser(newAuthUser);
+
+              // 關閉 Loading
+              toast.dismiss(toastLoading);
+              setToastLoading(false);
+
+              // 將按鈕設為可用及恢復透明度
+              if (target) {
+                target.removeAttribute("disabled");
+                target.classList.remove("opacity-80");
+              }
+
+              // 清空更新的圖片，這樣可以讓 Upload Button 恢復不可上傳的樣式
+              setUpdatedProfileImg && setUpdatedProfileImg(null);
+
+              // 最後顯示成功訊息
+              toast.success(data.message);
+            }
+          })
+          .catch(({ response }) => {
+            // 如果失敗，也一樣要停止 Loading
+            toast.dismiss(toastLoading);
+            setToastLoading(false);
+
+            // 以及恢復按鈕可用性及透明度
+            if (target) {
+              target.removeAttribute("disabled");
+              target.classList.remove("opacity-80");
+            }
+
+            // 清空更新的圖片，這樣可以讓 Upload Button 恢復不可上傳的樣式
+            setUpdatedProfileImg && setUpdatedProfileImg(null);
+
+            // 最後顯示錯誤訊息
+            console.log(response.data);
+            toast.error(response.data.errorMessage);
+          });
+      });
+    }
+  };
+
+  return { UpdateAuthPassword, UpdateAuthAvatarImg };
 };
 
 export default useSettingFetch;

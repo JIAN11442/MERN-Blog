@@ -14,17 +14,20 @@ import {
   GenerateEditProfilePropsType,
 } from "../commons/types.common";
 import InputBox from "../components/input-box.component";
+import useSettingFetch from "../fetchs/setting.fetch";
 
 const EditProfilePage = () => {
   const BioMaxLength = import.meta.env.VITE_BIO_LIMIT;
 
   const formRef = useRef<HTMLFormElement>(null);
+  const imgDisplayRef = useRef<HTMLImageElement>(null);
+  const imgUploadRef = useRef<HTMLButtonElement>(null);
 
-  const [BioContent, setBioContent] = useState("");
+  const [BioContent, setBioContent] = useState<string>("");
   const [generateEditProfile, setGenerateEditProfile] =
     useState<GenerateEditProfilePropsType | null>(null);
-
-  const [submitBtnDiabled, setSubmitBtnDisabled] = useState(true);
+  const [submitBtnDiabled, setSubmitBtnDisabled] = useState<boolean>(true);
+  const [updatedProfileImg, setUpdatedProfileImg] = useState<File | null>(null);
 
   const { authUser } = useAuthStore();
   const { access_token } = authUser as GenerateAuthDataType;
@@ -36,6 +39,7 @@ const EditProfilePage = () => {
   } = authorProfileInfo as AuthorProfileStructureType;
 
   const { GetAuthorProfileInfo } = useUserFetch();
+  const { UpdateAuthAvatarImg } = useSettingFetch();
 
   // 監聽 Bio InputBox 內容變化
   const handleBioOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -80,6 +84,32 @@ const EditProfilePage = () => {
           setSubmitBtnDisabled(true);
         }
       }
+    }
+  };
+
+  // 照片上傳預覽
+  const handleImgPreview = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const target = e.target;
+    const img = target.files?.[0];
+
+    if (imgDisplayRef.current && img && imgUploadRef.current) {
+      imgDisplayRef.current.src = URL.createObjectURL(img);
+      imgUploadRef.current.disabled = false;
+
+      setUpdatedProfileImg(img);
+    }
+  };
+
+  // 上傳照片
+  const handleUploadImg = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    if (updatedProfileImg) {
+      UpdateAuthAvatarImg({
+        imgFile: updatedProfileImg,
+        uploadImg_e: e,
+        setUpdatedProfileImg,
+      });
     }
   };
 
@@ -173,7 +203,7 @@ const EditProfilePage = () => {
                 "
               >
                 {/* Avatar Image */}
-                <img src={profile_img} />
+                <img ref={imgDisplayRef} src={profile_img} />
 
                 {/* Hover Upload Text */}
                 <div
@@ -201,17 +231,32 @@ const EditProfilePage = () => {
                 <input
                   type="file"
                   id="uploadImg"
-                  accept=".jpeg .png .jpg"
+                  accept=".png, .jpg, .jpeg"
                   hidden
+                  onChange={(e) => handleImgPreview(e)}
                 />
               </label>
 
               {/* Upload Button */}
               <button
-                className="
-                  btn-light
+                ref={imgUploadRef}
+                disabled={Boolean(!updatedProfileImg)}
+                onClick={(e) => handleUploadImg(e)}
+                className={`
                   px-10
-                "
+                  transition
+                  ${
+                    !updatedProfileImg
+                      ? `
+                         btn-light
+                         hover:opacity-100
+                       text-grey-dark/50
+                        `
+                      : `
+                         btn-dark
+                        `
+                  }
+                `}
               >
                 Upload
               </button>
@@ -352,8 +397,8 @@ const EditProfilePage = () => {
                     submitBtnDiabled &&
                     `
                       btn-dark
-                      opacity-30
-                      hover:opacity-30
+                      opacity-10
+                      hover:opacity-10
                     `
                   }
                 `}
