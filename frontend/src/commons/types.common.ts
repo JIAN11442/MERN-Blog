@@ -183,6 +183,17 @@ export interface FetchSettingPropsType {
   imgFile?: File;
   uploadImg_e?: React.MouseEvent<HTMLButtonElement>;
   setUpdatedProfileImg?: React.Dispatch<React.SetStateAction<File | null>>;
+  username?: string;
+  bio?: string;
+  social_links?: {
+    facebook?: string;
+    github?: string;
+    instagram?: string;
+    twitter?: string;
+    website?: string;
+    youtube?: string;
+  };
+  submitBtn_e?: React.FormEvent<HTMLButtonElement>;
 }
 
 export interface GenerateEditProfilePropsType {

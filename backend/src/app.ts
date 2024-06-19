@@ -73,8 +73,8 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   if (isHttpError(error)) {
     statusCode = error.statusCode;
     errMsg = error.message;
-  } else if (error instanceof Error) {
-    errMsg = ErrorsHandle(error);
+  } else {
+    errMsg = ErrorsHandle(error as Error);
   }
 
   res.status(statusCode).json({ errorMessage: errMsg });

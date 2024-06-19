@@ -157,15 +157,16 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
 
   // 如果是通過按鈕提交留言
   const handleButtonSubmit = async () => {
-    console.log("click");
     if (buttonRef.current) {
+      const target = buttonRef.current;
+
       // 防止連續點擊
-      buttonRef.current.disabled = true;
+      target.disabled = true;
 
       await handleCommentFunc();
 
       // 恢復按鈕
-      buttonRef.current.disabled = false;
+      target.disabled = false;
     }
   };
 

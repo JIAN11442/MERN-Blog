@@ -1,17 +1,22 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
+import useToastLoadingStore from "../states/toast-loading.state";
+import useAuthStore from "../states/user-auth.state";
+import useAuthorProfileStore from "../states/author-profile.state";
+
+import useAwsFetch from "./aws.fetch";
+
 import {
+  AuthorProfileStructureType,
   FetchSettingPropsType,
   GenerateAuthDataType,
 } from "../commons/types.common";
-import useToastLoadingStore from "../states/toast-loading.state";
-import useAwsFetch from "./aws.fetch";
-import useAuthStore from "../states/user-auth.state";
 
 const useSettingFetch = () => {
   const { authUser, setAuthUser } = useAuthStore();
   const { setToastLoading } = useToastLoadingStore();
+  const { authorProfileInfo, setAuthorProfileInfo } = useAuthorProfileStore();
 
   const { UploadImageToAWS } = useAwsFetch();
 
@@ -157,7 +162,81 @@ const useSettingFetch = () => {
     }
   };
 
-  return { UpdateAuthPassword, UpdateAuthAvatarImg };
+  // 更新用戶個人資料
+  const UpdateAuthProfileInfo = async ({
+    username,
+    bio,
+    social_links,
+    submitBtn_e,
+  }: FetchSettingPropsType) => {
+    const target = submitBtn_e?.currentTarget;
+    const toastLoading = toast.loading("Uploading...");
+
+    setToastLoading(true);
+
+    if (target) {
+      target.setAttribute("disabled", "true");
+      target.classList.add("opacity-80");
+    }
+
+    const requestURL = SETTING_SERVER_ROUTE + "/change-profile";
+
+    await axios
+      .post(requestURL, { username, bio, social_links })
+      .then(async ({ data }) => {
+        if (data) {
+          // 從 server 返回的 data 中取得更新後的用戶資料
+          const {
+            username: resUsername,
+            bio: resBio,
+            social_links: resSocial_links,
+          } = await data.result;
+
+          // 更新 zustand 中的用戶資料
+          const newAuthorProfileInfo = {
+            ...authorProfileInfo,
+            personal_info: {
+              ...authorProfileInfo?.personal_info,
+              username: resUsername,
+              bio: resBio,
+            },
+            social_links: resSocial_links,
+          } as AuthorProfileStructureType;
+
+          setAuthorProfileInfo(newAuthorProfileInfo);
+
+          // 關閉 Loading
+          toast.dismiss(toastLoading);
+          setToastLoading(false);
+
+          // 將按鈕設為可用及恢復透明度
+          if (target) {
+            target.removeAttribute("disabled");
+            target.classList.remove("opacity-80");
+          }
+
+          // 最後顯示成功訊息
+          toast.success(data.message);
+        }
+      })
+      .catch(({ response }) => {
+        // 如果失敗，也一樣要停止 Loading
+        toast.dismiss(toastLoading);
+        setToastLoading(false);
+
+        // 以及恢復按鈕可用性及透明度
+        if (target) {
+          target.removeAttribute("disabled");
+          target.classList.remove("opacity-80");
+        }
+
+        // 最後顯示錯誤訊息
+        console.log(response.data);
+        toast.error(response.data.errorMessage);
+      });
+  };
+
+  return { UpdateAuthPassword, UpdateAuthAvatarImg, UpdateAuthProfileInfo };
 };
 
 export default useSettingFetch;

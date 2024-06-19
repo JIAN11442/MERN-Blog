@@ -1,20 +1,21 @@
+import toast from "react-hot-toast";
 import React, { useEffect, useRef, useState } from "react";
 
 import Loader from "../components/loader.component";
+import InputBox from "../components/input-box.component";
 import AnimationWrapper from "../components/page-animation.component";
 
 import useAuthStore from "../states/user-auth.state";
 import useAuthorProfileStore from "../states/author-profile.state";
 
 import useUserFetch from "../fetchs/user.fetch";
+import useSettingFetch from "../fetchs/setting.fetch";
 
 import {
   AuthorProfileStructureType,
   GenerateAuthDataType,
   GenerateEditProfilePropsType,
 } from "../commons/types.common";
-import InputBox from "../components/input-box.component";
-import useSettingFetch from "../fetchs/setting.fetch";
 
 const EditProfilePage = () => {
   const BioMaxLength = import.meta.env.VITE_BIO_LIMIT;
@@ -32,14 +33,14 @@ const EditProfilePage = () => {
   const { authUser } = useAuthStore();
   const { access_token } = authUser as GenerateAuthDataType;
 
-  const { authorProfileInfo } = useAuthorProfileStore();
+  const { authorProfileInfo, resetAuthorProfileInfo } = useAuthorProfileStore();
   const {
     personal_info: { username, fullname, profile_img, email, bio },
     social_links,
   } = authorProfileInfo as AuthorProfileStructureType;
 
   const { GetAuthorProfileInfo } = useUserFetch();
-  const { UpdateAuthAvatarImg } = useSettingFetch();
+  const { UpdateAuthAvatarImg, UpdateAuthProfileInfo } = useSettingFetch();
 
   // 監聽 Bio InputBox 內容變化
   const handleBioOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -113,14 +114,60 @@ const EditProfilePage = () => {
     }
   };
 
+  // 表單提交及更新
+  const handleFormSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    // 解析表單內容
+    const formData: { [key: string]: string } = {};
+    const form = new FormData(formRef.current as HTMLFormElement);
+
+    for (const [key, value] of form.entries()) {
+      formData[key] = value.toString();
+    }
+
+    const {
+      username,
+      bio,
+      facebook,
+      github,
+      instagram,
+      twitter,
+      youtube,
+      website,
+    } = formData;
+
+    if (username.length < 3) {
+      return toast.error("Username must be at least 3 letters long");
+    }
+
+    if (bio.length > BioMaxLength) {
+      return toast.error(`Bio should not exceed ${BioMaxLength} characters`);
+    }
+
+    UpdateAuthProfileInfo({
+      username,
+      bio,
+      social_links: { facebook, github, instagram, twitter, youtube, website },
+      submitBtn_e: e,
+    });
+  };
+
   // 第一時間根據 access_token 取得作者資訊
   useEffect(() => {
     if (access_token) {
       GetAuthorProfileInfo(authUser?.username ?? "");
+
+      // 當離開頁面時，即本組件被卸載時，
+      // 重置作者資訊
+      // 這樣可以避免下次進入頁面時，因為上次的資料殘留而導致錯誤
+      return () => {
+        resetAuthorProfileInfo();
+      };
     }
   }, [access_token]);
 
-  // 初始化編輯資料，
+  // 初始化編輯資料
   // 為了實現表單內容變更時啟動提交按鈕的功能
   useEffect(() => {
     if (authorProfileInfo) {
@@ -137,6 +184,8 @@ const EditProfilePage = () => {
         website,
         youtube,
       });
+
+      setBioContent(bio);
     }
   }, [authorProfileInfo]);
 
@@ -305,7 +354,7 @@ const EditProfilePage = () => {
                   value={username}
                   placeholder="Username"
                   icon="fi fi-rr-at"
-                  onBlur={(e) => handleSubmitBtnDisabled(e)}
+                  onChange={(e) => handleSubmitBtnDisabled(e)}
                   className="mb-1"
                 />
 
@@ -323,8 +372,10 @@ const EditProfilePage = () => {
                   maxLength={BioMaxLength}
                   defaultValue={bio}
                   placeholder="Bio"
-                  onChange={(e) => handleBioOnChange(e)}
-                  onBlur={(e) => handleSubmitBtnDisabled(e)}
+                  onChange={(e) => {
+                    handleBioOnChange(e);
+                    handleSubmitBtnDisabled(e);
+                  }}
                   className="
                     input-box
                     pl-5
@@ -380,7 +431,7 @@ const EditProfilePage = () => {
                         icon={`${
                           key !== "website" ? `fi-brands-${key}` : "fi-rr-globe"
                         }`}
-                        onBlur={(e) => handleSubmitBtnDisabled(e)}
+                        onChange={(e) => handleSubmitBtnDisabled(e)}
                       />
                     );
                   })}
@@ -391,6 +442,7 @@ const EditProfilePage = () => {
               <button
                 type="submit"
                 disabled={submitBtnDiabled}
+                onClick={(e) => handleFormSubmit(e)}
                 className={`
                   btn-dark
                   ${

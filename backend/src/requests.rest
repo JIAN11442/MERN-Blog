@@ -18,10 +18,24 @@
 # }
 
 
-POST http://localhost:5000/api/comment/update-comment
+
+# POST http://localhost:5000/api/auth/signin
+# Content-Type: application/json
+
+# {
+#     "email": "test35@gmail.com",
+#     "password": "Test35"
+# }
+
+
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiMDIyZGM4NTQ3ZDgwZTMyOTMwNDAiLCJpYXQiOjE3MTg3OTU2OTgsImV4cCI6MTcxOTM5NTY5OH0.LREI1mFmad1fZZ0bJ8tAlYu7VNKisJTGfHSZZK9XSGY
+
+POST http://localhost:5000/api/setting/change-profile
 Content-Type: application/json
+# Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiMDIyZGM4NTQ3ZDgwZTMyOTMwNDAiLCJpYXQiOjE3MTg3OTU2OTgsImV4cCI6MTcxOTM5NTY5OH0.LREI1mFmad1fZZ0bJ8tAlYu7VNKisJTGfHSZZK9XSGY`
 
 {
-    "commentObjectId": "665ee2b17d306794595d2f08",
-    "newComment": "This is a new comment"
+    "username": "test35",
+    "bio": "This is a new bio",
+    "social_links": {"youtube":"https://www.youtube.com/","linkedin":"https://www.youtube.com/","twitter":"https://www.twitter.com/","github":"","facebook":"https://www.facebook.com/","instagram":"https://www.instagram.com/","website":"https://www.google.com/?L=1"}
 }
