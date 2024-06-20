@@ -12,11 +12,16 @@ import useAuthStore from "../states/user-auth.state";
 import useCollapseStore from "../states/collapse.state";
 import useEditorBlogStore from "../states/blog-editor.state";
 
+import useDashBoardFetch from "../fetchs/dashboard.fetch";
+
 const Navbar = () => {
-  const currPath = useLocation().pathname;
   const navigate = useNavigate();
+  const currPath = useLocation().pathname;
+  const searchBarRef = useRef<HTMLInputElement>(null);
 
   const { authUser } = useAuthStore();
+  const { access_token, notification } = authUser ?? {};
+
   const {
     panelCollapsed,
     setPanelCollapsed,
@@ -25,7 +30,7 @@ const Navbar = () => {
   } = useCollapseStore();
   const { initialEditBlog } = useEditorBlogStore();
 
-  const searchBarRef = useRef<HTMLInputElement>(null);
+  const { GetNotifications } = useDashBoardFetch();
 
   // 控制 SearchBar 的顯示與隱藏
   const handleSearchButton = () => {
@@ -73,6 +78,25 @@ const Navbar = () => {
       searchBarRef.current?.focus();
     }
   }, [searchBarVisibility, searchBarRef]);
+
+  // 取得通知
+  useEffect(() => {
+    if (access_token) {
+      // 這裡設定 100ms 的延遲，
+      // 避免 GetNotifications 在 jwtVerify 時來不及取得 access_token 就執行
+      // 結果返回 token null
+      // 當然在刷新時也是同理，延遲是為了讓 jwtVerify 先執行，再執行 GetNotifications()
+      // 不然 GetNotifications() 取得的 notification 會被 jwtVerify 覆蓋
+      // 導致 notification 一直是 null
+      const timeout = setTimeout(() => {
+        GetNotifications();
+      }, 100);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [authUser?.access_token]);
 
   return (
     <>
@@ -218,6 +242,29 @@ const Navbar = () => {
                     name="fi fi-rr-bell"
                     className="scale-[1.25] pt-0.5 block"
                   />
+                  {notification ? (
+                    <span
+                      className="
+                      absolute
+                      -top-1
+                      -right-1
+                      w-5
+                      h-5
+                      bg-red-500
+                      rounded-full
+                      flex
+                      items-center
+                      justify-center
+                      text-sm
+                      text-white-custom
+                      z-10
+                    "
+                    >
+                      {notification.length}
+                    </span>
+                  ) : (
+                    ""
+                  )}
                 </button>
               </Link>
 

@@ -1,13 +1,12 @@
-import axios from 'axios';
-import toast from 'react-hot-toast';
+import axios from "axios";
+import toast from "react-hot-toast";
 
-import useAuthStore from '../states/user-auth.state';
-import { authWithGoogleUsingPopUp } from '../commons/firebase.common';
+import useAuthStore from "../states/user-auth.state";
+import { authWithGoogleUsingPopUp } from "../commons/firebase.common";
 
-const AUTH_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + '/auth';
+const AUTH_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/auth";
 
 const useAuthFetch = () => {
-  const requestUrl = AUTH_SERVER_ROUTE + '/authentication';
   const { setAuthUser } = useAuthStore();
 
   // Fetch Authenticated User with Google Auth（sign in）
@@ -19,7 +18,7 @@ const useAuthFetch = () => {
     authWithGoogleUsingPopUp()
       .then((googleAuthUser) => {
         if (googleAuthUser) {
-          const serverRoute = '/auth/google-auth';
+          const serverRoute = "/auth/google-auth";
           const requestUrl = import.meta.env.VITE_SERVER_DOMAIN + serverRoute;
           const formData = {
             google_access_token: (googleAuthUser as { accessToken?: string })
@@ -29,7 +28,7 @@ const useAuthFetch = () => {
         }
       })
       .catch((error) => {
-        toast.error('trouble login through google');
+        toast.error("trouble login through google");
         return console.log(error);
       });
   };
@@ -40,7 +39,7 @@ const useAuthFetch = () => {
       .post(requestUrl, formData)
       .then(({ data }) => {
         if (data.message && data.user) {
-          sessionStorage.setItem('access_token', data.user.access_token);
+          sessionStorage.setItem("access_token", data.user.access_token);
           setAuthUser(data.user);
           toast.success(data.message);
         }
@@ -52,11 +51,11 @@ const useAuthFetch = () => {
         } else if (error.request) {
           // 請求發出但沒有收到回應
           console.log(error.request);
-          toast.error('Request made but no response received');
+          toast.error("Request made but no response received");
         } else {
           // 在設定請求時出現錯誤
           console.log(error.message);
-          toast.error('Request setup error: ', error.message);
+          toast.error("Request setup error: ", error.message);
         }
       });
   };
@@ -65,12 +64,14 @@ const useAuthFetch = () => {
   const GetAuthUserWithToken = () => {
     axios.defaults.withCredentials = true;
     axios.defaults.headers.common[
-      'Authorization'
-    ] = `Bearer ${sessionStorage.getItem('access_token')}`;
+      "Authorization"
+    ] = `Bearer ${sessionStorage.getItem("access_token")}`;
+
+    const requestUrl = AUTH_SERVER_ROUTE + "/authentication";
 
     axios
       .get(requestUrl)
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         if (data.user) {
           setAuthUser(data.user);
         }

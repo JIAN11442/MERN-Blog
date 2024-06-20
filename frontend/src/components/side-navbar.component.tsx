@@ -16,7 +16,7 @@ const SideNavbar = () => {
   const [sideBarVisible, setSideBarVisible] = useState(false);
 
   const { authUser } = useAuthStore();
-  const { access_token } = authUser ?? {};
+  const { access_token, notification } = authUser ?? {};
 
   const handleNavigatePage = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const { innerText } = e.currentTarget;
@@ -191,7 +191,25 @@ const SideNavbar = () => {
                   onClick={(e) => handleNavigatePage(e)}
                   className="sidebar-link"
                 >
-                  <FlatIcons name="fi fi-rr-bell" />
+                  <div className="relative">
+                    <FlatIcons name="fi fi-rr-bell" />
+                    {notification ? (
+                      <span
+                        className="
+                          absolute
+                          top-[-2px]
+                          right-[-1px]
+                          w-[6px]
+                          h-[6px]
+                          bg-red-custom
+                          rounded-full
+                          z-10
+                        "
+                      ></span>
+                    ) : (
+                      ""
+                    )}
+                  </div>
                   <p className="truncate">Notification</p>
                 </NavLink>
 

@@ -6,6 +6,7 @@ export interface GenerateAuthDataType {
   username: string;
   fullname: string;
   google_auth: boolean;
+  notification: string[];
 }
 
 export interface PersonalInfoStructureType {
