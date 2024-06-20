@@ -201,7 +201,7 @@ const Navbar = () => {
           {authUser ? (
             <>
               {/* Notification */}
-              <Link to="/dashboard/notification">
+              <Link to="/dashboard/notifications">
                 <button
                   className="
                     w-12

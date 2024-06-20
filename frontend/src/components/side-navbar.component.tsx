@@ -187,7 +187,7 @@ const SideNavbar = () => {
 
                 {/* Notification */}
                 <NavLink
-                  to="/dashboard/notification"
+                  to="/dashboard/notifications"
                   onClick={(e) => handleNavigatePage(e)}
                   className="sidebar-link"
                 >
