@@ -242,25 +242,25 @@ const Navbar = () => {
                     name="fi fi-rr-bell"
                     className="scale-[1.25] pt-0.5 block"
                   />
-                  {notification ? (
+                  {notification?.totalCount ? (
                     <span
                       className="
-                      absolute
-                      -top-1
-                      -right-1
-                      w-5
-                      h-5
-                      bg-red-500
-                      rounded-full
-                      flex
-                      items-center
-                      justify-center
-                      text-sm
-                      text-white-custom
-                      z-10
-                    "
+                        absolute
+                        -top-2
+                        -right-1
+                        w-5
+                        h-5
+                        bg-red-500
+                        rounded-full
+                        flex
+                        items-center
+                        justify-center
+                        text-[11px]
+                        text-white-custom
+                        z-10
+                      "
                     >
-                      {notification.length}
+                      {notification.totalCount}
                     </span>
                   ) : (
                     ""

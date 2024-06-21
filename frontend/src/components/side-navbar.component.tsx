@@ -52,6 +52,8 @@ const SideNavbar = () => {
     }
   };
 
+  // 當切換頁簽時，自動點擊 pageStateBtnRef
+  // 這樣就可以讓 activeTabLine 跟著移動
   useEffect(() => {
     if (pageStateBtnRef.current) {
       setSideBarVisible(false);
@@ -59,6 +61,34 @@ const SideNavbar = () => {
       pageStateBtnRef.current.click();
     }
   }, [pageState]);
+
+  // 如果第一次進入頁面是在 md 以上的寬度，這時候 activeTabLine 是 null，因為還沒有渲染
+  // 而如果這時候 resize 到 md 以下的寬度，因為 activeTabLine 是 null，
+  // 所以 activeTabLine 的 offsetLeft 及 offsetWidth 也都會是 0，這樣當然不會出現我們要的下劃線效果
+  // 所以我們這裡要監聽遊覽器寬度，
+  // 當監測到寬度小於 768 時，即 tailwindcss 中的 max-md 寬度，
+  // 自動點擊 pageStateBtnRef，讓 activeTabLine 跟著移動
+  useEffect(() => {
+    const handleResize = () => {
+      if (
+        window.innerWidth <= 768 &&
+        pageStateBtnRef.current &&
+        activeTabLineRef.current?.offsetLeft === 0
+      ) {
+        pageStateBtnRef.current.click();
+      }
+    };
+
+    // 第一次進入頁面時，就執行 handleResize
+    // 而不是等到 resize 時才執行，那就太晚了
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <>
@@ -193,7 +223,7 @@ const SideNavbar = () => {
                 >
                   <div className="relative">
                     <FlatIcons name="fi fi-rr-bell" />
-                    {notification ? (
+                    {notification?.totalCount ? (
                       <span
                         className="
                           absolute
