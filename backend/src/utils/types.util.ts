@@ -1,5 +1,5 @@
 import type mongoose from 'mongoose';
-import type { InferSchemaType } from 'mongoose';
+import type { InferSchemaType, ObjectId } from 'mongoose';
 import type { OutputData } from '@editorjs/editorjs';
 
 import { userSchema } from '../schemas/user.schema';
@@ -39,4 +39,11 @@ export interface BlogReqBody {
 export interface ChangePasswordReqBody {
   currPassword: string;
   newPassword: string;
+}
+
+export interface NotificationQueryProps {
+  notification_for: ObjectId;
+  user: ObjectId;
+  seen: string;
+  type?: string;
 }

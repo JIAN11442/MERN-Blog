@@ -1,25 +1,25 @@
-import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 
-import AnimationWrapper from '../components/page-animation.component';
+import AnimationWrapper from "../components/page-animation.component";
 import InpageNavigation, {
   activeButtonRef,
-} from '../components/inpage-navigation.component';
-import Loader from '../components/loader.component';
-import BlogPostCard from '../components/blog-card-banner.component';
-import NoDataMessage from '../components/blog-nodata.component';
-import LoadOptions from '../components/load-options.components';
-import UserCardWrapper from '../components/user-card-wrapper.component';
+} from "../components/inpage-navigation.component";
+import Loader from "../components/loader.component";
+import BlogPostCard from "../components/blog-card-banner.component";
+import NoDataMessage from "../components/blog-nodata.component";
+import LoadOptions from "../components/load-options.components";
+import UserCardWrapper from "../components/user-card-wrapper.component";
 
-import useHomeBlogStore from '../states/home-blog.state';
-import useCollapseStore from '../states/collapse.state';
+import useHomeBlogStore from "../states/home-blog.state";
+import useCollapseStore from "../states/collapse.state";
 
-import useBlogFetch from '../fetchs/blog.fetch';
-import useUserFetch from '../fetchs/user.fetch';
+import useBlogFetch from "../fetchs/blog.fetch";
+import useUserFetch from "../fetchs/user.fetch";
 
-import { FlatIcons } from '../icons/flaticons';
+import { FlatIcons } from "../icons/flaticons";
 
-import type { BlogStructureType } from '../commons/types.common';
+import type { BlogStructureType } from "../commons/types.common";
 
 const SearchPage = () => {
   const { query } = useParams();
@@ -52,24 +52,24 @@ const SearchPage = () => {
           h-cover
           gap-10
           justify-center
-          ${searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''}
+          ${searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""}
         `}
       >
         {/* searching related blogs(md-screen) and users(min-screen) */}
         <div className="w-full">
           <InpageNavigation
-            routes={[`Search Results from "${query}"`, 'Accounts Matched']}
+            routes={[`Search Results from "${query}"`, "Accounts Matched"]}
             defaultHiddenIndex={1}
           >
             {/* Search result of related blogs */}
             <>
               {queryBlogs === null ? (
                 // 如果 queryBlogs 為 null，顯示 loader
-                <Loader loader={{ speed: 1, size: 50 }} />
-              ) : 'results' in queryBlogs && queryBlogs.results.length ? (
+                <Loader />
+              ) : "results" in queryBlogs && queryBlogs?.results?.length ? (
                 // 如果 queryBlogs 不為 null 且有長度，則顯示 blog card
                 <div>
-                  {queryBlogs.results.map((blog: BlogStructureType, i) => (
+                  {queryBlogs?.results?.map((blog: BlogStructureType, i) => (
                     // delay: i * 0.1 可以讓每個 blog card 依次延遲出現
                     <AnimationWrapper
                       key={blog.title}
@@ -100,7 +100,7 @@ const SearchPage = () => {
             </>
 
             {/* Search result of related Authors */}
-            <UserCardWrapper query={query || ''} />
+            <UserCardWrapper query={query || ""} />
           </InpageNavigation>
         </div>
 
@@ -131,7 +131,7 @@ const SearchPage = () => {
           </div>
 
           {/* Users */}
-          <UserCardWrapper query={query || ''} />
+          <UserCardWrapper query={query || ""} />
         </div>
       </section>
     </AnimationWrapper>

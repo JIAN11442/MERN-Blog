@@ -49,7 +49,11 @@ export interface BlogStructureType {
 
 export interface GenerateToLoadStructureType {
   page: number;
-  results: BlogStructureType[] | PersonalInfoStructureType[];
+  results:
+    | BlogStructureType[]
+    | PersonalInfoStructureType[]
+    | NotificationStructureType[]
+    | null;
   totalDocs: number;
   prevLoadNum: number[];
 }
@@ -60,6 +64,7 @@ export interface FormattedBlogDataProps {
     | GenerateToLoadStructureType
     | BlogStructureType[]
     | PersonalInfoStructureType[]
+    | NotificationStructureType[]
     | null;
   fetchData: BlogStructureType[] | null;
   page: number;
@@ -90,6 +95,7 @@ export interface FetchBlogsPropsType extends FetchLoadPropsType {
 export interface LoadFunctionPropsType extends FetchLoadPropsType {
   category?: string;
   authorId?: string;
+  filter?: string;
 }
 
 export interface AuthorProfileStructureType {
@@ -209,4 +215,28 @@ export interface GenerateEditProfilePropsType {
   twitter?: string;
   website?: string;
   youtube?: string;
+}
+
+export interface NotificationStructureType {
+  _id?: string;
+  type?: string;
+  blog?: string | BlogStructureType;
+  notification_for?: string | PersonalInfoStructureType;
+  user?: string | AuthorStructureType;
+  comment?: string | CommentStructureType;
+  reply?: string | CommentStructureType;
+  replied_on_comment?: string | CommentStructureType;
+  seen?: boolean;
+}
+
+export interface NotificationFilterPropsType {
+  type: string;
+  count: number;
+}
+
+export interface FetchDashboardPropsType {
+  page?: number;
+  filter?: string;
+  deleteDocCount?: number;
+  state?: string;
 }

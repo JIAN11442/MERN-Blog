@@ -18,4 +18,5 @@ export default cleanEnv(process.env, {
   GET_RELATED_USERS_LIMIT: num(),
   GET_COMMENTS_LIMIT: num(),
   BIO_CHAR_LIMIT: num(),
+  NOTIFICATION_LOAD_LIMIT: num(),
 });

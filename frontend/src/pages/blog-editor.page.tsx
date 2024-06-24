@@ -41,10 +41,7 @@ const BlogEditorPage = () => {
         <Navigate to="/signin" />
       ) : editorState === "editor" ? (
         loading ? (
-          <Loader
-            loader={{ speed: 1, size: 50 }}
-            className={{ container: "mt-5" }}
-          />
+          <Loader className={{ container: "mt-5" }} />
         ) : (
           <BlogEditor />
         )

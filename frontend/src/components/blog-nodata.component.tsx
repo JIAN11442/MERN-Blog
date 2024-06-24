@@ -1,4 +1,4 @@
-import { twMerge } from 'tailwind-merge';
+import { twMerge } from "tailwind-merge";
 
 interface NoDataMessageProps {
   message: string;
@@ -23,7 +23,7 @@ const NoDataMessage: React.FC<NoDataMessageProps> = ({
         className
       )}
     >
-      <p>{message}</p>
+      <p className="truncate">{message}</p>
     </div>
   );
 };

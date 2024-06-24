@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import Loader from '../components/loader.component';
+import Loader from "../components/loader.component";
 
-import pageNotFoundImage from '../imgs/404-2.png';
-import fullLogo from '../imgs/full-logo.png';
+import pageNotFoundImage from "../imgs/404-2.png";
+import fullLogo from "../imgs/full-logo.png";
 
-import useCollapseStore from '../states/collapse.state';
+import useCollapseStore from "../states/collapse.state";
 
 const PageNotFound = () => {
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const PageNotFound = () => {
         justify-center
         text-center
         gap-5
-        ${searchBarVisibility ? 'translate-y-[80px] md:translate-y-0' : ''}
+        ${searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""}
       `}
     >
       {/* 404 Image */}
@@ -41,7 +41,7 @@ const PageNotFound = () => {
 
       {/* Do not display the text until the image has fully loaded */}
       {!imageLoaded ? (
-        <Loader loader={{ speed: 1, size: 50 }} />
+        <Loader />
       ) : (
         <>
           {/* Navigate text */}
@@ -55,15 +55,15 @@ const PageNotFound = () => {
             "
           >
             The page you are looking for does not exists. Please head back to
-            the{' '}
+            the{" "}
             <Link
               to="/"
               onClick={(e) => handleGoBack(e)}
               className="text-blue-600 underline"
             >
               previous page
-            </Link>{' '}
-            OR{' '}
+            </Link>{" "}
+            OR{" "}
             <Link to="/" className="text-blue-600 underline">
               home page
             </Link>

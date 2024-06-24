@@ -21,7 +21,7 @@ export const FormatDataForLoadMoreOrLess = async ({
     obj = {
       ...prevArr,
       results: "results" in prevArr &&
-        fetchData && [...prevArr.results, ...fetchData],
+        fetchData && [...(prevArr.results ?? ""), ...fetchData],
       page: page,
       prevLoadNum: "prevLoadNum" in prevArr && [
         ...prevArr.prevLoadNum,
@@ -38,9 +38,10 @@ export const FormatDataForLoadMoreOrLess = async ({
 
     obj = {
       ...prevArr,
-      results: "results" in prevArr && [
-        ...prevArr.results.slice(0, prevArr.results.length - reduceNum),
-      ],
+      results: "results" in prevArr &&
+        prevArr.results && [
+          ...prevArr.results.slice(0, prevArr.results.length - reduceNum),
+        ],
       page: page - 1,
       prevLoadNum: "prevLoadNum" in prevArr && prevArr.prevLoadNum,
     };

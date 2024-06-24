@@ -23,10 +23,10 @@ const UserCardWrapper: React.FC<UserCardWrapperProps> = ({ query }) => {
   return (
     <>
       {queryUsers === null ? (
-        <Loader loader={{ speed: 1, size: 50 }} />
-      ) : "results" in queryUsers && queryUsers.results.length ? (
+        <Loader />
+      ) : "results" in queryUsers && queryUsers?.results?.length ? (
         <div>
-          {queryUsers.results.map((user, i) => (
+          {queryUsers?.results?.map((user, i) => (
             <AnimationWrapper
               key={i}
               initial={{ opacity: 0 }}

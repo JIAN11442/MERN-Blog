@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import * as LoaderSpinners from 'react-spinners';
-import { twMerge } from 'tailwind-merge';
+import { Link } from "react-router-dom";
+import * as LoaderSpinners from "react-spinners";
+import { twMerge } from "tailwind-merge";
 
 interface LoaderProps {
   loader?: {
@@ -18,17 +18,17 @@ interface LoaderProps {
 }
 
 const Loader: React.FC<LoaderProps> = ({ loader, className, children }) => {
-  const color = loader?.color || 'rgb(209,213,219)';
+  const color = loader?.color || "rgb(209,213,219)";
   const size = loader?.size || 50;
-  const speed = loader?.speed || 0.5;
+  const speed = loader?.speed || 1;
 
-  const loaderName = (loader?.name || '') as keyof typeof LoaderSpinners;
+  const loaderName = (loader?.name || "") as keyof typeof LoaderSpinners;
 
   // 將該庫所有提供的選項轉成陣列
   const spinnerOptions = Object.keys(LoaderSpinners);
 
   // 預設 Loading 用的是該庫的 ClipLoader
-  let Loading = LoaderSpinners['ClipLoader'];
+  let Loading = LoaderSpinners["ClipLoader"];
 
   // 如果有指定 loaderName，檢查該庫是否有提供該 loaderName
   // 根據情況決定是否改變預設的 Loading 值
@@ -82,7 +82,7 @@ const Loader: React.FC<LoaderProps> = ({ loader, className, children }) => {
             {spinnerOptions.map((option, i) => (
               <li
                 key={i}
-                style={{ listStyleType: 'disc' }}
+                style={{ listStyleType: "disc" }}
                 className="text-start"
               >
                 {option}

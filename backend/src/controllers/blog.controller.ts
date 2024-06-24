@@ -142,7 +142,7 @@ export const getLatestBlogsByCategory: RequestHandler = async (req, res, next) =
       .sort({ publishedAt: -1 })
       .select('blog_id title banner des activity tags publishedAt -_id')
       .populate('author', 'personal_info.profile_img personal_info.username personal_info.fullname -_id')
-      .skip((page - 1) * env.GET_LATEST_BLOGS_LIMIT)
+      .skip((page - 1) * getLatestBlogLimit)
       .limit(getLatestBlogLimit);
 
     if (!tagBlogs) {

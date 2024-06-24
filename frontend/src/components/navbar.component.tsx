@@ -30,7 +30,7 @@ const Navbar = () => {
   } = useCollapseStore();
   const { initialEditBlog } = useEditorBlogStore();
 
-  const { GetNotifications } = useDashBoardFetch();
+  const { GetNotificationsByUserId } = useDashBoardFetch();
 
   // 控制 SearchBar 的顯示與隱藏
   const handleSearchButton = () => {
@@ -83,13 +83,13 @@ const Navbar = () => {
   useEffect(() => {
     if (access_token) {
       // 這裡設定 100ms 的延遲，
-      // 避免 GetNotifications 在 jwtVerify 時來不及取得 access_token 就執行
+      // 避免 GetNotificationsByUserId 在 jwtVerify 時來不及取得 access_token 就執行
       // 結果返回 token null
-      // 當然在刷新時也是同理，延遲是為了讓 jwtVerify 先執行，再執行 GetNotifications()
-      // 不然 GetNotifications() 取得的 notification 會被 jwtVerify 覆蓋
+      // 當然在刷新時也是同理，延遲是為了讓 jwtVerify 先執行，再執行 GetNotificationsByUserId()
+      // 不然 GetNotificationsByUserId() 取得的 notification 會被 jwtVerify 覆蓋
       // 導致 notification 一直是 null
       const timeout = setTimeout(() => {
-        GetNotifications();
+        GetNotificationsByUserId();
       }, 100);
 
       return () => {

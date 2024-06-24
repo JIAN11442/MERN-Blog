@@ -1,23 +1,35 @@
 import axios from "axios";
-import useAuthStore from "../states/user-auth.state";
-import { GenerateAuthDataType } from "../commons/types.common";
 
-const useDashBoardFetch = () => {
+import useAuthStore from "../states/user-auth.state";
+import useDashboardStore from "../states/dashboard.state";
+
+import {
+  GenerateAuthDataType,
+  FetchDashboardPropsType,
+  GenerateToLoadStructureType,
+} from "../commons/types.common";
+import { FormatDataForLoadMoreOrLess } from "../commons/generate.common";
+
+const useDashboardFetch = () => {
   const DASHBOARD_SERVER_ROUTE =
     import.meta.env.VITE_SERVER_DOMAIN + "/dashboard";
 
   const { authUser, setAuthUser } = useAuthStore();
+  const { notificationsInfo, setNotificationInfo } = useDashboardStore();
 
-  // 取得通知情況
-  const GetNotifications = async () => {
+  // 根據用戶 ID 取得通知情況
+  const GetNotificationsByUserId = async () => {
+    const requestUrl = DASHBOARD_SERVER_ROUTE + "/get-notifications-userId";
+
     await axios
-      .get(DASHBOARD_SERVER_ROUTE + "/get-notifications")
+      .get(requestUrl)
       .then(({ data }) => {
         // 將通知資料更新至 zustand 的 authUser
         const newAuthUser = {
           ...authUser,
           notification: data.notification,
         } as GenerateAuthDataType;
+
         setAuthUser(newAuthUser);
       })
       .catch((error) => {
@@ -25,7 +37,36 @@ const useDashBoardFetch = () => {
       });
   };
 
-  return { GetNotifications };
+  // 根據 Filter 來取得通知
+  const GetNotificationByFilter = async ({
+    page = 1,
+    filter,
+    deleteDocCount = 0,
+    state,
+  }: FetchDashboardPropsType) => {
+    const requestUrl = DASHBOARD_SERVER_ROUTE + "/notifications-filter-info";
+
+    await axios
+      .post(requestUrl, { page, filter, deleteDocCount })
+      .then(async ({ data }) => {
+        const formattedData = await FormatDataForLoadMoreOrLess({
+          prevArr: notificationsInfo,
+          fetchData: data.notification,
+          page,
+          fetchRoute: "dashboard",
+          countRoute: "/notifications-filter-count",
+          data_to_send: { filter },
+          state,
+        });
+
+        setNotificationInfo(formattedData as GenerateToLoadStructureType);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  return { GetNotificationsByUserId, GetNotificationByFilter };
 };
 
-export default useDashBoardFetch;
+export default useDashboardFetch;

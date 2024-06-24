@@ -5,10 +5,14 @@ import { RequestHandler } from 'express';
 import createHttpError from 'http-errors';
 import { Types } from 'mongoose';
 
-import NotificationSchema from '../schemas/notification.schema';
+import env from '../utils/validateEnv.util';
 
-// 取得通知情況
-export const getNotifications: RequestHandler = async (req, res, next) => {
+import NotificationSchema from '../schemas/notification.schema';
+import { NotificationQueryProps } from '../utils/types.util';
+
+// 根據 userId 取得通知情況，
+// 並格式化成前端需要的格式
+export const getNotificationsByUserId: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
     const objectUserId = new Types.ObjectId(userId);
@@ -17,16 +21,7 @@ export const getNotifications: RequestHandler = async (req, res, next) => {
       throw createHttpError(401, 'Unauthorized');
     }
 
-    // 找出所有 notification_for 為當前使用者，且未讀的通知
-    // 另外，如果是當前使用者自己發出的通知，則不會被列入($ne: 不等於的意思)
-
-    // const getNotificationsByUserId = await NotificationSchema.find({
-    //   notification_for: userId,
-    //   seen: false,
-    //   user: { $ne: userId },
-    // }).select('_id type');
-
-    const getNotificationsByUserId = await NotificationSchema.aggregate([
+    const notificationInfo = await NotificationSchema.aggregate([
       {
         // $match 用來過濾資料，只保留符合條件的資料
         $match: {
@@ -67,7 +62,93 @@ export const getNotifications: RequestHandler = async (req, res, next) => {
       },
     ]);
 
-    return res.status(200).json({ notification: getNotificationsByUserId[0] });
+    return res.status(200).json({ notification: notificationInfo[0] });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 根據 Filter 來取得通知
+export const getNotificationsByFilter: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { page, filter, deleteDocCount } = req.body;
+
+    const maxLimit = env.NOTIFICATION_LOAD_LIMIT;
+    let skipDocs = (page - 1) * maxLimit;
+
+    if (!userId) {
+      throw createHttpError(401, 'Unauthorized');
+    }
+
+    if (!filter) {
+      throw createHttpError(400, 'Please provide a filter type from client side');
+    }
+
+    const findQuery = {
+      notification_for: userId,
+      user: { $ne: userId },
+      seen: false,
+    } as unknown as NotificationQueryProps;
+
+    // 如果 filter 是 all, 就不需要額外加上 type 來篩選資料
+    // 如果 filter 不是 all, 就需要加上 type 來篩選資料
+    if (filter !== 'all') {
+      findQuery.type = filter;
+    }
+
+    // ??
+    if (deleteDocCount) {
+      skipDocs -= deleteDocCount;
+    }
+
+    const notificationsInfo = await NotificationSchema.find(findQuery)
+      .skip(skipDocs)
+      .limit(maxLimit)
+      .populate('blog', 'title blog_id')
+      .populate('user', 'personal_info.fullname personal_info.username personal_info.profile_img')
+      .populate('comment', 'comment')
+      .populate('replied_on_comment', 'comment')
+      .sort({ createdAt: -1 })
+      .select('createdAt type seen reply');
+
+    if (!notificationsInfo) {
+      throw createHttpError(500, 'No notifications found with this filter');
+    }
+
+    res.status(200).json({ notification: notificationsInfo });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 根據 Filter 來取得通知的數量
+export const getCountOfNotificationsByFilter: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { filter } = req.body;
+
+    console.log(userId, filter);
+
+    if (!filter) {
+      throw createHttpError(400, 'Please provide a filter type from client side');
+    }
+
+    const findQuery = {
+      notification_for: userId,
+      user: { $ne: userId },
+      seen: false,
+    } as unknown as NotificationQueryProps;
+
+    if (filter !== 'all') {
+      findQuery.type = filter;
+    }
+
+    const notificationCount = await NotificationSchema.countDocuments(findQuery);
+
+    res.status(200).json({ totalDocs: notificationCount });
   } catch (error) {
     console.log(error);
     next(error);

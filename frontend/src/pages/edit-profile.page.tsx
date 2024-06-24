@@ -198,7 +198,7 @@ const EditProfilePage = () => {
     >
       {!authorProfileInfo?._id ? (
         // 如果還沒取得作者資訊，顯示載入中
-        <Loader loader={{ speed: 1, size: 50 }} />
+        <Loader />
       ) : (
         // 如果已經取得作者資訊，顯示編輯頁面
         <div>

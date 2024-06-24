@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type {
   BlogStructureType,
   PersonalInfoStructureType,
@@ -18,6 +18,18 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   content,
   position = "horizontal",
 }) => {
+  const navigate = useNavigate();
+
+  const handleNavigateToProfile = () => {
+    const timeout = setTimeout(() => {
+      navigate(`/user/${username}`);
+    }, 0);
+
+    return () => {
+      clearInterval(timeout);
+    };
+  };
+
   const { fullname, username, profile_img } = author;
   const {
     publishedAt,
@@ -80,8 +92,8 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
           <img
             src={profile_img}
             className="
-              w-8
-              h-8
+              w-10
+              h-10
               rounded-full
             "
           />
@@ -93,17 +105,24 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
               text-nowrap
             "
           >
-            <span>{fullname}</span>
-            <span>·</span>
+            <span className="capitalize">{fullname}</span>
             <span
               className="
                 hidden 
                 md:flex 
                 gap-x-1 
-                text-blue-500
               "
             >
-              <span>@{username}</span>
+              <span>·</span>
+              <span
+                onClick={handleNavigateToProfile}
+                className="
+                  text-blue-500 
+                    hover:underline
+                "
+              >
+                @{username}
+              </span>
             </span>
           </p>
           {/* blog post date */}

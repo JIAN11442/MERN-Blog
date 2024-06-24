@@ -10,11 +10,13 @@ interface LoadLessBtnProps {
   state?: string;
   query?: string;
   authorId?: string;
+  filter?: string;
   loadLimit: number;
   loadFunction: ({
     category,
     query,
     authorId,
+    filter,
     page,
     state,
   }: LoadFunctionPropsType) => void;
@@ -25,12 +27,13 @@ const LoadLessBtn: React.FC<LoadLessBtnProps> = ({
   state = "loadless",
   query,
   authorId,
+  filter,
   loadLimit,
   loadFunction: LoadLessFunction,
 }) => {
   const { inPageNavState: category } = useHomeBlogStore();
 
-  if (data.results.length > loadLimit) {
+  if ((data?.results?.length ?? 0) > loadLimit) {
     return (
       <div
         onClick={() =>
@@ -38,6 +41,7 @@ const LoadLessBtn: React.FC<LoadLessBtnProps> = ({
             category,
             query,
             authorId,
+            filter,
             page: data.page,
             state,
           })

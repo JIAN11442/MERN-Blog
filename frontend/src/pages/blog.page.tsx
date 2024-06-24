@@ -98,10 +98,7 @@ const BlogPage = () => {
       transition={{ duration: 0.5 }}
     >
       {!publishedAt ? (
-        <Loader
-          loader={{ speed: 1, size: 50 }}
-          className={{ container: "mt-5" }}
-        />
+        <Loader className={{ container: "mt-5" }} />
       ) : (
         <>
           {/* Delete comment warning */}
@@ -113,11 +110,12 @@ const BlogPage = () => {
           )}
 
           {/* Close edit mode warning */}
-
           {isEditWarning && <EditCommentWarningModal />}
 
+          {/* Comment Container */}
           <BlogCommentContainer />
 
+          {/* Blog */}
           <div
             className={`
               max-w-[900px]
