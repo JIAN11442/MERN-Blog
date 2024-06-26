@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import type { BlogStructureType } from "../commons/types.common";
-import { getDay } from "../commons/date.common";
+import { getTimeAgo } from "../commons/date.common";
 
 interface MinimalBlogPostCardProps {
   blog: BlogStructureType;
@@ -42,7 +42,9 @@ const MinimalBlogPostCard: React.FC<MinimalBlogPostCardProps> = ({
             </span> */}
           </p>
           {/* blog post date */}
-          <p className="min-w-fit text-grey-dark/60 ">{getDay(publishedAt!)}</p>
+          <p className="min-w-fit text-grey-dark/60 ">
+            {getTimeAgo(publishedAt!)}
+          </p>
         </div>
 
         {/* Blog Title */}

@@ -9,6 +9,7 @@ interface InputBoxProps {
   name: string;
   value?: string;
   placeholder: string;
+  content?: string | null;
   icon: string;
   className?: string;
   disabled?: boolean;
@@ -24,6 +25,7 @@ const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
       name,
       value,
       placeholder,
+      content,
       icon,
       className,
       disabled = false,
@@ -74,6 +76,7 @@ const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
             className={`
               input-icon
               ${disabled && "opacity-50"}
+              ${content?.length && `text-${name}`}
             `}
           />
         </div>

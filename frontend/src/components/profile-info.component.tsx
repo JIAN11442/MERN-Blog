@@ -22,7 +22,25 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
   return (
     <div className={twMerge(`md:w-[90%]`, className)}>
       {/* Bio */}
-      <p className={`text-md leading-7 ${!bio.length && "text-grey-dark/50"}`}>
+      <p
+        className={`
+          text-md
+          leading-7
+          ${
+            !bio.length
+              ? "text-grey-dark/50"
+              : `
+                  p-5
+                  border-l-4
+                  border-orange-200
+                  bg-orange-100/30
+                  text-orange-900
+                  whitespace-pre-wrap
+                  rounded-md
+                `
+          }
+        `}
+      >
         {bio.length ? bio : "Nothing to read here"}
       </p>
 
@@ -55,7 +73,14 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
                   name={`${
                     key !== "website" ? `fi-brands-${key}` : "fi-rr-globe"
                   }`}
-                  className="text-xl hover:text-black-custom transition"
+                  className={`
+                    text-xl
+                   text-grey-dark
+                    opacity-60
+                    hover:opacity-100
+                    hover:text-${key}
+                    transition
+                    `}
                 />
               </Link>
             )
@@ -64,7 +89,7 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
       </div>
 
       {/* Joined date */}
-      <p className="text-md leading-7 text-grey-dark">
+      <p className="text-md leading-7 text-grey-dark/40">
         Joined on {getFullDay(createdAt)}
       </p>
     </div>

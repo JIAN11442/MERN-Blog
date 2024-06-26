@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { twMerge } from "tailwind-merge";
 
 import BlogCommentField from "./blog-comment-field.component";
 import AnimationWrapper from "./page-animation.component";
+import CommentCardOptionsPanel from "./comment-card-panel.component";
 
 import useAuthStore from "../states/user-auth.state";
 import useBlogCommentStore from "../states/blog-comment.state";
@@ -13,13 +15,12 @@ import useCommentFetch from "../fetchs/comment.fetch";
 
 import { FlatIcons } from "../icons/flaticons";
 
-import { getDay } from "../commons/date.common";
+import { getTimeAgo } from "../commons/date.common";
 import type {
   AuthorProfileStructureType,
   BlogStructureType,
   GenerateCommentStructureType,
 } from "../commons/types.common";
-import CommentCardOptionsPanel from "./comment-card-panel.component";
 
 interface BlogCommentCardProps {
   index: number;
@@ -29,6 +30,8 @@ interface BlogCommentCardProps {
   options?: boolean;
   optionsCollapse?: boolean;
   allowLoadMoreReplies?: boolean;
+  children?: ReactNode;
+  className?: string;
 }
 
 const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
@@ -39,6 +42,8 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
   options = true,
   optionsCollapse = false,
   allowLoadMoreReplies = true,
+  children,
+  className,
 }) => {
   const {
     _id: commentObjectId,
@@ -129,8 +134,10 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
       // 當刪除完所有 comment 後，並不會有下一個 comment 來與本次 parent comment 的 childrenLevel 做比較
       // 所以在每一次迴圈都需要判斷是否有下一個 comment，也就是這裡的 commentsArr[childrenIndex]，如果沒有就不用再迴圈了
       while (
-        commentsArr[childrenIndex] &&
-        commentsArr[childrenIndex].childrenLevel > commentData.childrenLevel
+        (commentsArr[childrenIndex].childrenLevel &&
+          commentData.childrenLevel &&
+          commentsArr[childrenIndex].childrenLevel) ??
+        0 > (commentData.childrenLevel ?? 0)
       ) {
         commentsArr.splice(childrenIndex, 1);
       }
@@ -292,7 +299,12 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
 
   return (
     <div
-      className="w-full"
+      className={twMerge(
+        `
+        w-full
+        `,
+        className
+      )}
       style={{
         paddingLeft: `${
           options ? `${leftVal * paddingLeftIncrementVal}px` : ""
@@ -322,8 +334,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
           "
         >
           {/* Avatar && Fullname */}
-          <Link
-            to={`/user/${username}`}
+          <div
             className="
               flex 
               w-[80%]
@@ -331,21 +342,39 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
               items-center
             "
           >
-            <img
-              src={profile_img}
-              className="
-                w-8
-                h-8 
-                rounded-full
-              "
-            />
+            <Link to={`/user/${username}`}>
+              <img
+                src={profile_img}
+                className="
+                  w-8
+                  h-8 
+                  rounded-full
+                  hover:opacity-80
+                  transition
+                "
+              />
+            </Link>
 
-            <p className="truncate">
+            <p
+              className="
+                flex
+                gap-1
+                truncate
+              "
+            >
               <span>{fullname} </span>
               <span>·</span>
-              <span className="text-blue-500"> @{username}</span>
+              <Link
+                to={`/user/${username}`}
+                className="
+                  text-blue-500
+                  hover:underline
+                "
+              >
+                @{username}
+              </Link>
             </p>
-          </Link>
+          </div>
 
           {/* Date */}
           <p
@@ -355,7 +384,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
               text-grey-dark/60
             "
           >
-            {getDay(commentedAt ?? "")}
+            {getTimeAgo(commentedAt!)}
           </p>
         </div>
 
@@ -554,6 +583,8 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
             </AnimationWrapper>
           )}
         </>
+
+        {children}
       </div>
 
       {/* Loadmore Replies Button */}

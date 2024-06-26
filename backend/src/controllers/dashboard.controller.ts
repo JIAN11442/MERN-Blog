@@ -89,7 +89,6 @@ export const getNotificationsByFilter: RequestHandler = async (req, res, next) =
     const findQuery = {
       notification_for: userId,
       user: { $ne: userId },
-      seen: false,
     } as unknown as NotificationQueryProps;
 
     // 如果 filter 是 all, 就不需要額外加上 type 來篩選資料
@@ -109,7 +108,7 @@ export const getNotificationsByFilter: RequestHandler = async (req, res, next) =
       .populate('blog', 'title blog_id')
       .populate('user', 'personal_info.fullname personal_info.username personal_info.profile_img')
       .populate('comment', 'comment')
-      .populate('replied_on_comment', 'comment')
+      .populate('replied_on_comment', '_id comment commentedAt')
       .sort({ createdAt: -1 })
       .select('createdAt type seen reply');
 
@@ -129,8 +128,6 @@ export const getCountOfNotificationsByFilter: RequestHandler = async (req, res, 
   try {
     const { userId } = req;
     const { filter } = req.body;
-
-    console.log(userId, filter);
 
     if (!filter) {
       throw createHttpError(400, 'Please provide a filter type from client side');

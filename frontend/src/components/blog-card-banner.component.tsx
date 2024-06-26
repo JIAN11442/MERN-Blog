@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
+
 import type {
   BlogStructureType,
   PersonalInfoStructureType,
 } from "../commons/types.common";
+import { getTimeAgo } from "../commons/date.common";
 
-import { getDay } from "../commons/date.common";
 import { FlatIcons } from "../icons/flaticons";
 
 interface BlogPostCardProps {
@@ -53,13 +54,14 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
                 justify-start
                 md:max-w-[400px]
                 max-md:max-w-[450px]
+                gap-5
               `
             : `
                 flex
                 items-center
+                gap-10
               `
         }
-        gap-10
         border-b
         border-grey-custom
         pb-5
@@ -95,6 +97,9 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
               w-10
               h-10
               rounded-full
+              shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+              shadow-grey-dark/10
+              hover:shadow-grey-dark/20
             "
           />
           {/* author fullname && username*/}
@@ -132,7 +137,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
               text-grey-dark/60
             "
           >
-            {getDay(publishedAt!)}
+            {getTimeAgo(publishedAt!)}
           </p>
         </div>
 

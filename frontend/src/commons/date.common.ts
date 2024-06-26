@@ -1,16 +1,18 @@
+import moment from "moment";
+
 const months = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 // const days = [
@@ -34,4 +36,20 @@ export const getFullDay = (timestamp: string) => {
   const date = new Date(timestamp);
 
   return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+};
+
+export const getTimeAgo = (timestamp: string) => {
+  let timeAgo;
+
+  timeAgo = moment(timestamp).fromNow();
+
+  const timeUnit = timeAgo.split(" ")[1];
+
+  if (timeUnit === "month" || timeUnit === "months") {
+    timeAgo = getDay(timestamp);
+  } else if (timeUnit === "year" || timeUnit === "years") {
+    timeAgo = getFullDay(timestamp);
+  }
+
+  return timeAgo;
 };

@@ -1,16 +1,16 @@
-import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
-import useAuthStore from '../states/user-auth.state';
-import useTargetBlogStore from '../states/target-blog.state';
-import useBlogLikedStore from '../states/blog-liked.state';
+import useAuthStore from "../states/user-auth.state";
+import useTargetBlogStore from "../states/target-blog.state";
+import useBlogLikedStore from "../states/blog-liked.state";
 
-import { FlatIcons } from '../icons/flaticons';
-import useLikedFetch from '../fetchs/liked.fetch';
+import { FlatIcons } from "../icons/flaticons";
+import useLikedFetch from "../fetchs/liked.fetch";
 
-import type { BlogStructureType } from '../commons/types.common';
-import useBlogCommentStore from '../states/blog-comment.state';
+import type { BlogStructureType } from "../commons/types.common";
+import useBlogCommentStore from "../states/blog-comment.state";
 
 const BlogInteraction = () => {
   const { authUser } = useAuthStore();
@@ -39,7 +39,9 @@ const BlogInteraction = () => {
       // 因爲 isLikedByUser 是異步，所以 setIsLikedByUser 之後，并不能馬上拿到最新的 isLikedByUser
       // 因此這裏直接取反，不用等待 setIsLikedByUser 更新
 
-      const newTotalLikes = !isLikedByUser ? total_likes + 1 : total_likes - 1;
+      const newTotalLikes = !isLikedByUser
+        ? (total_likes ?? 0) + 1
+        : (total_likes ?? 0) - 1;
 
       setTargetBlogInfo({
         ...targetBlogInfo,
@@ -53,7 +55,7 @@ const BlogInteraction = () => {
     } else {
       // 如果還沒登入，當然就不能按讚
       // 因為之後需要用戶資料記錄是哪位用戶按讚
-      toast.error('Please login first to like this blog');
+      toast.error("Please login first to like this blog");
     }
   };
 
@@ -108,17 +110,22 @@ const BlogInteraction = () => {
                 items-center
                 justify-center
                 transition
+                shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
                 ${
                   isLikedByUser
                     ? `
                         bg-red-custom/20
                         text-red-custom
                       `
-                    : 'bg-grey-custom/80'
+                    : `
+                      bg-grey-custom/80
+                      hover:shadow-grey-dark/20
+                      hover:-rotate-90
+                      `
                 }
               `}
             >
-              <FlatIcons name={`fi fi-${isLikedByUser ? 'sr' : 'rr'}-heart`} />
+              <FlatIcons name={`fi fi-${isLikedByUser ? "sr" : "rr"}-heart`} />
             </button>
             <p>{total_likes}</p>
           </div>
@@ -140,7 +147,10 @@ const BlogInteraction = () => {
                 flex
                 items-center
                 justify-center
-                bg-grey-custom/80      
+                bg-grey-custom/80
+                shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+                hover:shadow-grey-dark/20
+                hover:rotate-90
               "
             >
               <FlatIcons name="fi fi-rr-comment-dots" />

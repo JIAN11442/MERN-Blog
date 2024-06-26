@@ -10,6 +10,7 @@ import HandyToolBtn from "../components/handy-tool.component";
 import AnimationWrapper from "../components/page-animation.component";
 import BlogCommentContainer from "../components/blog-comment-container.component";
 import DeleteCommentWarningModal from "../components/delete-warning.component";
+import EditCommentWarningModal from "../components/edit-warning.component";
 
 import useTargetBlogStore from "../states/target-blog.state";
 import useCollapseStore from "../states/collapse.state";
@@ -18,9 +19,8 @@ import useBlogCommentStore from "../states/blog-comment.state";
 
 import useBlogFetch from "../fetchs/blog.fetch";
 
-import { getDay } from "../commons/date.common";
+import { getTimeAgo } from "../commons/date.common";
 import type { BlogStructureType } from "../commons/types.common";
-import EditCommentWarningModal from "../components/edit-warning.component";
 
 const BlogPage = () => {
   const { blogId } = useParams();
@@ -155,7 +155,19 @@ const BlogPage = () => {
                 >
                   {/* profile image */}
                   <Link to={`/user/${author_username}`}>
-                    <img src={profile_img} className="w-12 h-12 rounded-full" />
+                    <img
+                      src={profile_img}
+                      className="
+                        w-12
+                        h-12
+                        rounded-full
+                        shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+                      shadow-grey-dark/10
+                      hover:shadow-grey-dark/20
+                        hover:opacity-80
+                        transition
+                      "
+                    />
                   </Link>
 
                   {/* fullname && username */}
@@ -166,7 +178,7 @@ const BlogPage = () => {
 
                     <Link
                       to={`/user/${author_username}`}
-                      className="underline underline-offset-2 text-blue-500"
+                      className="text-blue-500 hover:underline transition"
                     >
                       @{author_username}
                     </Link>
@@ -182,7 +194,7 @@ const BlogPage = () => {
                     max-sm:pl-5
                   "
                 >
-                  Published on {getDay(publishedAt)}
+                  Published on {getTimeAgo(publishedAt!)}
                 </p>
               </div>
 
@@ -245,9 +257,9 @@ const BlogPage = () => {
                   <div
                     className="
                       grid
-                      max-md:grid-cols-1
-                      md:grid-cols-2
-                      md:gap-20
+                      max-sm:grid-cols-1
+                      sm:grid-cols-2
+                      sm:gap-10
                     "
                   >
                     {similarBlogsInfo.map((blog, i) => {

@@ -128,6 +128,7 @@ export interface ScrollPropsType {
 }
 
 export interface CommentStructureType {
+  _id?: string;
   blog_id?: string;
   blog_author?: string;
   comment?: string;
@@ -139,7 +140,7 @@ export interface CommentStructureType {
 
 export interface GenerateCommentStructureType extends CommentStructureType {
   _id?: string;
-  childrenLevel: number;
+  childrenLevel?: number;
   isReplyLoaded?: boolean;
   parentIndex?: number;
   commentedAt?: string;
@@ -227,6 +228,7 @@ export interface NotificationStructureType {
   reply?: string | CommentStructureType;
   replied_on_comment?: string | CommentStructureType;
   seen?: boolean;
+  createdAt?: string;
 }
 
 export interface NotificationFilterPropsType {

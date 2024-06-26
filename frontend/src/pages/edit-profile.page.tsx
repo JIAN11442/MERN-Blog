@@ -18,6 +18,8 @@ import {
 } from "../commons/types.common";
 
 const EditProfilePage = () => {
+  type DataTypes = keyof typeof generateEditProfile;
+
   const BioMaxLength = import.meta.env.VITE_BIO_LIMIT;
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -39,6 +41,8 @@ const EditProfilePage = () => {
     social_links,
   } = authorProfileInfo as AuthorProfileStructureType;
 
+  const [socialLinksContent, setSocialLinksContent] = useState(social_links);
+
   const { GetAuthorProfileInfo } = useUserFetch();
   const { UpdateAuthAvatarImg, UpdateAuthProfileInfo } = useSettingFetch();
 
@@ -56,8 +60,6 @@ const EditProfilePage = () => {
     const target = e.target;
     const formData: { [key: string]: string } = {};
 
-    type DataTypes = keyof typeof generateEditProfile;
-
     if (formRef.current && generateEditProfile) {
       // 解析表單內容
       const form = new FormData(formRef.current);
@@ -66,9 +68,12 @@ const EditProfilePage = () => {
         formData[key] = value.toString();
       }
 
+      setSocialLinksContent(formData);
+
       // 如果是在提交按鈕已是啟動狀態的前提下，目標表單內容有變更
       // 那就沒有必要檢查表單內容是否有變更，因為有變更就一定要啟動提交按鈕
       // 這樣會比較有效率
+
       if (
         target.value !== generateEditProfile[target.name as DataTypes] &&
         !submitBtnDiabled
@@ -428,6 +433,10 @@ const EditProfilePage = () => {
                         type="text"
                         value={link}
                         placeholder="https://"
+                        content={
+                          socialLinksContent &&
+                          (socialLinksContent[key as DataTypes] ?? "")
+                        }
                         icon={`${
                           key !== "website" ? `fi-brands-${key}` : "fi-rr-globe"
                         }`}
