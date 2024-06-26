@@ -18,6 +18,7 @@ import { FlatIcons } from "../icons/flaticons";
 import { getTimeAgo } from "../commons/date.common";
 import type {
   AuthorProfileStructureType,
+  AuthorStructureType,
   BlogStructureType,
   GenerateCommentStructureType,
 } from "../commons/types.common";
@@ -67,10 +68,11 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
   const { targetBlogInfo, setTargetBlogInfo } = useTargetBlogStore();
   const {
     comments: { results: commentsArr },
-    author: {
-      personal_info: { username: blogAuthorUsername },
-    },
+    author,
   } = targetBlogInfo as Required<BlogStructureType>;
+  const {
+    personal_info: { username: blogAuthorUsername },
+  } = author as AuthorStructureType;
 
   const {
     totalRepliesLoaded,
@@ -134,10 +136,8 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
       // 當刪除完所有 comment 後，並不會有下一個 comment 來與本次 parent comment 的 childrenLevel 做比較
       // 所以在每一次迴圈都需要判斷是否有下一個 comment，也就是這裡的 commentsArr[childrenIndex]，如果沒有就不用再迴圈了
       while (
-        (commentsArr[childrenIndex].childrenLevel &&
-          commentData.childrenLevel &&
-          commentsArr[childrenIndex].childrenLevel) ??
-        0 > (commentData.childrenLevel ?? 0)
+        (commentsArr[childrenIndex]?.childrenLevel ?? 0) >
+        (commentData.childrenLevel ?? 0)
       ) {
         commentsArr.splice(childrenIndex, 1);
       }

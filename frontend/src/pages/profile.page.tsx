@@ -19,6 +19,7 @@ import useAuthorProfileStore from "../states/author-profile.state";
 
 import {
   AuthorProfileStructureType,
+  AuthorStructureType,
   type BlogStructureType,
 } from "../commons/types.common";
 
@@ -160,19 +161,21 @@ const ProfilePage = () => {
                   <Loader />
                 ) : "results" in latestBlogs && latestBlogs?.results?.length ? (
                   <div>
-                    {latestBlogs?.results?.map((blog: BlogStructureType, i) => (
-                      <AnimationWrapper
-                        key={blog.title}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: i * 0.1 }}
-                      >
-                        <BlogPostCard
-                          author={blog.author?.personal_info ?? {}}
-                          content={blog}
-                        />
-                      </AnimationWrapper>
-                    ))}
+                    {latestBlogs?.results?.map((blog: BlogStructureType, i) => {
+                      const { author } = blog;
+                      const { personal_info } = author as AuthorStructureType;
+
+                      return (
+                        <AnimationWrapper
+                          key={blog.title}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.5, delay: i * 0.1 }}
+                        >
+                          <BlogPostCard author={personal_info} content={blog} />
+                        </AnimationWrapper>
+                      );
+                    })}
 
                     {/* Load Operation */}
                     <LoadOptions

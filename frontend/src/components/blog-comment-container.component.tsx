@@ -130,7 +130,7 @@ const BlogCommentContainer = () => {
     if (commentsArr) {
       const maxLevel = commentsArr.reduce(
         (acc, comment) =>
-          comment.childrenLevel > acc ? comment.childrenLevel : acc,
+          (comment.childrenLevel ?? 0) > acc ? comment.childrenLevel ?? 0 : acc,
         0
       );
 
@@ -333,7 +333,7 @@ const BlogCommentContainer = () => {
                 <BlogCommentCard
                   index={i}
                   commentData={comment}
-                  leftVal={comment.childrenLevel * 4}
+                  leftVal={(comment.childrenLevel ?? 0) * 4}
                   paddingLeftIncrementVal={paddingLeftIncrementVal}
                   optionsCollapse={optionsCollapse}
                   allowLoadMoreReplies={allowLoadMoreReplies}

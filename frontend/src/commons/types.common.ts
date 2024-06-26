@@ -40,7 +40,7 @@ export interface BlogStructureType {
   des?: string;
   content?: OutputData;
   tags?: string[];
-  author?: { _id?: string; personal_info: PersonalInfoStructureType };
+  author?: string | AuthorStructureType;
   activity?: ActivityStructureType;
   comments?: { results: GenerateCommentStructureType[] };
   draft?: boolean;
@@ -164,6 +164,8 @@ export interface FetchCommentPropsType {
   totalDeletedCommentNum?: number;
   loadmore?: boolean;
   newCommentContent?: string;
+  notificationId?: string;
+  notificationIndex?: number;
 }
 
 export interface RepliesLoadedPropsType {

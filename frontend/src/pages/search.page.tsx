@@ -19,7 +19,10 @@ import useUserFetch from "../fetchs/user.fetch";
 
 import { FlatIcons } from "../icons/flaticons";
 
-import type { BlogStructureType } from "../commons/types.common";
+import type {
+  AuthorStructureType,
+  BlogStructureType,
+} from "../commons/types.common";
 
 const SearchPage = () => {
   const { query } = useParams();
@@ -69,20 +72,22 @@ const SearchPage = () => {
               ) : "results" in queryBlogs && queryBlogs?.results?.length ? (
                 // 如果 queryBlogs 不為 null 且有長度，則顯示 blog card
                 <div>
-                  {queryBlogs?.results?.map((blog: BlogStructureType, i) => (
-                    // delay: i * 0.1 可以讓每個 blog card 依次延遲出現
-                    <AnimationWrapper
-                      key={blog.title}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: i * 0.1 }}
-                    >
-                      <BlogPostCard
-                        author={blog.author?.personal_info ?? {}}
-                        content={blog}
-                      />
-                    </AnimationWrapper>
-                  ))}
+                  {queryBlogs?.results?.map((blog: BlogStructureType, i) => {
+                    const { author } = blog;
+                    const { personal_info } = author as AuthorStructureType;
+
+                    return (
+                      // delay: i * 0.1 可以讓每個 blog card 依次延遲出現
+                      <AnimationWrapper
+                        key={blog.title}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                      >
+                        <BlogPostCard author={personal_info} content={blog} />
+                      </AnimationWrapper>
+                    );
+                  })}
 
                   {/* Load Operation */}
                   <LoadOptions

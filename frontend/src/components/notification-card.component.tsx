@@ -1,4 +1,7 @@
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
+
+import AnimationWrapper from "./page-animation.component";
 
 import useAuthStore from "../states/user-auth.state";
 
@@ -10,35 +13,46 @@ import {
   NotificationStructureType,
 } from "../commons/types.common";
 import { getTimeAgo } from "../commons/date.common";
-import { useState } from "react";
-import AnimationWrapper from "./page-animation.component";
-import BlogCommentField from "./blog-comment-field.component";
+import useCommentFetch from "../fetchs/comment.fetch";
+import toast from "react-hot-toast";
 
 interface NotificationCardProps {
   index: number;
-  notification: NotificationStructureType;
+  data: NotificationStructureType;
 }
 
-const NotificationCard: React.FC<NotificationCardProps> = ({
-  index,
-  notification,
-}) => {
+const NotificationCard: React.FC<NotificationCardProps> = ({ index, data }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const [isReplying, setIsReplying] = useState(false);
+  const [content, setContent] = useState("");
 
   const {
+    _id,
     user,
     type,
     replied_on_comment,
     blog,
-    comment: reply,
+    comment: notificationComment,
+    reply: notificationReply,
     createdAt,
-  } = notification;
+  } = data;
+
   const { personal_info } = (user as AuthorStructureType) ?? {};
   const { fullname, username, profile_img } = personal_info ?? {};
-  const { blog_id, title } = (blog as BlogStructureType) ?? {};
+
+  const {
+    _id: blogObjectId,
+    blog_id,
+    title,
+    author: blogAuthorId,
+  } = (blog as BlogStructureType) ?? {};
+
   const { comment } =
     (replied_on_comment as GenerateCommentStructureType) ?? {};
-  const { comment: replyContent } = (reply as CommentStructureType) ?? {};
+
+  const { _id: replyId, comment: replyContent } =
+    (notificationComment as CommentStructureType) ?? {};
 
   const { authUser } = useAuthStore();
 
@@ -50,8 +64,49 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     },
   };
 
+  const { AddCommentToBlog } = useCommentFetch();
+
+  // 控制展開 Reply Box
   const handleReply = () => {
     setIsReplying(!isReplying);
+  };
+
+  // 監聽並儲存 textarea 的內容
+  // 同時根據內容自動調整輸入框高度
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const input = e.target;
+
+    setContent(input.value);
+
+    input.style.height = "auto";
+    input.style.height = `${input.scrollHeight + 2}px`;
+  };
+
+  // 新增回覆留言
+  const handleEnterSubmit = async (
+    e: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
+    if (e.key === "Enter" && !e.shiftKey && textareaRef.current) {
+      e.preventDefault();
+
+      textareaRef.current.disabled = true;
+
+      await AddCommentToBlog({
+        blogObjectId,
+        comment: content,
+        blog_author: blogAuthorId as string,
+        replying_to: replyId,
+        notificationId: _id,
+        notificationIndex: index,
+      });
+
+      textareaRef.current.value = "";
+      textareaRef.current.disabled = false;
+
+      toast.success("reply successfully");
+
+      setIsReplying(false);
+    }
   };
 
   return (
@@ -262,6 +317,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               items-center
             `}
           >
+            {/* Options Button */}
             {type !== "like" && (
               <div className="flex gap-5">
                 <button
@@ -305,10 +361,14 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                 transition={{ duration: 0.5 }}
               >
                 <textarea
+                  ref={textareaRef}
                   placeholder={`Reply to @${username}`}
+                  onChange={(e) => handleInput(e)}
+                  onKeyDown={(e) => handleEnterSubmit(e)}
                   className={`
                     input-box
                     pl-5
+                    max-h-[200px]
                     placeholder:text-grey-dark/50
                     resize-none
                     w-full
@@ -317,6 +377,14 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                   `}
                 ></textarea>
               </AnimationWrapper>
+            )}
+
+            {notificationReply ? (
+              <div>
+                <p>is replied from notification</p>
+              </div>
+            ) : (
+              ""
             )}
           </>
         </div>

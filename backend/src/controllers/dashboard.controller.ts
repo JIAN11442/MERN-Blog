@@ -105,7 +105,7 @@ export const getNotificationsByFilter: RequestHandler = async (req, res, next) =
     const notificationsInfo = await NotificationSchema.find(findQuery)
       .skip(skipDocs)
       .limit(maxLimit)
-      .populate('blog', 'title blog_id')
+      .populate('blog', 'title blog_id author')
       .populate('user', 'personal_info.fullname personal_info.username personal_info.profile_img')
       .populate('comment', 'comment')
       .populate('replied_on_comment', '_id comment commentedAt')

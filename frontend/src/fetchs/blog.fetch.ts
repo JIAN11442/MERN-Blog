@@ -169,7 +169,7 @@ const useBlogFetch = () => {
 
           // 為了在不重新向後端請求取得 latestBlogs 的情況下，即時改變目標 blog 的閲讀數
           // 這裡直接在本地更新 zustand 管理的 latestBlogs 數據
-          if (latestBlogs && "results" in latestBlogs) {
+          if (latestBlogs && "results" in latestBlogs && latestBlogs.results) {
             const updateTargetBlogTotalReads = latestBlogs.results.map(
               (blog: BlogStructureType) => {
                 if (blog.blog_id === blogData.blog_id) {

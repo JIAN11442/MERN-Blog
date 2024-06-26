@@ -8,7 +8,9 @@ import useTargetBlogStore from "../states/target-blog.state";
 import {
   GenerateCommentStructureType,
   FetchCommentPropsType,
+  NotificationStructureType,
 } from "../commons/types.common";
+import useDashboardStore from "../states/dashboard.state";
 
 const useCommentFetch = () => {
   const { authUser } = useAuthStore();
@@ -18,6 +20,8 @@ const useCommentFetch = () => {
   const { comments, activity } = targetBlogInfo ?? {};
   const { results: commentsArr } = comments ?? {};
   const { total_comments, total_parent_comments } = activity ?? {};
+
+  const { notificationsInfo } = useDashboardStore();
 
   const {
     totalParentCommentsLoaded,
@@ -84,129 +88,160 @@ const useCommentFetch = () => {
     replying_to,
     index,
     replyState,
+    notificationId,
+    notificationIndex,
   }: FetchCommentPropsType) => {
     const requestURL = COMMENT_SERVER_ROUTE + "/create-new-comment";
 
     await axios
-      .post(requestURL, { blogObjectId, comment, blog_author, replying_to })
+      .post(requestURL, {
+        blogObjectId,
+        comment,
+        blog_author,
+        replying_to,
+        notificationId,
+      })
       .then(({ data }) => {
         if (data) {
-          let newCommentsArr = [];
-
-          // 讀取目標 blog 時重構的 comments 資料
-          const commentsArr =
-            comments && "results" in comments ? comments.results : [];
-
-          // 將創建的新留言資料也重構成符合一開始讀取 comments 時重構的樣子
-          // 比如賦予 commented_by 屬性，並將其設為當前登入用戶的相關資訊
-          data.commented_by = {
-            personal_info: { username, fullname, profile_img },
-          };
-
-          data.blog_id = blogObjectId;
-
-          // 如果是回覆留言
-          if (replying_to && index !== undefined) {
-            // 找到與當前留言同層的留言的 index
-            // 那就是我們要插入新留言的位置
-            let startingPoint = commentsArr.findIndex(
-              (comment, i) =>
-                i > index &&
-                comment.childrenLevel <= commentsArr[index].childrenLevel
-            );
-
-            // 但如果沒有找到，那就代表當前 blog 只有一個留言，也就是現在要回覆的頭留言
-            // 那就直接插入到最後一個位置即可
-            if (startingPoint === -1) {
-              startingPoint = commentsArr.length;
-            }
-
-            // 然後將新留言插入到該留言下子留言的最後一個留言後面
-            commentsArr[index].children?.push(data._id);
-
-            data.childrenLevel = commentsArr[index].childrenLevel + 1;
-            data.parent = commentsArr[index]._id;
-            data.parentIndex = index;
-
-            // 如果原留言的子留言數還沒到限制數量，
+          // 如果是從 notification 那裡回覆並新增的留言，
+          // 就會有 notificationId 和 notificationIndex
+          if (notificationId && notificationIndex) {
             if (
-              (commentsArr[index]?.children?.length ?? 0) <= LOAD_COMMENT_LIMIT
+              notificationsInfo &&
+              "results" in notificationsInfo &&
+              notificationsInfo.results
             ) {
-              let newTotalRepliesLoaded = totalRepliesLoaded;
+              // 這時候會需要更新 zustand 處的 notificationInfo 中 results 中的目標通知內容
+              // 添加上 reply ，這樣我們才能即時得知已從 notification 處回覆
+              (
+                notificationsInfo.results[
+                  notificationIndex
+                ] as NotificationStructureType
+              ).reply = notificationId;
+            }
+          }
+          // 反之，不是在 notification 處回覆
+          // 那就是在 comment container 那裡
+          else {
+            let newCommentsArr = [];
 
-              const isRecordedRepliesLoadedIndex = totalRepliesLoaded.findIndex(
-                (item) => item.index === index
+            // 讀取目標 blog 時重構的 comments 資料
+            const commentsArr =
+              comments && "results" in comments ? comments.results : [];
+
+            // 將創建的新留言資料也重構成符合一開始讀取 comments 時重構的樣子
+            // 比如賦予 commented_by 屬性，並將其設為當前登入用戶的相關資訊
+            data.commented_by = {
+              personal_info: { username, fullname, profile_img },
+            };
+
+            data.blog_id = blogObjectId;
+
+            // 如果是回覆留言
+            if (replying_to && index !== undefined) {
+              // 找到與當前留言同層的留言的 index
+              // 那就是我們要插入新留言的位置
+              let startingPoint = commentsArr.findIndex(
+                (comment, i) =>
+                  i > index &&
+                  (comment.childrenLevel ?? 0) <=
+                    (commentsArr[index].childrenLevel ?? 0)
               );
 
-              // 就要看是否已經有記錄過該留言的載入回覆留言數
-              // 如果沒有記錄過，那就新增一個記錄
+              // 但如果沒有找到，那就代表當前 blog 只有一個留言，也就是現在要回覆的頭留言
+              // 那就直接插入到最後一個位置即可
+              if (startingPoint === -1) {
+                startingPoint = commentsArr.length;
+              }
+
+              // 然後將新留言插入到該留言下子留言的最後一個留言後面
+              commentsArr[index].children?.push(data._id);
+
+              data.childrenLevel = (commentsArr[index].childrenLevel ?? 0) + 1;
+              data.parent = commentsArr[index]._id;
+              data.parentIndex = index;
+
+              // 如果原留言的子留言數還沒到限制數量，
               if (
-                isRecordedRepliesLoadedIndex === -1 ||
-                totalRepliesLoaded[isRecordedRepliesLoadedIndex].loadedNum === 0
+                (commentsArr[index]?.children?.length ?? 0) <=
+                LOAD_COMMENT_LIMIT
               ) {
-                newTotalRepliesLoaded = [
-                  ...totalRepliesLoaded,
-                  {
-                    index,
-                    loadedNum: commentsArr[index].children?.length ?? 0,
-                  },
-                ];
-              }
-              // 如果有記錄過，那就累加載入的回覆留言數
-              else {
-                newTotalRepliesLoaded = totalRepliesLoaded.map((item) =>
-                  item.index === index
-                    ? { ...item, loadedNum: item.loadedNum + 1 }
-                    : item
-                );
+                let newTotalRepliesLoaded = totalRepliesLoaded;
+
+                const isRecordedRepliesLoadedIndex =
+                  totalRepliesLoaded.findIndex((item) => item.index === index);
+
+                // 就要看是否已經有記錄過該留言的載入回覆留言數
+                // 如果沒有記錄過，那就新增一個記錄
+                if (
+                  isRecordedRepliesLoadedIndex === -1 ||
+                  totalRepliesLoaded[isRecordedRepliesLoadedIndex].loadedNum ===
+                    0
+                ) {
+                  newTotalRepliesLoaded = [
+                    ...totalRepliesLoaded,
+                    {
+                      index,
+                      loadedNum: commentsArr[index].children?.length ?? 0,
+                    },
+                  ];
+                }
+                // 如果有記錄過，那就累加載入的回覆留言數
+                else {
+                  newTotalRepliesLoaded = totalRepliesLoaded.map((item) =>
+                    item.index === index
+                      ? { ...item, loadedNum: item.loadedNum + 1 }
+                      : item
+                  );
+                }
+
+                // 接著更新 totalRepliesLoaded
+                setTotalRepliesLoaded(newTotalRepliesLoaded);
+
+                // 最後，將新留言插入到母留言的最後一個子留言後面
+                commentsArr.splice(startingPoint, 0, data);
               }
 
-              // 接著更新 totalRepliesLoaded
-              setTotalRepliesLoaded(newTotalRepliesLoaded);
+              newCommentsArr = commentsArr;
 
-              // 最後，將新留言插入到母留言的最後一個子留言後面
-              commentsArr.splice(startingPoint, 0, data);
+              replyState?.setIsReplying(false);
+            }
+            // 如果是頭留言
+            else {
+              // 賦予 childrenLevel 屬性，並將其設為 0
+              data.childrenLevel = 0;
+
+              // 將創建的新留言資料加入到目標 blog 的 comments 資料中
+              newCommentsArr = commentsArr ? [...commentsArr, data] : [data];
             }
 
-            newCommentsArr = commentsArr;
+            // 要累加的創建頭留言數
+            const parentCommentIncrementVal = replying_to ? 0 : 1;
 
-            replyState?.setIsReplying(false);
+            // 更新目標 blog 的 comments 資料和 activity 資料
+            // 記得 (total_comments ?? 0) + 1 一定要括弧，不然就沒意義了
+            // 因為 ?? 這個運算符的優先級比 + 低
+            // 所以如果寫成 total_comments ?? 0 + 1，就會先執行 ?? 這個運算符，再執行 + 1
+            // 結果會變成 total_comments ?? 1
+            // 這樣的話當 total_comments 不為 undefined 或 null，比如是 0, 1, 2, 3....時，
+            // 結果會返回原本的 total_comments，這樣就沒意義了
+            setTargetBlogInfo({
+              ...targetBlogInfo,
+              comments: { ...comments, results: newCommentsArr },
+              activity: {
+                ...activity,
+                total_comments: (total_comments ?? 0) + 1,
+                total_parent_comments:
+                  (total_parent_comments ?? 0) + parentCommentIncrementVal,
+              },
+            });
+
+            // 將一開始讀取目標 blog 資料並賦予重構讀取的 comments 資料時記錄的 '總頭留言數'
+            // 加上創建後的那一個頭留言數 parentCommentIncrementVal，就是新的 '總頭留言數'
+            setTotalParentCommentsLoaded(
+              (totalParentCommentsLoaded ?? 0) + parentCommentIncrementVal
+            );
           }
-          // 如果是頭留言
-          else {
-            // 賦予 childrenLevel 屬性，並將其設為 0
-            data.childrenLevel = 0;
-
-            // 將創建的新留言資料加入到目標 blog 的 comments 資料中
-            newCommentsArr = commentsArr ? [...commentsArr, data] : [data];
-          }
-
-          // 要累加的創建頭留言數
-          const parentCommentIncrementVal = replying_to ? 0 : 1;
-
-          // 更新目標 blog 的 comments 資料和 activity 資料
-          // 記得 (total_comments ?? 0) + 1 一定要括弧，不然就沒意義了
-          // 因為 ?? 這個運算符的優先級比 + 低
-          // 所以如果寫成 total_comments ?? 0 + 1，就會先執行 ?? 這個運算符，再執行 + 1
-          // 結果會變成 total_comments ?? 1
-          // 這樣的話當 total_comments 不為 undefined 或 null，比如是 0, 1, 2, 3....時，
-          // 結果會返回原本的 total_comments，這樣就沒意義了
-          setTargetBlogInfo({
-            ...targetBlogInfo,
-            comments: { ...comments, results: newCommentsArr },
-            activity: {
-              ...activity,
-              total_comments: (total_comments ?? 0) + 1,
-              total_parent_comments:
-                (total_parent_comments ?? 0) + parentCommentIncrementVal,
-            },
-          });
-
-          // 將一開始讀取目標 blog 資料並賦予重構讀取的 comments 資料時記錄的 '總頭留言數'
-          // 加上創建後的那一個頭留言數 parentCommentIncrementVal，就是新的 '總頭留言數'
-          setTotalParentCommentsLoaded(
-            (totalParentCommentsLoaded ?? 0) + parentCommentIncrementVal
-          );
         }
       })
       .catch((error) => {
@@ -268,7 +303,7 @@ const useCommentFetch = () => {
           }
 
           repliesComment.map((comment: GenerateCommentStructureType) => {
-            comment.childrenLevel = commentsArr[index].childrenLevel + 1;
+            comment.childrenLevel = (commentsArr[index].childrenLevel ?? 0) + 1;
             // 為了方便之後前端判斷是否加入[載入更多留言 button 功能]而設定的屬性
             comment.parentIndex = index;
           });
@@ -286,7 +321,8 @@ const useCommentFetch = () => {
             let startingPoint = commentsArr.findIndex(
               (comment, i) =>
                 i > index &&
-                comment.childrenLevel <= commentsArr[index].childrenLevel
+                (comment.childrenLevel ?? 0) <=
+                  (commentsArr[index].childrenLevel ?? 0)
             );
 
             if (startingPoint === -1) {
@@ -350,10 +386,10 @@ const useCommentFetch = () => {
       }
 
       // 如果有展開，那就要刪除其下所有回覆留言
-      if (commentsArr[index].isReplyLoaded) {
+      if (commentsArr[index] && commentsArr[index].isReplyLoaded) {
         while (
-          commentsArr[index + 1].childrenLevel >
-          commentsArr[index].childrenLevel
+          (commentsArr[index + 1].childrenLevel ?? 0) >
+          (commentsArr[index].childrenLevel ?? 0)
         ) {
           commentsArr.splice(index + 1, 1);
 

@@ -20,7 +20,10 @@ import useBlogCommentStore from "../states/blog-comment.state";
 import useBlogFetch from "../fetchs/blog.fetch";
 
 import { getTimeAgo } from "../commons/date.common";
-import type { BlogStructureType } from "../commons/types.common";
+import type {
+  AuthorStructureType,
+  BlogStructureType,
+} from "../commons/types.common";
 
 const BlogPage = () => {
   const { blogId } = useParams();
@@ -41,15 +44,10 @@ const BlogPage = () => {
   // 所以如果要在這裡呼叫所有屬性，typescript 會報錯，因為有可能為 undefined
   // 所以這裡使用 Required<BlogStructureType> 來告訴 typescript 這個物件裡面的所有屬性都是必要的
   // 這樣就不會報錯了
-  const {
-    title,
-    content,
-    banner,
-    author: {
-      personal_info: { username: author_username, fullname, profile_img },
-    },
-    publishedAt,
-  } = targetBlogInfo as Required<BlogStructureType>;
+  const { title, content, banner, author, publishedAt } =
+    targetBlogInfo as Required<BlogStructureType>;
+  const { personal_info } = author as AuthorStructureType;
+  const { username: author_username, fullname, profile_img } = personal_info;
 
   const { isEditWarning } = useBlogCommentStore();
 
@@ -263,9 +261,8 @@ const BlogPage = () => {
                     "
                   >
                     {similarBlogsInfo.map((blog, i) => {
-                      const {
-                        author: { personal_info },
-                      } = blog as Required<BlogStructureType>;
+                      const { author } = blog as Required<BlogStructureType>;
+                      const { personal_info } = author as AuthorStructureType;
 
                       return (
                         <AnimationWrapper

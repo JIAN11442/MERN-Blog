@@ -46,7 +46,7 @@ export const getCommentsByBlogId: RequestHandler = async (req, res, next) => {
 export const createNewComment: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
-    const { blogObjectId, comment: reqComment, blog_author, replying_to } = req.body;
+    const { blogObjectId, comment: reqComment, blog_author, replying_to, notificationId } = req.body;
 
     if (!userId) {
       throw createHttpError(401, 'Please login first');
@@ -119,6 +119,20 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
 
       if (!updateRepliedComment) {
         throw createHttpError(500, 'Failed to update replied comment children');
+      }
+
+      // 如果是從 notification 那裡回复的，
+      // 那要在回覆目標 notification 更新 reply 為新增的回覆留言 ID
+      // 這樣才能分辨哪些 notification 已回覆
+      if (notificationId) {
+        const updateNotificationReply = await NotificationSchema.findOneAndUpdate(
+          { _id: notificationId },
+          { reply: newComment._id },
+        );
+
+        if (!updateNotificationReply) {
+          throw createHttpError(500, 'Failed to update replied id to notification');
+        }
       }
 
       // 雖然前面的 notificationObj 設定過了 notification_for，但那是適用於頭留言

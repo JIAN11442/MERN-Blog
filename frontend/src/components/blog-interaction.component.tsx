@@ -9,7 +9,10 @@ import useBlogLikedStore from "../states/blog-liked.state";
 import { FlatIcons } from "../icons/flaticons";
 import useLikedFetch from "../fetchs/liked.fetch";
 
-import type { BlogStructureType } from "../commons/types.common";
+import type {
+  AuthorStructureType,
+  BlogStructureType,
+} from "../commons/types.common";
 import useBlogCommentStore from "../states/blog-comment.state";
 
 const BlogInteraction = () => {
@@ -23,10 +26,11 @@ const BlogInteraction = () => {
     blog_id,
     activity,
     activity: { total_likes, total_comments },
-    author: {
-      personal_info: { username: author_username },
-    },
+    author,
   } = targetBlogInfo as Required<BlogStructureType>;
+  const {
+    personal_info: { username: author_username },
+  } = author as AuthorStructureType;
 
   const { GetLikeStatusOfBlog, UpdateLikeStatusOfBlog } = useLikedFetch();
 

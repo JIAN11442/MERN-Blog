@@ -283,7 +283,7 @@ const NotificationPage = () => {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.5, delay: i * 0.1 }}
                     >
-                      <NotificationCard index={i} notification={item} />
+                      <NotificationCard index={i} data={item} />
                     </AnimationWrapper>
                   )
                 )}

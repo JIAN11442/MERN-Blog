@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom";
-import type { BlogStructureType } from "../commons/types.common";
+import type {
+  AuthorStructureType,
+  BlogStructureType,
+} from "../commons/types.common";
 import { getTimeAgo } from "../commons/date.common";
 
 interface MinimalBlogPostCardProps {
@@ -12,7 +15,8 @@ const MinimalBlogPostCard: React.FC<MinimalBlogPostCardProps> = ({
   index,
 }) => {
   const { title, publishedAt, blog_id: id, author } = blog;
-  const { fullname, profile_img } = author?.personal_info || {};
+  const { fullname, profile_img } =
+    (author as AuthorStructureType)?.personal_info || {};
 
   return (
     <Link

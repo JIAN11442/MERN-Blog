@@ -17,7 +17,10 @@ import useHomeBlogStore from "../states/home-blog.state";
 
 import { FlatIcons } from "../icons/flaticons";
 import useBlogFetch from "../fetchs/blog.fetch";
-import type { BlogStructureType } from "../commons/types.common";
+import type {
+  AuthorStructureType,
+  BlogStructureType,
+} from "../commons/types.common";
 
 const Homepage = () => {
   const { searchBarVisibility } = useCollapseStore();
@@ -132,20 +135,22 @@ const Homepage = () => {
               ) : "results" in latestBlogs && latestBlogs?.results?.length ? (
                 // 如果 latestBlogs 不為 null 且有長度，則顯示 blog card
                 <div>
-                  {latestBlogs?.results?.map((blog: BlogStructureType, i) => (
-                    // delay: i * 0.1 可以讓每個 blog card 依次延遲出現
-                    <AnimationWrapper
-                      key={blog.title}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: i * 0.1 }}
-                    >
-                      <BlogPostCard
-                        author={blog.author?.personal_info ?? {}}
-                        content={blog}
-                      />
-                    </AnimationWrapper>
-                  ))}
+                  {latestBlogs?.results?.map((blog: BlogStructureType, i) => {
+                    const { author } = blog;
+                    const { personal_info } = author as AuthorStructureType;
+
+                    return (
+                      // delay: i * 0.1 可以讓每個 blog card 依次延遲出現
+                      <AnimationWrapper
+                        key={blog.title}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                      >
+                        <BlogPostCard author={personal_info} content={blog} />
+                      </AnimationWrapper>
+                    );
+                  })}
 
                   {/* Load Operation */}
                   <LoadOptions
