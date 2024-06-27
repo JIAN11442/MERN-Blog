@@ -1,4 +1,5 @@
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import React, { useEffect, useRef, useState } from "react";
 
 import Loader from "../components/loader.component";
@@ -16,11 +17,14 @@ import {
   GenerateAuthDataType,
   GenerateEditProfilePropsType,
 } from "../commons/types.common";
+import useSettingStore from "../states/setting.state";
 
 const EditProfilePage = () => {
   type DataTypes = keyof typeof generateEditProfile;
 
   const BioMaxLength = import.meta.env.VITE_BIO_LIMIT;
+
+  const navigate = useNavigate();
 
   const formRef = useRef<HTMLFormElement>(null);
   const imgDisplayRef = useRef<HTMLImageElement>(null);
@@ -28,6 +32,8 @@ const EditProfilePage = () => {
 
   const [BioContent, setBioContent] = useState<string>("");
   const [generateEditProfile, setGenerateEditProfile] =
+    useState<GenerateEditProfilePropsType | null>(null);
+  const [socialLinksContent, setSocialLinksContent] =
     useState<GenerateEditProfilePropsType | null>(null);
   const [submitBtnDiabled, setSubmitBtnDisabled] = useState<boolean>(true);
   const [updatedProfileImg, setUpdatedProfileImg] = useState<File | null>(null);
@@ -41,7 +47,7 @@ const EditProfilePage = () => {
     social_links,
   } = authorProfileInfo as AuthorProfileStructureType;
 
-  const [socialLinksContent, setSocialLinksContent] = useState(social_links);
+  const { setSettingUpdated } = useSettingStore();
 
   const { GetAuthorProfileInfo } = useUserFetch();
   const { UpdateAuthAvatarImg, UpdateAuthProfileInfo } = useSettingFetch();
@@ -156,6 +162,9 @@ const EditProfilePage = () => {
       social_links: { facebook, github, instagram, twitter, youtube, website },
       submitBtn_e: e,
     });
+
+    setSettingUpdated(true);
+    navigate(`/user/${username}`);
   };
 
   // 第一時間根據 access_token 取得作者資訊
@@ -179,7 +188,7 @@ const EditProfilePage = () => {
       const { facebook, github, instagram, twitter, website, youtube } =
         social_links;
 
-      setGenerateEditProfile({
+      const obj = {
         username,
         bio,
         facebook,
@@ -188,7 +197,10 @@ const EditProfilePage = () => {
         twitter,
         website,
         youtube,
-      });
+      };
+
+      setGenerateEditProfile(obj);
+      setSocialLinksContent(obj);
 
       setBioContent(bio);
     }
@@ -435,7 +447,7 @@ const EditProfilePage = () => {
                         placeholder="https://"
                         content={
                           socialLinksContent &&
-                          (socialLinksContent[key as DataTypes] ?? "")
+                          socialLinksContent[key as DataTypes]
                         }
                         icon={`${
                           key !== "website" ? `fi-brands-${key}` : "fi-rr-globe"

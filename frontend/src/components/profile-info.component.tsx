@@ -78,7 +78,19 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
                    text-grey-dark
                     opacity-60
                     hover:opacity-100
-                    hover:text-${key}
+                    ${
+                      key === "youtube"
+                        ? "hover:text-youtube"
+                        : key === "facebook"
+                        ? "hover:text-facebook"
+                        : key === "instagram"
+                        ? "hover:text-instagram"
+                        : key === "twitter"
+                        ? "hover:text-twitter"
+                        : key === "github"
+                        ? "hover:text-github"
+                        : "hover:text-website"
+                    }
                     transition
                     `}
                 />

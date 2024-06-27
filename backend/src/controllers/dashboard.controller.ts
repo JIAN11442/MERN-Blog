@@ -89,6 +89,7 @@ export const getNotificationsByFilter: RequestHandler = async (req, res, next) =
     const findQuery = {
       notification_for: userId,
       user: { $ne: userId },
+      removed: false,
     } as unknown as NotificationQueryProps;
 
     // 如果 filter 是 all, 就不需要額外加上 type 來篩選資料
@@ -108,9 +109,10 @@ export const getNotificationsByFilter: RequestHandler = async (req, res, next) =
       .populate('blog', 'title blog_id author')
       .populate('user', 'personal_info.fullname personal_info.username personal_info.profile_img')
       .populate('comment', 'comment')
+      .populate('reply', 'comment')
       .populate('replied_on_comment', '_id comment commentedAt')
       .sort({ createdAt: -1 })
-      .select('createdAt type seen reply');
+      .select('createdAt type seen reply removed');
 
     if (!notificationsInfo) {
       throw createHttpError(500, 'No notifications found with this filter');
@@ -146,6 +148,28 @@ export const getCountOfNotificationsByFilter: RequestHandler = async (req, res, 
     const notificationCount = await NotificationSchema.countDocuments(findQuery);
 
     res.status(200).json({ totalDocs: notificationCount });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 刪除(remove)通知
+export const removeNotificationById: RequestHandler = async (req, res, next) => {
+  try {
+    const { notificationId } = req.body;
+
+    if (!notificationId) {
+      throw createHttpError(400, 'Please provide a notification id');
+    }
+
+    const updateNotification = await NotificationSchema.findByIdAndUpdate({ _id: notificationId }, { removed: true });
+
+    if (!updateNotification) {
+      throw createHttpError(500, 'Failed to remove notification');
+    }
+
+    res.status(200).json({ message: 'Notification removed successfully' });
   } catch (error) {
     console.log(error);
     next(error);

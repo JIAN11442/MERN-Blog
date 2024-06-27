@@ -15,13 +15,19 @@ import {
 import { getTimeAgo } from "../commons/date.common";
 import useCommentFetch from "../fetchs/comment.fetch";
 import toast from "react-hot-toast";
+import useDashboardStore from "../states/dashboard.state";
 
 interface NotificationCardProps {
   index: number;
+  state?: string;
   data: NotificationStructureType;
 }
 
-const NotificationCard: React.FC<NotificationCardProps> = ({ index, data }) => {
+const NotificationCard: React.FC<NotificationCardProps> = ({
+  index,
+  state = "notification",
+  data,
+}) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [isReplying, setIsReplying] = useState(false);
@@ -54,8 +60,10 @@ const NotificationCard: React.FC<NotificationCardProps> = ({ index, data }) => {
   const { _id: replyId, comment: replyContent } =
     (notificationComment as CommentStructureType) ?? {};
 
-  const { authUser } = useAuthStore();
+  const { comment: replyComment } =
+    (notificationReply as CommentStructureType) ?? {};
 
+  const { authUser } = useAuthStore();
   const commented_by = {
     personal_info: {
       fullname: authUser?.fullname,
@@ -63,6 +71,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({ index, data }) => {
       profile_img: authUser?.profile_img,
     },
   };
+
+  const { setActiveRemoveWarningModal } = useDashboardStore();
 
   const { AddCommentToBlog } = useCommentFetch();
 
@@ -109,14 +119,33 @@ const NotificationCard: React.FC<NotificationCardProps> = ({ index, data }) => {
     }
   };
 
+  // 開啟移除警告視窗
+  const handleActiveRemoveWarningModal = (data: NotificationStructureType) => {
+    setActiveRemoveWarningModal({ state: true, index, data });
+  };
+
+  // const handleRemoveNotification = (e: React.MouseEvent<HTMLButtonElement>) => {
+  //   const target = e.currentTarget;
+
+  //   target.disabled = true;
+  // };
+
   return (
     <div
-      className="
+      className={`
         p-6
-        border-b
+        ${
+          state === "warning"
+            ? `
+                border
+                rounded-md
+                shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+               shadow-grey-dark/5
+              `
+            : "border-b"
+        }
         border-grey-custom
-        border-l-black-custom
-      "
+      `}
     >
       <div
         className="
@@ -268,6 +297,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({ index, data }) => {
                         w-9
                         h-9
                         rounded-full
+                        shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+                      shadow-grey-dark/10
                       "
                     />
 
@@ -290,6 +321,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({ index, data }) => {
                         w-9
                         h-9
                         rounded-full
+                        shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+                      shadow-grey-dark/10
                       "
                     />
                     <div
@@ -310,49 +343,57 @@ const NotificationCard: React.FC<NotificationCardProps> = ({ index, data }) => {
           </div>
 
           {/* Date && Options Button */}
-          <div
-            className={`
-              flex
-              gap-5
-              items-center
-            `}
-          >
-            {/* Options Button */}
-            {type !== "like" && (
-              <div className="flex gap-5">
-                <button
-                  onClick={handleReply}
-                  className="
-                    text-grey-dark/50
-                    hover:text-grey-dark/80
-                    hover:underline
-                    underline-offset-2
-                    transition
-                  "
-                >
-                  Reply
-                </button>
+          <>
+            {state !== "warning" && (
+              <div
+                className={`
+                  flex
+                  gap-5
+                  items-center
+                `}
+              >
+                {/* Options Button */}
+                {type !== "like" && (
+                  <div className="flex gap-5">
+                    {!notificationReply && (
+                      <button
+                        onClick={handleReply}
+                        className="
+                          text-grey-dark/50
+                          hover:text-grey-dark/80
+                          hover:underline
+                          underline-offset-2
+                          transition
+                        "
+                      >
+                        Reply
+                      </button>
+                    )}
 
-                <button
-                  className="
-                    text-grey-dark/50
-                    hover:text-grey-dark/80
-                    hover:underline
-                    underline-offset-2
-                    transition
-                  "
-                >
-                  Delete
-                </button>
+                    <button
+                      onClick={() => handleActiveRemoveWarningModal(data)}
+                      className="
+                        text-grey-dark/50
+                        hover:text-grey-dark/80
+                        hover:underline
+                        underline-offset-2
+                        transition
+                      "
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+
+                {/* Notification Time ago */}
+                <p className="text-grey-dark/50">{getTimeAgo(createdAt!)}</p>
               </div>
             )}
+          </>
 
-            {/* Notification Time ago */}
-            <p className="text-grey-dark/50">{getTimeAgo(createdAt!)}</p>
-          </div>
-
-          {/* Reply Box */}
+          {/* Reply */}
           <>
+            {/* Reply Box */}
             {isReplying && (
               <AnimationWrapper
                 keyValue="notification-reply-box"
@@ -379,9 +420,79 @@ const NotificationCard: React.FC<NotificationCardProps> = ({ index, data }) => {
               </AnimationWrapper>
             )}
 
+            {/* reply message */}
             {notificationReply ? (
-              <div>
-                <p>is replied from notification</p>
+              <div
+                className="
+                  p-4
+                  bg-grey-custom/70
+                  rounded-md
+                "
+              >
+                <div
+                  className="
+                    flex
+                    gap-3
+                    items-center
+                  "
+                >
+                  <img
+                    src={authUser?.profile_img}
+                    className="
+                      w-9
+                      h-9
+                      rounded-full
+                      shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+                    shadow-grey-dark/5
+                    "
+                  />
+
+                  <h1
+                    className="
+                      font-medium
+                      text-xl
+                      text-grey-dark
+                      line-clamp-1
+                    "
+                  >
+                    <Link
+                      to={`/user/${authUser?.username}`}
+                      className="
+                        text-blue-500
+                        hover:underline
+                        transition
+                        mx-1
+                      "
+                    >
+                      @{authUser?.username}
+                    </Link>
+
+                    <span className="font-normal">replied to</span>
+
+                    <Link
+                      to={`/user/${username}`}
+                      className="
+                        text-blue-500
+                        hover:underline
+                        transition
+                        mx-1
+                      "
+                    >
+                      @{username}
+                    </Link>
+                  </h1>
+                </div>
+
+                <p
+                  className="
+                    mt-3
+                    ml-14
+                    text-green-600
+                    line-clamp-1
+                  "
+                >
+                  {replyComment}
+                </p>
               </div>
             ) : (
               ""

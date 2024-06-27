@@ -15,7 +15,7 @@ const useDashboardFetch = () => {
     import.meta.env.VITE_SERVER_DOMAIN + "/dashboard";
 
   const { authUser, setAuthUser } = useAuthStore();
-  const { notificationsInfo, setNotificationInfo } = useDashboardStore();
+  const { notificationsInfo, setNotificationsInfo } = useDashboardStore();
 
   // 根據用戶 ID 取得通知情況
   const GetNotificationsByUserId = async () => {
@@ -59,7 +59,7 @@ const useDashboardFetch = () => {
           state,
         });
 
-        setNotificationInfo(formattedData as GenerateToLoadStructureType);
+        setNotificationsInfo(formattedData as GenerateToLoadStructureType);
       })
       .catch((error) => {
         console.log(error);

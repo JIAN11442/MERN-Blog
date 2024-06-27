@@ -76,7 +76,22 @@ const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
             className={`
               input-icon
               ${disabled && "opacity-50"}
-              ${content?.length && `text-${name}`}
+              ${
+                content?.length &&
+                (name === "youtube"
+                  ? "text-youtube"
+                  : name === "facebook"
+                  ? "text-facebook"
+                  : name === "instagram"
+                  ? "text-instagram"
+                  : name === "twitter"
+                  ? "text-twitter"
+                  : name === "github"
+                  ? "text-github"
+                  : name === "website"
+                  ? "text-website"
+                  : "text-grey-dark")
+              }
             `}
           />
         </div>

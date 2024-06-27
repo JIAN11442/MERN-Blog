@@ -230,6 +230,7 @@ export interface NotificationStructureType {
   reply?: string | CommentStructureType;
   replied_on_comment?: string | CommentStructureType;
   seen?: boolean;
+  removed?: boolean;
   createdAt?: string;
 }
 

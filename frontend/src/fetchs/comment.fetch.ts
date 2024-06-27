@@ -117,7 +117,7 @@ const useCommentFetch = () => {
                 notificationsInfo.results[
                   notificationIndex
                 ] as NotificationStructureType
-              ).reply = notificationId;
+              ).reply = { _id: notificationId, comment: data.comment };
             }
           }
           // 反之，不是在 notification 處回覆

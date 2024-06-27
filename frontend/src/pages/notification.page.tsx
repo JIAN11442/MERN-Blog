@@ -4,13 +4,16 @@ import { FlatIcons } from "../icons/flaticons";
 import useAuthStore from "../states/user-auth.state";
 import useDashboardStore from "../states/dashboard.state";
 
-import useDashboardFetch from "../fetchs/dashboard.fetch";
 import NoDataMessage from "../components/blog-nodata.component";
 import Loader from "../components/loader.component";
 import AnimationWrapper from "../components/page-animation.component";
 import NotificationCard from "../components/notification-card.component";
-import { NotificationStructureType } from "../commons/types.common";
 import LoadOptions from "../components/load-options.components";
+import RemoveNotificationWarningModal from "../components/remove-notification-warning.component";
+
+import useDashboardFetch from "../fetchs/dashboard.fetch";
+
+import { NotificationStructureType } from "../commons/types.common";
 
 const NotificationPage = () => {
   const filters = ["all", "like", "comment", "reply"];
@@ -30,7 +33,8 @@ const NotificationPage = () => {
   });
 
   const { GetNotificationByFilter } = useDashboardFetch();
-  const { notificationsInfo, setNotificationInfo } = useDashboardStore();
+  const { notificationsInfo, activeRemoveWarningModal, setNotificationsInfo } =
+    useDashboardStore();
 
   // 通過點擊 button 來改變 filter 的狀態
   const handleFilterState = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -40,7 +44,7 @@ const NotificationPage = () => {
       notification?.countByType.find((t) => t.type === innerText)?.count ?? 0;
 
     setFilter({ type: innerText, count: stateCount });
-    setNotificationInfo(null);
+    setNotificationsInfo(null);
   };
 
   // 決定 filterPanel 的開關狀態
@@ -105,6 +109,9 @@ const NotificationPage = () => {
 
   return (
     <div>
+      {/* Warning Modal */}
+      {activeRemoveWarningModal.state && <RemoveNotificationWarningModal />}
+
       {/* Title */}
       <h1
         className="

@@ -11,6 +11,7 @@ export const notificationSchema = new Schema(
     reply: { type: Schema.Types.ObjectId, ref: 'comments' },
     replied_on_comment: { type: Schema.Types.ObjectId, ref: 'comments' },
     seen: { type: Boolean, default: false },
+    removed: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

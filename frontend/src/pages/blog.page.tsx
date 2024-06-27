@@ -9,8 +9,8 @@ import BlogContent from "../components/blog-content.component";
 import HandyToolBtn from "../components/handy-tool.component";
 import AnimationWrapper from "../components/page-animation.component";
 import BlogCommentContainer from "../components/blog-comment-container.component";
-import DeleteCommentWarningModal from "../components/delete-warning.component";
-import EditCommentWarningModal from "../components/edit-warning.component";
+import DeleteCommentWarningModal from "../components/delete-comment-warning.component";
+import EditCommentWarningModal from "../components/edit-comment-warning.component";
 
 import useTargetBlogStore from "../states/target-blog.state";
 import useCollapseStore from "../states/collapse.state";

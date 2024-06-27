@@ -26,12 +26,6 @@ export default {
         purple: {
           custom: "#8B46FF",
         },
-        twitter: "#1DA1F2",
-        facebook: "#4267B2",
-        youtube: "#ff0000",
-        github: "#24292f",
-        instagram: "#fc0068",
-        website: "#68e5f4",
       },
 
       fontSize: {
@@ -42,6 +36,14 @@ export default {
         "3xl": "28px",
         "4xl": "38px",
         "5xl": "50px",
+      },
+      textColor: {
+        twitter: "#1DA1F2",
+        facebook: "#4267B2",
+        youtube: "#ff0000",
+        github: "#24292f",
+        instagram: "#fc0068",
+        website: "#68e5f4",
       },
     },
   },

@@ -44,6 +44,7 @@ export interface ChangePasswordReqBody {
 export interface NotificationQueryProps {
   notification_for: ObjectId;
   user: ObjectId;
-  seen: string;
+  seen: boolean;
+  removed: boolean;
   type?: string;
 }

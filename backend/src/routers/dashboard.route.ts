@@ -5,6 +5,7 @@ import {
   getNotificationsByUserId,
   getNotificationsByFilter,
   getCountOfNotificationsByFilter,
+  removeNotificationById,
 } from '../controllers/dashboard.controller';
 
 const dashboardRoute = express.Router();
@@ -13,5 +14,6 @@ dashboardRoute.get('/get-notifications-userId', jwtVerify, getNotificationsByUse
 
 dashboardRoute.post('/notifications-filter-info', jwtVerify, getNotificationsByFilter);
 dashboardRoute.post('/notifications-filter-count', jwtVerify, getCountOfNotificationsByFilter);
+dashboardRoute.post('/remove-notification', jwtVerify, removeNotificationById);
 
 export default dashboardRoute;
