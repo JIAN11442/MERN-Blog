@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   GenerateToLoadStructureType,
+  NotificationFilterPropsType,
   NotificationStructureType,
 } from "../commons/types.common";
 
@@ -14,6 +15,13 @@ interface DashboardProps {
     index: number;
     data: NotificationStructureType | null;
   };
+  activeDeleteWarningModal: {
+    state: boolean;
+    index: number;
+    data: NotificationStructureType | null;
+  };
+  filter: NotificationFilterPropsType;
+  isDeleteReply: boolean;
 
   setNotificationsInfo: (
     info: NotificationStructureType[] | GenerateToLoadStructureType | null
@@ -23,15 +31,42 @@ interface DashboardProps {
     index: number;
     data: NotificationStructureType | null;
   }) => void;
+  setActiveDeleteWarningModal: (active: {
+    state: boolean;
+    index: number;
+    data: NotificationStructureType | null;
+  }) => void;
+  setFilter: (filter: NotificationFilterPropsType) => void;
+  setIsDeleteReply: (isDelete: boolean) => void;
 }
 
 const useDashboardStore = create<DashboardProps>((set) => ({
   notificationsInfo: null,
   activeRemoveWarningModal: { state: false, index: 0, data: null },
+  activeDeleteWarningModal: {
+    state: false,
+    index: 0,
+    data: null,
+  },
+  notificationByFilterObj: {
+    page: 1,
+    filter: "all",
+    deleteDocCount: 0,
+  },
+  filter: {
+    type: "all",
+    count: 0,
+  },
+  isDeleteReply: false,
 
   setNotificationsInfo: (info) => set({ notificationsInfo: info }),
   setActiveRemoveWarningModal: (active) =>
     set({ activeRemoveWarningModal: active }),
+  setActiveDeleteWarningModal: (active) => {
+    set({ activeDeleteWarningModal: active });
+  },
+  setFilter: (filter) => set({ filter }),
+  setIsDeleteReply: (isDelete) => set({ isDeleteReply: isDelete }),
 }));
 
 export default useDashboardStore;

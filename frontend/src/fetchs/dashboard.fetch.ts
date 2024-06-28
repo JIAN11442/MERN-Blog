@@ -9,6 +9,7 @@ import {
   GenerateToLoadStructureType,
 } from "../commons/types.common";
 import { FormatDataForLoadMoreOrLess } from "../commons/generate.common";
+import toast from "react-hot-toast";
 
 const useDashboardFetch = () => {
   const DASHBOARD_SERVER_ROUTE =
@@ -66,7 +67,33 @@ const useDashboardFetch = () => {
       });
   };
 
-  return { GetNotificationsByUserId, GetNotificationByFilter };
+  // 更新通知狀態
+  const UpdateNotificationRemoveState = async ({
+    notificationId,
+  }: FetchDashboardPropsType) => {
+    const requestUrl = DASHBOARD_SERVER_ROUTE + "/remove-notification";
+
+    const taostLoading = toast.loading("Removing...");
+
+    await axios
+      .post(requestUrl, { notificationId })
+      .then(({ data }) => {
+        if (data) {
+          toast.dismiss(taostLoading);
+          toast.success(data.message);
+        }
+      })
+      .catch((error) => {
+        toast.dismiss(taostLoading);
+        console.log(error);
+      });
+  };
+
+  return {
+    GetNotificationsByUserId,
+    GetNotificationByFilter,
+    UpdateNotificationRemoveState,
+  };
 };
 
 export default useDashboardFetch;

@@ -27,6 +27,7 @@ export const getNotificationsByUserId: RequestHandler = async (req, res, next) =
         $match: {
           notification_for: objectUserId,
           seen: false,
+          removed: false,
           user: { $ne: objectUserId },
         },
       },
@@ -109,7 +110,7 @@ export const getNotificationsByFilter: RequestHandler = async (req, res, next) =
       .populate('blog', 'title blog_id author')
       .populate('user', 'personal_info.fullname personal_info.username personal_info.profile_img')
       .populate('comment', 'comment')
-      .populate('reply', 'comment')
+      .populate('reply', 'comment children')
       .populate('replied_on_comment', '_id comment commentedAt')
       .sort({ createdAt: -1 })
       .select('createdAt type seen reply removed');
@@ -138,6 +139,7 @@ export const getCountOfNotificationsByFilter: RequestHandler = async (req, res, 
     const findQuery = {
       notification_for: userId,
       user: { $ne: userId },
+      removed: false,
       seen: false,
     } as unknown as NotificationQueryProps;
 
@@ -154,7 +156,7 @@ export const getCountOfNotificationsByFilter: RequestHandler = async (req, res, 
   }
 };
 
-// 刪除(remove)通知
+// 移除通知
 export const removeNotificationById: RequestHandler = async (req, res, next) => {
   try {
     const { notificationId } = req.body;
@@ -163,13 +165,17 @@ export const removeNotificationById: RequestHandler = async (req, res, next) => 
       throw createHttpError(400, 'Please provide a notification id');
     }
 
-    const updateNotification = await NotificationSchema.findByIdAndUpdate({ _id: notificationId }, { removed: true });
+    const updateNotification = await NotificationSchema.findByIdAndUpdate(
+      { _id: notificationId },
+      { removed: true },
+      { new: true },
+    );
 
     if (!updateNotification) {
       throw createHttpError(500, 'Failed to remove notification');
     }
 
-    res.status(200).json({ message: 'Notification removed successfully' });
+    res.status(200).json({ message: 'Notification removed successfully', notification: updateNotification });
   } catch (error) {
     console.log(error);
     next(error);

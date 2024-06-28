@@ -22,6 +22,7 @@ export interface PersonalInfoStructureType {
 }
 
 export interface AuthorStructureType {
+  _id?: string;
   personal_info: PersonalInfoStructureType;
 }
 
@@ -139,7 +140,6 @@ export interface CommentStructureType {
 }
 
 export interface GenerateCommentStructureType extends CommentStructureType {
-  _id?: string;
   childrenLevel?: number;
   isReplyLoaded?: boolean;
   parentIndex?: number;
@@ -148,8 +148,8 @@ export interface GenerateCommentStructureType extends CommentStructureType {
 }
 
 export interface FetchCommentPropsType {
-  blogObjectId?: string;
-  commentObjectId?: string;
+  blogObjId?: string;
+  commentObjId?: string;
   skip?: number;
   commentsArr?: GenerateCommentStructureType[] | null;
   comment?: string;
@@ -165,6 +165,7 @@ export interface FetchCommentPropsType {
   loadmore?: boolean;
   newCommentContent?: string;
   notificationId?: string;
+  notificationObjId?: string;
   notificationIndex?: number;
 }
 
@@ -227,7 +228,7 @@ export interface NotificationStructureType {
   notification_for?: string | PersonalInfoStructureType;
   user?: string | AuthorStructureType;
   comment?: string | CommentStructureType;
-  reply?: string | CommentStructureType;
+  reply?: string | GenerateCommentStructureType;
   replied_on_comment?: string | CommentStructureType;
   seen?: boolean;
   removed?: boolean;
@@ -244,4 +245,5 @@ export interface FetchDashboardPropsType {
   filter?: string;
   deleteDocCount?: number;
   state?: string;
+  notificationId?: string;
 }

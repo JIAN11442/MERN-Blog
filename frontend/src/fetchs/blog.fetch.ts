@@ -163,7 +163,7 @@ const useBlogFetch = () => {
         if (blogData) {
           // 將重構後的 comment 資料架構更新到 blogData 的 comments 屬性
           blogData.comments = await GetAndGenerateCommentsData({
-            blogObjectId: blogData._id,
+            blogObjId: blogData._id,
             skip: 0,
           });
 

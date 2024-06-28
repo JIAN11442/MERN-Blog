@@ -23,9 +23,9 @@ const commentMaxLimit = env.GET_COMMENTS_LIMIT;
 // 取得目標 blog 的所有未回復的留言
 export const getCommentsByBlogId: RequestHandler = async (req, res, next) => {
   try {
-    const { blogObjectId, skip } = req.body;
+    const { blogObjId, skip } = req.body;
 
-    const comments = await CommentSchema.find({ blog_id: blogObjectId, isReply: false })
+    const comments = await CommentSchema.find({ blog_id: blogObjId, isReply: false })
       .populate('commented_by', 'personal_info.username personal_info.fullname personal_info.profile_img')
       .skip(skip)
       .limit(commentMaxLimit)
@@ -46,13 +46,13 @@ export const getCommentsByBlogId: RequestHandler = async (req, res, next) => {
 export const createNewComment: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
-    const { blogObjectId, comment: reqComment, blog_author, replying_to, notificationId } = req.body;
+    const { blogObjId, comment: reqComment, blog_author, replying_to, notificationId } = req.body;
 
     if (!userId) {
       throw createHttpError(401, 'Please login first');
     }
 
-    if (!blogObjectId) {
+    if (!blogObjId) {
       throw createHttpError(400, 'Please provide blog objectId from client');
     }
 
@@ -66,7 +66,7 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
     // 如果是回覆留言，replying_to 會有回覆目標留言的 objectId
     // 如果是頭留言，replying_to 會是 undefined
     const commentObj = {
-      blog_id: blogObjectId,
+      blog_id: blogObjId,
       blog_author,
       comment: reqComment,
       commented_by: userId,
@@ -86,7 +86,7 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
     // 同時更新 blog 的 comments 及 activity 資料
     // 如果是回覆留言，不會增加 total_parent_comments
     const updateBlogInfo = await BlogSchema.findOneAndUpdate(
-      { _id: blogObjectId },
+      { _id: blogObjId },
       {
         $push: { comments: newComment._id },
         $inc: { 'activity.total_comments': 1, 'activity.total_parent_comments': replying_to ? 0 : 1 },
@@ -102,7 +102,7 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
     // 如果是回覆留言，replied_on_comment 就是被回覆留言的 objectId，反之就是 undefined
     const notificationObj = {
       type: replying_to ? 'reply' : 'comment',
-      blog: blogObjectId,
+      blog: blogObjId,
       notification_for: blog_author,
       user: userId,
       comment: newComment._id,
@@ -196,17 +196,18 @@ export const loadRepliesByCommentId: RequestHandler = async (req, res, next) => 
 };
 
 interface deleteFuncPropsType {
-  commentObjectId: string;
+  commentObjId: string;
   deleteNum: number;
+  notificationObjId?: string;
 }
 
 // 刪除留言
-const deleteCommentFunc = async ({ commentObjectId, deleteNum }: deleteFuncPropsType) => {
+const deleteCommentFunc = async ({ commentObjId, deleteNum, notificationObjId }: deleteFuncPropsType) => {
   let deleteCount = deleteNum;
 
   try {
     // 找到該留言
-    const comment = await CommentSchema.findOne({ _id: commentObjectId });
+    const comment = await CommentSchema.findOne({ _id: commentObjId });
 
     // 如果找不到該留言，自然就不能刪除，就回傳錯誤
     if (!comment) {
@@ -222,7 +223,7 @@ const deleteCommentFunc = async ({ commentObjectId, deleteNum }: deleteFuncProps
       await Promise.all(
         comment.children.map(async (replies) => {
           // 刪除的同時也要累加返回的 deleteCount，給下一個遞歸使用
-          const childDeleteCount = await deleteCommentFunc({ commentObjectId: replies.toString(), deleteNum: 0 });
+          const childDeleteCount = await deleteCommentFunc({ commentObjId: replies.toString(), deleteNum: 0 });
           deleteCount += childDeleteCount;
         }),
       );
@@ -240,7 +241,7 @@ const deleteCommentFunc = async ({ commentObjectId, deleteNum }: deleteFuncProps
       // 記得要回到被回覆留言的 children 中刪除該回覆留言的 objectId
       const updateParentComment = await CommentSchema.findOneAndUpdate(
         { _id: comment.parent },
-        { $pull: { children: commentObjectId } },
+        { $pull: { children: commentObjId } },
         { new: true },
       );
 
@@ -250,7 +251,7 @@ const deleteCommentFunc = async ({ commentObjectId, deleteNum }: deleteFuncProps
     }
 
     // 當然不管是頭留言還是回覆留言，都要刪除該留言的通知
-    const deleteNotification = await NotificationSchema.findOneAndDelete({ comment: commentObjectId });
+    const deleteNotification = await NotificationSchema.findOneAndDelete({ comment: commentObjId });
 
     // 如果刪除通知失敗，就回傳錯誤
     if (!deleteNotification) {
@@ -264,7 +265,7 @@ const deleteCommentFunc = async ({ commentObjectId, deleteNum }: deleteFuncProps
     const updateBlogInfo = await BlogSchema.findOneAndUpdate(
       { _id: comment?.blog_id },
       {
-        $pull: { comments: commentObjectId },
+        $pull: { comments: commentObjId },
         $inc: { 'activity.total_comments': -1, 'activity.total_parent_comments': comment?.parent ? 0 : -1 },
       },
     );
@@ -275,11 +276,22 @@ const deleteCommentFunc = async ({ commentObjectId, deleteNum }: deleteFuncProps
     }
 
     // 最後刪除該留言
-    const deleteComment = await CommentSchema.findOneAndDelete({ _id: commentObjectId });
+    const deleteComment = await CommentSchema.findOneAndDelete({ _id: commentObjId });
 
     // 如果刪除留言失敗，就回傳錯誤
     if (!deleteComment) {
       throw createHttpError(500, 'Failed to delete comment');
+    }
+
+    if (notificationObjId) {
+      const updateNotificationReply = await NotificationSchema.findOneAndUpdate(
+        { _id: notificationObjId },
+        { $unset: { reply: '' } },
+      );
+
+      if (!updateNotificationReply) {
+        throw createHttpError(500, 'Failed to update reply props of notification');
+      }
     }
 
     // 反之，如果找到該留言並成功刪除，就要增加 deleteCount
@@ -295,7 +307,7 @@ const deleteCommentFunc = async ({ commentObjectId, deleteNum }: deleteFuncProps
 export const deleteCommentById: RequestHandler = (req, res, next) => {
   try {
     const { userId } = req;
-    const { commentObjectId } = req.body;
+    const { commentObjId, notificationObjId } = req.body;
 
     const deleteNum = 0;
 
@@ -303,12 +315,12 @@ export const deleteCommentById: RequestHandler = (req, res, next) => {
       throw createHttpError(401, 'Please login first');
     }
 
-    if (!commentObjectId) {
+    if (!commentObjId) {
       throw createHttpError(400, 'Please provide comment id from client');
     }
 
     // 首先找出目標留言ID的留言
-    CommentSchema.findOne({ _id: commentObjectId })
+    CommentSchema.findOne({ _id: commentObjId })
       .then(async (comment) => {
         let deletedCommentNum;
 
@@ -322,7 +334,7 @@ export const deleteCommentById: RequestHandler = (req, res, next) => {
         // 因此這裡的 comment?.blog_author?.equals(userId) 才會正確運作
 
         if (userId == comment?.commented_by || comment?.blog_author?.equals(userId)) {
-          deletedCommentNum = await deleteCommentFunc({ commentObjectId, deleteNum });
+          deletedCommentNum = await deleteCommentFunc({ commentObjId, deleteNum, notificationObjId });
         } else {
           throw createHttpError(403, 'You are not allowed to delete this comment');
         }
@@ -342,13 +354,13 @@ export const deleteCommentById: RequestHandler = (req, res, next) => {
 export const updateCommentById: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
-    const { commentObjectId, newCommentContent } = req.body;
+    const { commentObjId, newCommentContent } = req.body;
 
     if (!userId) {
       throw createHttpError(401, 'Please login first');
     }
 
-    if (!commentObjectId) {
+    if (!commentObjId) {
       throw createHttpError(400, 'Please provide comment id from client');
     }
 
@@ -356,14 +368,14 @@ export const updateCommentById: RequestHandler = async (req, res, next) => {
       throw createHttpError(400, 'Please write something or provide new comment from client');
     }
 
-    const targetCommentExist = await CommentSchema.findOne({ _id: commentObjectId, commented_by: userId });
+    const targetCommentExist = await CommentSchema.findOne({ _id: commentObjId, commented_by: userId });
 
     if (!targetCommentExist) {
       throw createHttpError(403, 'You are not allowed to update this comment');
     }
 
     const updateComment = await CommentSchema.findOneAndUpdate(
-      { _id: commentObjectId, commented_by: userId },
+      { _id: commentObjId, commented_by: userId },
       { comment: newCommentContent },
     );
 

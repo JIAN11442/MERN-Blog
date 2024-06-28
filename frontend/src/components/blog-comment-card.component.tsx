@@ -46,12 +46,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
   children,
   className,
 }) => {
-  const {
-    _id: commentObjectId,
-    comment,
-    commented_by,
-    commentedAt,
-  } = commentData;
+  const { _id: commentObjId, comment, commented_by, commentedAt } = commentData;
   const {
     personal_info: { username, fullname, profile_img },
   } = commented_by as AuthorProfileStructureType;
@@ -173,7 +168,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
     commentData.isReplyLoaded = true;
 
     LoadRepliesCommentById({
-      repliedCommentId: commentObjectId,
+      repliedCommentId: commentObjId,
       skip: 0,
       index: index,
       commentsArr,
@@ -576,7 +571,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
                   authUsername === username ? "yourself" : `@${username}`
                 }`}
                 index={index}
-                replyingTo={commentObjectId}
+                replyingTo={commentObjId}
                 replyState={{ isReplying, setIsReplying }}
                 showButton={true}
               />

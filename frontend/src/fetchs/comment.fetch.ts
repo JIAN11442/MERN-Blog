@@ -39,13 +39,13 @@ const useCommentFetch = () => {
 
   // 取得目標 blog 的所有未回復留言
   const GetCommentsByBlogId = async ({
-    blogObjectId,
+    blogObjId,
     skip,
   }: FetchCommentPropsType) => {
     const requestURL = COMMENT_SERVER_ROUTE + "/get-blog-comments";
 
     return await axios
-      .post(requestURL, { blogObjectId, skip })
+      .post(requestURL, { blogObjId, skip })
       .then(({ data: { comments } }) => {
         return comments;
       })
@@ -57,12 +57,12 @@ const useCommentFetch = () => {
   // 調整取得的留言資料結構
   const GetAndGenerateCommentsData = async ({
     skip = 0,
-    blogObjectId,
+    blogObjId,
     commentsArr = null,
   }: FetchCommentPropsType) => {
     let res;
 
-    return GetCommentsByBlogId({ blogObjectId, skip }).then((comments) => {
+    return GetCommentsByBlogId({ blogObjId, skip }).then((comments) => {
       // 賦予所有取得的未回復留言一個 childrenLevel 屬性，並將其設為 0
       comments.map((comment: GenerateCommentStructureType) => {
         comment.childrenLevel = 0;
@@ -82,7 +82,7 @@ const useCommentFetch = () => {
 
   // 創建新的頭留言
   const AddCommentToBlog = async ({
-    blogObjectId,
+    blogObjId,
     comment,
     blog_author,
     replying_to,
@@ -95,7 +95,7 @@ const useCommentFetch = () => {
 
     await axios
       .post(requestURL, {
-        blogObjectId,
+        blogObjId,
         comment,
         blog_author,
         replying_to,
@@ -105,7 +105,7 @@ const useCommentFetch = () => {
         if (data) {
           // 如果是從 notification 那裡回覆並新增的留言，
           // 就會有 notificationId 和 notificationIndex
-          if (notificationId && notificationIndex) {
+          if (notificationId && notificationIndex !== undefined) {
             if (
               notificationsInfo &&
               "results" in notificationsInfo &&
@@ -117,7 +117,7 @@ const useCommentFetch = () => {
                 notificationsInfo.results[
                   notificationIndex
                 ] as NotificationStructureType
-              ).reply = { _id: notificationId, comment: data.comment };
+              ).reply = { _id: data._id, comment: data.comment };
             }
           }
           // 反之，不是在 notification 處回覆
@@ -135,7 +135,7 @@ const useCommentFetch = () => {
               personal_info: { username, fullname, profile_img },
             };
 
-            data.blog_id = blogObjectId;
+            data.blog_id = blogObjId;
 
             // 如果是回覆留言
             if (replying_to && index !== undefined) {
@@ -435,23 +435,28 @@ const useCommentFetch = () => {
   };
 
   const DeleteTargetComment = async ({
-    commentObjectId,
+    commentObjId,
     index = 0,
+    notificationObjId,
   }: FetchCommentPropsType) => {
     const requestURL = COMMENT_SERVER_ROUTE + "/delete-target-comment";
 
+    console.log(notificationObjId);
+
     await axios
-      .post(requestURL, { commentObjectId })
+      .post(requestURL, { commentObjId, notificationObjId })
       .then(({ data }) => {
         if (data) {
           // 因為沒辦法直接從前端知道刪除的總留言數
           // 比如刪除的留言其下可能有很多層的子留言，沒全部展開的話，就不知道有多少個
           // 因此只能在後端返回刪除的留言數，然後再在前端進行計算
-          deleteCommentFunc({
-            index,
-            commentsArr,
-            totalDeletedCommentNum: data.deletedCommentNum,
-          });
+          if (!notificationObjId) {
+            deleteCommentFunc({
+              index,
+              commentsArr,
+              totalDeletedCommentNum: data.deletedCommentNum,
+            });
+          }
         }
       })
       .catch((error) => {
@@ -461,7 +466,7 @@ const useCommentFetch = () => {
 
   // 更新目標留言
   const UpdateTargetCommentContent = async ({
-    commentObjectId,
+    commentObjId,
     newCommentContent,
   }: FetchCommentPropsType) => {
     if (!newCommentContent?.length) {
@@ -471,12 +476,12 @@ const useCommentFetch = () => {
     const requestURL = COMMENT_SERVER_ROUTE + "/update-comment";
 
     await axios
-      .post(requestURL, { commentObjectId, newCommentContent })
+      .post(requestURL, { commentObjId, newCommentContent })
       .then(({ data }) => {
         if (data) {
-          // 根據前端傳遞的 commentObjectId 找到對應的留言在 commentsArr 中的 index
+          // 根據前端傳遞的 commentObjId 找到對應的留言在 commentsArr 中的 index
           const index = commentsArr?.findIndex(
-            (comment) => comment._id === commentObjectId
+            (comment) => comment._id === commentObjId
           );
 
           if (commentsArr && index !== undefined && index >= 0) {

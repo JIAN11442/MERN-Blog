@@ -10,6 +10,7 @@ import AnimationWrapper from "../components/page-animation.component";
 import NotificationCard from "../components/notification-card.component";
 import LoadOptions from "../components/load-options.components";
 import RemoveNotificationWarningModal from "../components/remove-notification-warning.component";
+import DeleteNotificationCommentWarningModal from "../components/delete-notification-comment-warning.component";
 
 import useDashboardFetch from "../fetchs/dashboard.fetch";
 
@@ -27,14 +28,19 @@ const NotificationPage = () => {
   const { authUser } = useAuthStore();
   const { notification } = authUser ?? {};
 
-  const [filter, setFilter] = useState({
-    type: "all",
-    count: notification?.totalCount,
-  });
+  const {
+    filter,
+    notificationsInfo,
+    activeRemoveWarningModal,
+    activeDeleteWarningModal,
+    isDeleteReply,
+    setFilter,
+    setNotificationsInfo,
+    setIsDeleteReply,
+  } = useDashboardStore();
 
-  const { GetNotificationByFilter } = useDashboardFetch();
-  const { notificationsInfo, activeRemoveWarningModal, setNotificationsInfo } =
-    useDashboardStore();
+  const { GetNotificationByFilter, GetNotificationsByUserId } =
+    useDashboardFetch();
 
   // 通過點擊 button 來改變 filter 的狀態
   const handleFilterState = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -43,8 +49,10 @@ const NotificationPage = () => {
     const stateCount =
       notification?.countByType.find((t) => t.type === innerText)?.count ?? 0;
 
-    setFilter({ type: innerText, count: stateCount });
-    setNotificationsInfo(null);
+    setFilter({ ...filter, type: innerText, count: stateCount });
+
+    // 更新通知數
+    GetNotificationsByUserId();
   };
 
   // 決定 filterPanel 的開關狀態
@@ -91,6 +99,9 @@ const NotificationPage = () => {
     // 而不是等到 resize 時才執行
     handleResize();
 
+    // 更新通知數
+    GetNotificationsByUserId();
+
     window.addEventListener("resize", handleResize);
 
     return () => {
@@ -100,17 +111,53 @@ const NotificationPage = () => {
 
   // 儅 filter 改變時，重新取得相關通知資料
   useEffect(() => {
-    GetNotificationByFilter({
-      page: 1,
-      filter: filter.type,
-      deleteDocCount: 0,
-    });
-  }, [filter]);
+    setNotificationsInfo(null);
+
+    // 如果是因爲刪除通知的回覆訊息而觸發
+    // 那需要延遲一秒後再重新取得通知資料
+    if (isDeleteReply) {
+      const timeout = setTimeout(() => {
+        // 更新通知數
+        GetNotificationsByUserId();
+
+        GetNotificationByFilter({
+          page: 1,
+          filter: filter.type,
+          deleteDocCount: 0,
+        });
+      }, 1000);
+
+      return () => {
+        clearTimeout(timeout);
+        setIsDeleteReply(false);
+      };
+    }
+    // 反之如果是因爲點擊 filter 按鈕而觸發
+    // 那不需要延遲，直接重新取得通知資料
+    else {
+      GetNotificationByFilter({
+        page: 1,
+        filter: filter.type,
+        deleteDocCount: 0,
+      });
+    }
+  }, [filter, isDeleteReply]);
+
+  // 初始化 filter 的 count
+  // 為了在遊覽器小於 400px 時，能正確的顯示 'all' filter 的 count
+  useEffect(() => {
+    if (notification?.totalCount) {
+      setFilter({ ...filter, count: notification.totalCount });
+    }
+  }, [notification]);
 
   return (
     <div>
       {/* Warning Modal */}
       {activeRemoveWarningModal.state && <RemoveNotificationWarningModal />}
+      {activeDeleteWarningModal.state && (
+        <DeleteNotificationCommentWarningModal />
+      )}
 
       {/* Title */}
       <h1
@@ -154,7 +201,7 @@ const NotificationPage = () => {
                     `}
                   >
                     {item === "all"
-                      ? `${item} (${notification?.totalCount})`
+                      ? `${item} (${notification?.totalCount ?? 0})`
                       : item}
                   </button>
 
@@ -247,6 +294,7 @@ const NotificationPage = () => {
                       className="w-5 h-5"
                       onChange={() => {
                         setFilter({
+                          ...filter,
                           type: item,
                           count:
                             item === "all"

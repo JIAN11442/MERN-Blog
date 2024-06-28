@@ -4,10 +4,14 @@ import { FlatIcons } from "../icons/flaticons";
 import NotificationCard from "./notification-card.component";
 
 import useDashboardStore from "../states/dashboard.state";
+import useDashboardFetch from "../fetchs/dashboard.fetch";
+
 import {
+  GenerateAuthDataType,
   GenerateToLoadStructureType,
   NotificationStructureType,
 } from "../commons/types.common";
+import useAuthStore from "../states/user-auth.state";
 
 const RemoveNotificationWarningModal = () => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -22,6 +26,12 @@ const RemoveNotificationWarningModal = () => {
   const { results, totalDocs: totalNums } =
     notificationsInfo as GenerateToLoadStructureType;
 
+  const { authUser, setAuthUser } = useAuthStore();
+  const { notification } = authUser ?? {};
+  const { totalCount, countByType } = notification ?? {};
+
+  const { UpdateNotificationRemoveState } = useDashboardFetch();
+
   // 取消移除
   const handleCancel = () => {
     setActiveRemoveWarningModal({ state: false, index: 0, data: null });
@@ -33,26 +43,49 @@ const RemoveNotificationWarningModal = () => {
 
     target.disabled = true;
 
-    results?.splice(index, 1);
-
-    target.disabled = false;
+    // 更新 DB 的資料
+    UpdateNotificationRemoveState({ notificationId: data?._id });
 
     // 更新 zustand 的資料
+    results?.splice(index, 1);
+
     setNotificationsInfo({
       ...notificationsInfo,
       results,
       totalDocs: totalNums - 1,
     } as GenerateToLoadStructureType);
 
+    // 更新 authUser 中 notification 的資料
+    const newAuthUser = {
+      ...authUser,
+      notification: {
+        ...notification,
+        totalCount: (totalCount ?? 0) - 1,
+        countByType: countByType?.map((t) => {
+          if (t.type === data?.type) {
+            return { ...t, count: t.count - 1 };
+          } else {
+            return t;
+          }
+        }),
+      },
+    } as GenerateAuthDataType;
+
+    console.log(newAuthUser);
+
+    setAuthUser(newAuthUser);
+
+    target.disabled = false;
+
     // 關閉警告視窗
-    setActiveRemoveWarningModal({ state: false, index: 0, data: null });
+    handleCancel();
   };
 
   // 自動關閉刪除警告視窗
   useEffect(() => {
     const handleOnBlur = (e: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        setActiveRemoveWarningModal({ state: false, index: 0, data: null });
+        handleCancel();
       }
     };
 

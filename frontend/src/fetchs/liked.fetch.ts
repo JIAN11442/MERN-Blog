@@ -7,7 +7,7 @@ import useTargetBlogStore from "../states/target-blog.state";
 import type { BlogStructureType } from "../commons/types.common";
 
 interface FetchLikedPropsType {
-  blogObjectId: string;
+  blogObjId: string;
   isLikedByUser?: boolean | null;
 }
 
@@ -25,11 +25,11 @@ const useLikedFetch = () => {
   const LIKED_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/liked";
 
   // 检查用户是否曾經按贊了博客
-  const GetLikeStatusOfBlog = async ({ blogObjectId }: FetchLikedPropsType) => {
+  const GetLikeStatusOfBlog = async ({ blogObjId }: FetchLikedPropsType) => {
     const requestURL = LIKED_SERVER_ROUTE + "/get-user-like-status";
 
     await axios
-      .post(requestURL, { blogObjectId })
+      .post(requestURL, { blogObjId })
       .then(({ data: { result } }) => {
         setIsLikedByUser(result);
       })
@@ -40,13 +40,13 @@ const useLikedFetch = () => {
 
   // 更新目標博客的点赞状态
   const UpdateLikeStatusOfBlog = async ({
-    blogObjectId,
+    blogObjId,
     isLikedByUser,
   }: FetchLikedPropsType) => {
     const requestURL = LIKED_SERVER_ROUTE + "/like-blog";
 
     await axios
-      .post(requestURL, { blogObjectId, isLikedByUser })
+      .post(requestURL, { blogObjId, isLikedByUser })
       .then(({ data }) => {
         if (data) {
           if (latestBlogs && "results" in latestBlogs) {

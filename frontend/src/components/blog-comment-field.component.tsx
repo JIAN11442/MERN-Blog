@@ -9,7 +9,10 @@ import useBlogCommentStore from "../states/blog-comment.state";
 import { twMerge } from "tailwind-merge";
 import { FlatIcons } from "../icons/flaticons";
 import BlogCommentCard from "./blog-comment-card.component";
-import { GenerateCommentStructureType } from "../commons/types.common";
+import {
+  AuthorStructureType,
+  GenerateCommentStructureType,
+} from "../commons/types.common";
 
 interface BlogCommentFieldProps {
   action: string;
@@ -108,7 +111,7 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
     // 如果當前是編輯模式，則更新留言
     if (action === "edit") {
       await UpdateTargetCommentContent({
-        commentObjectId: editComment?.data?._id,
+        commentObjId: editComment?.data?._id,
         newCommentContent: comment,
       });
 
@@ -120,9 +123,9 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
     // 那就新增留言(不管是數據庫或 zustand 庫的資料都更新)
     else {
       await AddCommentToBlog({
-        blogObjectId: targetBlogInfo._id,
+        blogObjId: targetBlogInfo._id,
         comment,
-        blog_author: targetBlogInfo.author?._id,
+        blog_author: (targetBlogInfo.author as AuthorStructureType)?._id,
         replying_to: replyingTo,
         index: index,
         replyState: replyState,

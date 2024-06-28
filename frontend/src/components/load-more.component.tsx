@@ -57,6 +57,7 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
         "
       >
         {/* <p>· Load more ·</p> */}
+
         <p className="text-nowrap">Load more</p>
       </div>
     );

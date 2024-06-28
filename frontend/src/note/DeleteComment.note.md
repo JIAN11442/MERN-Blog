@@ -3,13 +3,13 @@
 
 ```ts
 const deleteCommentFunc = async ({
-  commentObjectId,
+  commentObjId,
   deleteNum,
 }: deleteFuncPropsType) => {
   let deleteCount = deleteNum;
 
   // 找到該留言後刪除，所以要用 findOneAndDelete
-  await CommentSchema.findOneAndDelete({ _id: commentObjectId }).then(
+  await CommentSchema.findOneAndDelete({ _id: commentObjId }).then(
     (comment) => {
       deleteCount += 1;
 
@@ -17,18 +17,18 @@ const deleteCommentFunc = async ({
       if (comment?.parent) {
         CommentSchema.findOneAndUpdate(
           { _id: comment.parent },
-          { $pull: { children: commentObjectId } }
+          { $pull: { children: commentObjId } }
         )
           .then(() => {
             deleteCount += 1;
-            console.log('delete parent comment children successfully');
+            console.log("delete parent comment children successfully");
           })
           .catch((error) => console.log(error));
       }
 
       // 當然不管是頭留言還是回覆留言，都要刪除該留言的通知
-      NotificationSchema.findOneAndDelete({ comment: commentObjectId })
-        .then(() => console.log('delete comment notification successfully'))
+      NotificationSchema.findOneAndDelete({ comment: commentObjId })
+        .then(() => console.log("delete comment notification successfully"))
         .catch((error) => console.log(error));
 
       // 與 notification 一樣，
@@ -38,10 +38,10 @@ const deleteCommentFunc = async ({
       BlogSchema.findOneAndUpdate(
         { _id: comment?.blog_id },
         {
-          $pull: { comments: commentObjectId },
+          $pull: { comments: commentObjId },
           $inc: {
-            'activity.total_comments': -1,
-            'activity.total_parent_comments': comment?.parent ? 0 : -1,
+            "activity.total_comments": -1,
+            "activity.total_parent_comments": comment?.parent ? 0 : -1,
           },
         }
       )
@@ -49,7 +49,7 @@ const deleteCommentFunc = async ({
           if (comment?.children.length) {
             comment.children.map((replies) =>
               deleteCommentFunc({
-                commentObjectId: replies.toString(),
+                commentObjId: replies.toString(),
                 deleteNum: deleteCount,
               })
             );
@@ -74,18 +74,18 @@ const deleteCommentFunc = async ({
 
 ```ts
 const deleteCommentFunc = async ({
-  commentObjectId,
+  commentObjId,
   deleteNum,
 }: deleteFuncPropsType) => {
   let deleteCount = deleteNum;
 
   try {
     // 找到該留言
-    const comment = await CommentSchema.findOne({ _id: commentObjectId });
+    const comment = await CommentSchema.findOne({ _id: commentObjId });
 
     // 如果找不到該留言，自然就不能刪除，就回傳錯誤
     if (!comment) {
-      throw createHttpError(404, 'Comment not found');
+      throw createHttpError(404, "Comment not found");
     }
 
     // 如果該留言有 children，就要先遞迴刪除該留言的所有 children
@@ -97,7 +97,7 @@ const deleteCommentFunc = async ({
         comment.children.map(async (replies) => {
           // 刪除的同時也要累加返回的 deleteCount，給下一個遞歸使用
           const childDeleteCount = await deleteCommentFunc({
-            commentObjectId: replies.toString(),
+            commentObjId: replies.toString(),
             deleteNum: 0,
           });
           deleteCount += childDeleteCount;
@@ -113,29 +113,29 @@ const deleteCommentFunc = async ({
       });
 
       if (!parentComment) {
-        throw createHttpError(404, 'Parent comment not found');
+        throw createHttpError(404, "Parent comment not found");
       }
 
       // 記得要回到被回覆留言的 children 中刪除該回覆留言的 objectId
       const updateParentComment = await CommentSchema.findOneAndUpdate(
         { _id: comment.parent },
-        { $pull: { children: commentObjectId } },
+        { $pull: { children: commentObjId } },
         { new: true }
       );
 
       if (!updateParentComment) {
-        throw createHttpError(500, 'Failed to delete parent comment children');
+        throw createHttpError(500, "Failed to delete parent comment children");
       }
     }
 
     // 當然不管是頭留言還是回覆留言，都要刪除該留言的通知
     const deleteNotification = await NotificationSchema.findOneAndDelete({
-      comment: commentObjectId,
+      comment: commentObjId,
     });
 
     // 如果刪除通知失敗，就回傳錯誤
     if (!deleteNotification) {
-      throw createHttpError(500, 'Failed to delete comment notification');
+      throw createHttpError(500, "Failed to delete comment notification");
     }
 
     // 與 notification 一樣，
@@ -145,10 +145,10 @@ const deleteCommentFunc = async ({
     const updateBlogInfo = await BlogSchema.findOneAndUpdate(
       { _id: comment?.blog_id },
       {
-        $pull: { comments: commentObjectId },
+        $pull: { comments: commentObjId },
         $inc: {
-          'activity.total_comments': -1,
-          'activity.total_parent_comments': comment?.parent ? 0 : -1,
+          "activity.total_comments": -1,
+          "activity.total_parent_comments": comment?.parent ? 0 : -1,
         },
       }
     );
@@ -157,18 +157,18 @@ const deleteCommentFunc = async ({
     if (!updateBlogInfo) {
       throw createHttpError(
         500,
-        'Failed to update blog comments info and activity info'
+        "Failed to update blog comments info and activity info"
       );
     }
 
     // 最後刪除該留言
     const deleteComment = await CommentSchema.findOneAndDelete({
-      _id: commentObjectId,
+      _id: commentObjId,
     });
 
     // 如果刪除留言失敗，就回傳錯誤
     if (!deleteComment) {
-      throw createHttpError(500, 'Failed to delete comment');
+      throw createHttpError(500, "Failed to delete comment");
     }
 
     console.log(deleteComment.comment);
@@ -193,18 +193,18 @@ const deleteCommentFunc = async ({
 
 ```ts
 const deleteCommentFunc = async ({
-  commentObjectId,
+  commentObjId,
   deleteNum,
 }: deleteFuncPropsType) => {
   let deleteCount = deleteNum;
 
   try {
     // 找到該留言
-    const comment = await CommentSchema.findOne({ _id: commentObjectId });
+    const comment = await CommentSchema.findOne({ _id: commentObjId });
 
     // 如果找不到該留言，自然就不能刪除，就回傳錯誤
     if (!comment) {
-      throw createHttpError(404, 'Comment not found');
+      throw createHttpError(404, "Comment not found");
     }
 
     // 如果該留言有 children，就要先遞迴刪除該留言的所有 children
@@ -213,7 +213,7 @@ const deleteCommentFunc = async ({
     if (comment?.children.length) {
       for (const replies of comment.children) {
         const childDeleteCount = await deleteCommentFunc({
-          commentObjectId: replies.toString(),
+          commentObjId: replies.toString(),
           deleteNum: 0,
         });
         deleteCount += childDeleteCount;
@@ -228,29 +228,29 @@ const deleteCommentFunc = async ({
       });
 
       if (!parentComment) {
-        throw createHttpError(404, 'Parent comment not found');
+        throw createHttpError(404, "Parent comment not found");
       }
 
       // 記得要回到被回覆留言的 children 中刪除該回覆留言的 objectId
       const updateParentComment = await CommentSchema.findOneAndUpdate(
         { _id: comment.parent },
-        { $pull: { children: commentObjectId } },
+        { $pull: { children: commentObjId } },
         { new: true }
       );
 
       if (!updateParentComment) {
-        throw createHttpError(500, 'Failed to delete parent comment children');
+        throw createHttpError(500, "Failed to delete parent comment children");
       }
     }
 
     // 當然不管是頭留言還是回覆留言，都要刪除該留言的通知
     const deleteNotification = await NotificationSchema.findOneAndDelete({
-      comment: commentObjectId,
+      comment: commentObjId,
     });
 
     // 如果刪除通知失敗，就回傳錯誤
     if (!deleteNotification) {
-      throw createHttpError(500, 'Failed to delete comment notification');
+      throw createHttpError(500, "Failed to delete comment notification");
     }
 
     // 與 notification 一樣，
@@ -260,10 +260,10 @@ const deleteCommentFunc = async ({
     const updateBlogInfo = await BlogSchema.findOneAndUpdate(
       { _id: comment?.blog_id },
       {
-        $pull: { comments: commentObjectId },
+        $pull: { comments: commentObjId },
         $inc: {
-          'activity.total_comments': -1,
-          'activity.total_parent_comments': comment?.parent ? 0 : -1,
+          "activity.total_comments": -1,
+          "activity.total_parent_comments": comment?.parent ? 0 : -1,
         },
       }
     );
@@ -272,18 +272,18 @@ const deleteCommentFunc = async ({
     if (!updateBlogInfo) {
       throw createHttpError(
         500,
-        'Failed to update blog comments info and activity info'
+        "Failed to update blog comments info and activity info"
       );
     }
 
     // 最後刪除該留言
     const deleteComment = await CommentSchema.findOneAndDelete({
-      _id: commentObjectId,
+      _id: commentObjId,
     });
 
     // 如果刪除留言失敗，就回傳錯誤
     if (!deleteComment) {
-      throw createHttpError(500, 'Failed to delete comment');
+      throw createHttpError(500, "Failed to delete comment");
     }
 
     console.log(deleteComment.comment);
@@ -309,14 +309,14 @@ const deleteCommentFunc = async ({
 
 ```ts
 const deleteCommentFunc = async ({
-  commentObjectId,
+  commentObjId,
   deleteNum,
 }: deleteFuncPropsType) => {
   let deleteCount = deleteNum;
 
   try {
     // 找到該留言
-    const comment = await CommentSchema.findOne({ _id: commentObjectId });
+    const comment = await CommentSchema.findOne({ _id: commentObjId });
 
     // 如果找不到該留言，自然就不能刪除，就回傳錯誤
     if (!comment) {
@@ -330,7 +330,7 @@ const deleteCommentFunc = async ({
 
       deleteCount = await comment.children.reduce(async (accPromise, childId) => {
         const acc = await accPromise;
-        const result = await deleteCommentFunc({ commentObjectId: childId.toString(), deleteNum: acc });
+        const result = await deleteCommentFunc({ commentObjId: childId.toString(), deleteNum: acc });
         return result;
       }, Promise.resolve(deleteCount));
 
@@ -348,7 +348,7 @@ const deleteCommentFunc = async ({
       // 記得要回到被回覆留言的 children 中刪除該回覆留言的 objectId
       const updateParentComment = await CommentSchema.findOneAndUpdate(
         { _id: comment.parent },
-        { $pull: { children: commentObjectId } },
+        { $pull: { children: commentObjId } },
         { new: true }
       );
 
@@ -359,7 +359,7 @@ const deleteCommentFunc = async ({
 
     // 當然不管是頭留言還是回覆留言，都要刪除該留言的通知
     const deleteNotification = await NotificationSchema.findOneAndDelete({
-      comment: commentObjectId,
+      comment: commentObjId,
     });
 
     // 如果刪除通知失敗，就回傳錯誤
@@ -374,7 +374,7 @@ const deleteCommentFunc = async ({
     const updateBlogInfo = await BlogSchema.findOneAndUpdate(
       { _id: comment?.blog_id },
       {
-        $pull: { comments: commentObjectId },
+        $pull: { comments: commentObjId },
         $inc: {
           'activity.total_comments': -1,
           'activity.total_parent_comments': comment?.parent ? 0 : -1,
@@ -392,7 +392,7 @@ const deleteCommentFunc = async ({
 
     // 最後刪除該留言
     const deleteComment = await CommentSchema.findOneAndDelete({
-      _id: commentObjectId,
+      _id: commentObjId,
     });
 
     // 如果刪除留言失敗，就回傳錯誤

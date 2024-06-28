@@ -61,7 +61,7 @@ const BlogCommentContainer = () => {
     // 取得新的留言(skip 掉原本就 load 的 comments 數量)
     const newCommentsArr = await GetAndGenerateCommentsData({
       skip: totalParentCommentsLoaded ?? 0,
-      blogObjectId: targetBlogInfo?._id,
+      blogObjId: targetBlogInfo?._id,
       commentsArr,
     });
 

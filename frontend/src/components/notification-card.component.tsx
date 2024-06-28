@@ -1,9 +1,13 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import AnimationWrapper from "./page-animation.component";
 
 import useAuthStore from "../states/user-auth.state";
+import useDashboardStore from "../states/dashboard.state";
+
+import useCommentFetch from "../fetchs/comment.fetch";
 
 import {
   AuthorStructureType,
@@ -13,14 +17,12 @@ import {
   NotificationStructureType,
 } from "../commons/types.common";
 import { getTimeAgo } from "../commons/date.common";
-import useCommentFetch from "../fetchs/comment.fetch";
-import toast from "react-hot-toast";
-import useDashboardStore from "../states/dashboard.state";
 
 interface NotificationCardProps {
   index: number;
   state?: string;
   data: NotificationStructureType;
+  currFilterBtn?: React.RefObject<HTMLButtonElement>;
 }
 
 const NotificationCard: React.FC<NotificationCardProps> = ({
@@ -48,7 +50,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   const { fullname, username, profile_img } = personal_info ?? {};
 
   const {
-    _id: blogObjectId,
+    _id: blogObjId,
     blog_id,
     title,
     author: blogAuthorId,
@@ -72,7 +74,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     },
   };
 
-  const { setActiveRemoveWarningModal } = useDashboardStore();
+  const { setActiveRemoveWarningModal, setActiveDeleteWarningModal } =
+    useDashboardStore();
 
   const { AddCommentToBlog } = useCommentFetch();
 
@@ -102,7 +105,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
       textareaRef.current.disabled = true;
 
       await AddCommentToBlog({
-        blogObjectId,
+        blogObjId,
         comment: content,
         blog_author: blogAuthorId as string,
         replying_to: replyId,
@@ -120,15 +123,25 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   };
 
   // 開啟移除警告視窗
-  const handleActiveRemoveWarningModal = (data: NotificationStructureType) => {
+  const handleActiveRemoveWarningModal = () => {
     setActiveRemoveWarningModal({ state: true, index, data });
   };
 
-  // const handleRemoveNotification = (e: React.MouseEvent<HTMLButtonElement>) => {
-  //   const target = e.currentTarget;
+  // 開啟刪除警告視窗
+  const handleActiveDeleteWarningModal = () => {
+    setActiveDeleteWarningModal({
+      state: true,
+      index,
+      data,
+    });
+  };
 
-  //   target.disabled = true;
-  // };
+  // 當展開 Reply Box 時，自動 focus
+  useEffect(() => {
+    if (isReplying) {
+      textareaRef.current?.focus();
+    }
+  }, [isReplying]);
 
   return (
     <div
@@ -142,7 +155,10 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                 shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
                shadow-grey-dark/5
               `
-            : "border-b"
+            : `
+                border-b
+                max-w-[600px]
+              `
         }
         border-grey-custom
       `}
@@ -153,6 +169,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           gap-5
         "
       >
+        {/* Avatar */}
         <img
           src={profile_img}
           className="
@@ -162,6 +179,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           "
         />
 
+        {/* Content */}
         <div
           className="
             flex
@@ -276,7 +294,6 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                   className="
                     mt-5
                     p-4
-                    lg:max-w-[550px]
                     border
                     border-grey-custom
                     rounded-md
@@ -348,30 +365,19 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               <div
                 className={`
                   flex
+                  w-full
                   gap-5
                   items-center
                 `}
               >
-                {/* Options Button */}
-                {type !== "like" && (
-                  <div className="flex gap-5">
-                    {!notificationReply && (
-                      <button
-                        onClick={handleReply}
-                        className="
-                          text-grey-dark/50
-                          hover:text-grey-dark/80
-                          hover:underline
-                          underline-offset-2
-                          transition
-                        "
-                      >
-                        Reply
-                      </button>
-                    )}
+                {/* Notification Time ago */}
+                <p className="text-grey-dark/50">{getTimeAgo(createdAt!)}</p>
 
+                {/* Options Button */}
+                <div className="flex gap-5">
+                  {!notificationReply && type !== "like" && (
                     <button
-                      onClick={() => handleActiveRemoveWarningModal(data)}
+                      onClick={handleReply}
                       className="
                         text-grey-dark/50
                         hover:text-grey-dark/80
@@ -380,13 +386,23 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                         transition
                       "
                     >
-                      Remove
+                      Reply
                     </button>
-                  </div>
-                )}
+                  )}
 
-                {/* Notification Time ago */}
-                <p className="text-grey-dark/50">{getTimeAgo(createdAt!)}</p>
+                  <button
+                    onClick={handleActiveRemoveWarningModal}
+                    className="
+                      text-grey-dark/50
+                      hover:text-grey-dark/80
+                      hover:underline
+                      underline-offset-2
+                      transition
+                    "
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
             )}
           </>
@@ -485,7 +501,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
                 <p
                   className="
-                    mt-3
+                    my-2
                     ml-14
                     text-green-600
                     line-clamp-1
@@ -493,6 +509,20 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                 >
                   {replyComment}
                 </p>
+
+                <button
+                  onClick={handleActiveDeleteWarningModal}
+                  className="
+                    ml-14
+                    text-grey-dark/50
+                    hover:text-grey-dark/80
+                    hover:underline
+                    underline-offset-2
+                    transition
+                  "
+                >
+                  Delete
+                </button>
               </div>
             ) : (
               ""

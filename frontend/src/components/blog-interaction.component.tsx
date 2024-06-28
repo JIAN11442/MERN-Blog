@@ -53,7 +53,7 @@ const BlogInteraction = () => {
       });
 
       UpdateLikeStatusOfBlog({
-        blogObjectId: _id,
+        blogObjId: _id,
         isLikedByUser: !isLikedByUser,
       });
     } else {
@@ -70,7 +70,7 @@ const BlogInteraction = () => {
   // Get Like Status of Blog from beginning
   useEffect(() => {
     if (authUser?.access_token) {
-      GetLikeStatusOfBlog({ blogObjectId: _id });
+      GetLikeStatusOfBlog({ blogObjId: _id });
     }
   }, [_id]);
 

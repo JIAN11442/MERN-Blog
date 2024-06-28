@@ -44,7 +44,7 @@ const DeleteCommentWarningModal: React.FC<DeleteCommentWarningProps> = ({
   // 刪除留言，再關閉刪除警告視窗
   const handleDelete = () => {
     // 刪除數據庫中的目標留言
-    DeleteTargetComment({ commentObjectId: _id, index });
+    DeleteTargetComment({ commentObjId: _id, index });
 
     // 再讓刪除按鈕設為可用
     setDeleteBtnDisabled(false);
@@ -163,7 +163,7 @@ const DeleteCommentWarningModal: React.FC<DeleteCommentWarningProps> = ({
               center
             "
           >
-            Do you really want to delete this comment{" "}
+            <span>Do you really want to delete this comment </span>
             <span className="text-xl">
               {data?.children?.length
                 ? `
