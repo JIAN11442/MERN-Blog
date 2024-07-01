@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
 interface SettingProps {
-  SettingUpdated: boolean;
-  setSettingUpdated: (state: boolean) => void;
+  isProfileUpdated: boolean;
+  setIsProfileUpdated: (state: boolean) => void;
 }
 
 const useSettingStore = create<SettingProps>((set) => ({
-  SettingUpdated: false,
-  setSettingUpdated: (state) => set({ SettingUpdated: state }),
+  isProfileUpdated: false,
+  setIsProfileUpdated: (state) => set({ isProfileUpdated: state }),
 }));
 
 export default useSettingStore;

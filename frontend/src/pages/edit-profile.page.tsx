@@ -47,7 +47,7 @@ const EditProfilePage = () => {
     social_links,
   } = authorProfileInfo as AuthorProfileStructureType;
 
-  const { setSettingUpdated } = useSettingStore();
+  const { setIsProfileUpdated } = useSettingStore();
 
   const { GetAuthorProfileInfo } = useUserFetch();
   const { UpdateAuthAvatarImg, UpdateAuthProfileInfo } = useSettingFetch();
@@ -163,7 +163,11 @@ const EditProfilePage = () => {
       submitBtn_e: e,
     });
 
-    setSettingUpdated(true);
+    // 為了讓之後 navigate 到 user/username 頁面時，
+    // 可以判斷是因為資料更新還是自主進入該頁面
+    // 而做出不同的行為
+    setIsProfileUpdated(true);
+
     navigate(`/user/${username}`);
   };
 

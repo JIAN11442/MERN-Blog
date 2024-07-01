@@ -176,6 +176,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             w-12
             h-12
             rounded-full
+            border
+            border-grey-custom
           "
         />
 

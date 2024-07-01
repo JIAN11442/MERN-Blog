@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import AnimationWrapper from "../components/page-animation.component";
@@ -16,6 +16,7 @@ import useCollapseStore from "../states/collapse.state";
 import useAuthStore from "../states/user-auth.state";
 import useHomeBlogStore from "../states/home-blog.state";
 import useAuthorProfileStore from "../states/author-profile.state";
+import useSettingStore from "../states/setting.state";
 
 import {
   AuthorProfileStructureType,
@@ -25,20 +26,23 @@ import {
 
 const ProfilePage = () => {
   const { authorId: paramsAuthor } = useParams();
-  const { authorProfileInfo } = useAuthorProfileStore();
-  const { searchBarVisibility } = useCollapseStore();
+  const [initialIndex, setInitialIndex] = useState(0);
+
   const { authUser } = useAuthStore();
-  const { latestBlogs, loadBlogsLimit, setLatestBlogs } = useHomeBlogStore();
-
-  const { GetAuthorProfileInfo } = useUserFetch();
-  const { GetLatestBlogsByAuthor } = useBlogFetch();
-
+  const { authorProfileInfo } = useAuthorProfileStore();
   const {
     personal_info: { username: profile_username, fullname, profile_img, bio },
     account_info: { total_posts, total_reads },
     social_links,
     createdAt,
   } = authorProfileInfo as AuthorProfileStructureType;
+
+  const { searchBarVisibility } = useCollapseStore();
+  const { latestBlogs, loadBlogsLimit, setLatestBlogs } = useHomeBlogStore();
+  const { isProfileUpdated, setIsProfileUpdated } = useSettingStore();
+
+  const { GetAuthorProfileInfo } = useUserFetch();
+  const { GetLatestBlogsByAuthor } = useBlogFetch();
 
   // Fetch author profile info
   useEffect(() => {
@@ -57,6 +61,24 @@ const ProfilePage = () => {
       setLatestBlogs(null);
     };
   }, [authorProfileInfo]);
+
+  // Reset initialIndex when profile is updated
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768 && isProfileUpdated) {
+        setInitialIndex(1);
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      setIsProfileUpdated(false);
+    };
+  }, [isProfileUpdated]);
 
   return (
     <AnimationWrapper
@@ -154,6 +176,8 @@ const ProfilePage = () => {
             <InpageNavigation
               routes={["Blogs Published", "About"]}
               defaultHiddenIndex={1}
+              initialActiveIndex={initialIndex}
+              adaptiveAdjustment={true}
             >
               {/* latest blogs */}
               <>

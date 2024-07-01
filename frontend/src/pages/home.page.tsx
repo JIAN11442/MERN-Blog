@@ -126,6 +126,7 @@ const Homepage = () => {
           <InpageNavigation
             routes={[inPageNavState, "trending blogs"]}
             defaultHiddenIndex={1}
+            adaptiveAdjustment={true}
           >
             {/* Latest blogs */}
             <>

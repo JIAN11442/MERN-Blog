@@ -8,6 +8,7 @@ interface InpageNavigationProps {
   routes: string[];
   defaultHiddenIndex?: number;
   initialActiveIndex?: number;
+  adaptiveAdjustment?: boolean;
   children: React.ReactNode;
 }
 
@@ -18,6 +19,7 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
   routes,
   defaultHiddenIndex,
   initialActiveIndex = 0,
+  adaptiveAdjustment = false,
   children,
 }) => {
   activeButtonRef = useRef<HTMLButtonElement>(null);
@@ -45,6 +47,30 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
       changePageState(activeButtonRef.current, initialActiveIndex);
     }
   }, []);
+
+  // 這是一個選擇性功能，
+  // 為了讓頁簽在遊覽器突然變大時，能自動切換到第一個頁簽上
+  useEffect(() => {
+    if (adaptiveAdjustment) {
+      const handleResize = () => {
+        // 如果當前頁面是 md-screen，即大於等於 768px，
+        // 且 inPageNavIndex > 0，即不在第一個頁簽上
+
+        if (window.innerWidth >= 768 && inPageNavIndex > 0) {
+          const target = document.getElementById(routes[0]);
+
+          // 則自動切換到第一個頁簽上
+          target?.click();
+        }
+      };
+
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    }
+  }, [adaptiveAdjustment, inPageNavIndex]);
 
   return (
     <>
@@ -89,6 +115,7 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
             // 2. 因此可以知道，ref 與 e.target 還是有差異的，ref 是在初始化時取得，而 e.target 是在點擊時取得
             // 3. 前者在 map 時會有問題，後者則不會
             <button
+              id={route}
               ref={i === initialActiveIndex ? activeButtonRef : null}
               key={i}
               onClick={(e) => changePageState(e.target as HTMLButtonElement, i)}
@@ -112,6 +139,7 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
 
         {/* 當前切換 Button 下標綫 - 以分隔綫的方式呈現 */}
         <hr
+          id="inpage-nav-line"
           ref={activeTabLineRef}
           className={`
             absolute
