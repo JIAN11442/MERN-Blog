@@ -71,8 +71,6 @@ const RemoveNotificationWarningModal = () => {
       },
     } as GenerateAuthDataType;
 
-    console.log(newAuthUser);
-
     setAuthUser(newAuthUser);
 
     target.disabled = false;

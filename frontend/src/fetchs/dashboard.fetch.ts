@@ -7,6 +7,7 @@ import {
   GenerateAuthDataType,
   FetchDashboardPropsType,
   GenerateToLoadStructureType,
+  NotificationStructureType,
 } from "../commons/types.common";
 import { FormatDataForLoadMoreOrLess } from "../commons/generate.common";
 import toast from "react-hot-toast";
@@ -16,6 +17,9 @@ const useDashboardFetch = () => {
     import.meta.env.VITE_SERVER_DOMAIN + "/dashboard";
 
   const { authUser, setAuthUser } = useAuthStore();
+  const { notification } = (authUser as GenerateAuthDataType) ?? {};
+  const { countByType, totalCount } = notification ?? {};
+
   const { notificationsInfo, setNotificationsInfo } = useDashboardStore();
 
   // 根據用戶 ID 取得通知情況
@@ -61,6 +65,37 @@ const useDashboardFetch = () => {
         });
 
         setNotificationsInfo(formattedData as GenerateToLoadStructureType);
+
+        if (filter !== "all" && formattedData?.results) {
+          // 根據目前加載的資料數，更新通知狀態為已讀
+          for (const i of formattedData.results) {
+            const item = i as NotificationStructureType;
+            const loadNum = data.notification.length;
+            const filterIndex = countByType.findIndex((t) => t.type === filter);
+
+            if (item.seen == false) {
+              UpdateNotificationSeenStateById({
+                notificationId: (i as NotificationStructureType)._id,
+                seen: true,
+              });
+
+              // 接著更新 zustand 中 authUser 的 notification 資料
+              if (notification.countByType[filterIndex].count > 0) {
+                notification.totalCount = totalCount - loadNum;
+                notification.countByType = countByType.map((t) => {
+                  if (t.type === filter) {
+                    return {
+                      ...t,
+                      count: t.count - loadNum,
+                    };
+                  } else {
+                    return t;
+                  }
+                });
+              }
+            }
+          }
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -89,10 +124,36 @@ const useDashboardFetch = () => {
       });
   };
 
+  // 將用戶所有通知標記為...
+  const UpdateNotificationSeenStateByUser = async ({
+    seen,
+  }: FetchDashboardPropsType) => {
+    const requestUrl =
+      DASHBOARD_SERVER_ROUTE + "/update-notifications-seen-user";
+
+    await axios.post(requestUrl, { seen }).catch((error) => {
+      console.log(error);
+    });
+  };
+
+  // 根據通知 ID 更新通知狀態
+  const UpdateNotificationSeenStateById = async ({
+    notificationId,
+    seen,
+  }: FetchDashboardPropsType) => {
+    const requestUrl = DASHBOARD_SERVER_ROUTE + "/update-notifications-seen-id";
+
+    await axios.post(requestUrl, { notificationId, seen }).catch((error) => {
+      console.log(error);
+    });
+  };
+
   return {
     GetNotificationsByUserId,
     GetNotificationByFilter,
     UpdateNotificationRemoveState,
+    UpdateNotificationSeenStateByUser,
+    UpdateNotificationSeenStateById,
   };
 };
 

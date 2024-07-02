@@ -246,4 +246,5 @@ export interface FetchDashboardPropsType {
   deleteDocCount?: number;
   state?: string;
   notificationId?: string;
+  seen?: boolean;
 }

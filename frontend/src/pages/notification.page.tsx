@@ -15,6 +15,7 @@ import DeleteNotificationCommentWarningModal from "../components/delete-notifica
 import useDashboardFetch from "../fetchs/dashboard.fetch";
 
 import { NotificationStructureType } from "../commons/types.common";
+import NotificationOptionsPanel from "../components/notification-options-panel.component";
 
 const NotificationPage = () => {
   const filters = ["all", "like", "comment", "reply"];
@@ -22,8 +23,9 @@ const NotificationPage = () => {
   const filterPanelRef = useRef<HTMLDivElement>(null);
 
   const [collapse, setCollapse] = useState(false);
-  const [panelActive, setPanelActive] = useState(false);
+  const [activeFilterPanel, setActiveFilterPanel] = useState(false);
   const [windowInnerWidth, setWindowInnerWidth] = useState(window.innerWidth);
+  const [activeNotificationPanel, setActiveNotificationPanel] = useState(false);
 
   const { authUser } = useAuthStore();
   const { notification } = authUser ?? {};
@@ -34,9 +36,11 @@ const NotificationPage = () => {
     activeRemoveWarningModal,
     activeDeleteWarningModal,
     isDeleteReply,
+    isMarked,
     setFilter,
     setNotificationsInfo,
     setIsDeleteReply,
+    setIsMarked,
   } = useDashboardStore();
 
   const { GetNotificationByFilter, GetNotificationsByUserId } =
@@ -56,18 +60,34 @@ const NotificationPage = () => {
   };
 
   // 決定 filterPanel 的開關狀態
-  const handlePanelState = () => {
-    setPanelActive(!panelActive);
+  const handleActiveFilterPanel = () => {
+    setActiveFilterPanel(!activeFilterPanel);
+  };
+
+  // 決定 notificationPanel 的開關狀態
+  const handleActiveNotificationPanel = () => {
+    setActiveNotificationPanel(!activeNotificationPanel);
+  };
+
+  // 當 optionsPanel button blur 時，就關閉 optionsPanel
+  const handleOptionsPanelOnBlur = () => {
+    const timeout = setTimeout(() => {
+      setActiveNotificationPanel(false);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   };
 
   // 當 filterPanel 是 active 時，
   // 監聽點擊事件，當點擊的不是 filterPanel 時，就關閉 filterPanel
   // 實現自動關閉 filterPanel 的效果
   useEffect(() => {
-    if (panelActive && filterPanelRef.current) {
+    if (activeFilterPanel && filterPanelRef.current) {
       const panelOnBlur = (e: MouseEvent) => {
         if (!filterPanelRef.current?.contains(e.target as Node)) {
-          setPanelActive(false);
+          setActiveFilterPanel(false);
         }
       };
 
@@ -80,7 +100,7 @@ const NotificationPage = () => {
         document.removeEventListener("click", panelOnBlur);
       };
     }
-  }, [panelActive, filterPanelRef]);
+  }, [activeFilterPanel, filterPanelRef]);
 
   // 監聽遊覽器寬度，
   // 以便知道什麼時候要 collapse filter
@@ -115,7 +135,7 @@ const NotificationPage = () => {
 
     // 如果是因爲刪除通知的回覆訊息而觸發
     // 那需要延遲一秒後再重新取得通知資料
-    if (isDeleteReply) {
+    if (isDeleteReply || isMarked) {
       const timeout = setTimeout(() => {
         // 更新通知數
         GetNotificationsByUserId();
@@ -125,11 +145,15 @@ const NotificationPage = () => {
           filter: filter.type,
           deleteDocCount: 0,
         });
+
+        setIsDeleteReply(false);
+        setIsMarked(false);
       }, 1000);
 
       return () => {
         clearTimeout(timeout);
         setIsDeleteReply(false);
+        setIsMarked(false);
       };
     }
     // 反之如果是因爲點擊 filter 按鈕而觸發
@@ -141,7 +165,7 @@ const NotificationPage = () => {
         deleteDocCount: 0,
       });
     }
-  }, [filter, isDeleteReply]);
+  }, [filter, isDeleteReply, isMarked]);
 
   // 初始化 filter 的 count
   // 為了在遊覽器小於 400px 時，能正確的顯示 'all' filter 的 count
@@ -158,7 +182,6 @@ const NotificationPage = () => {
       {activeDeleteWarningModal.state && (
         <DeleteNotificationCommentWarningModal />
       )}
-
       {/* Title */}
       <h1
         className="
@@ -171,8 +194,18 @@ const NotificationPage = () => {
         Recent Notifications
       </h1>
 
-      {/* Filters Options */}
-      <div className="my-8 max-md:mt-0">
+      {/* Filters Options (大於 400px) */}
+      <div
+        className="
+          flex
+          max-sm:gap-5
+          sm:gap-10
+          items-center
+          justify-between
+          my-8
+          max-md:mt-0
+        "
+      >
         {!collapse ? (
           // 當遊覽器寬度大於 400px
           <div
@@ -237,7 +270,7 @@ const NotificationPage = () => {
           <div>
             {/* Filter state button */}
             <button
-              onClick={handlePanelState}
+              onClick={handleActiveFilterPanel}
               className="
                 flex
                 gap-3
@@ -252,73 +285,96 @@ const NotificationPage = () => {
                 {filter.type + `${filter.count ? ` (${filter.count})` : ""}`}
               </p>
             </button>
-
-            {/* Filter options panel */}
-            <div
-              ref={filterPanelRef}
-              className={`
-                grid
-                p-6
-                gap-2
-                ${
-                  panelActive
-                    ? `
-                        block
-                        border-b
-                        border-grey-custom
-                      `
-                    : "hidden"
-                }
-                ${windowInnerWidth > 300 ? "grid-cols-2" : "grid-cols-1"}
-              `}
-            >
-              {filters.map((item, i) => {
-                const targetTypeInfo = notification?.countByType.find(
-                  (t) => t.type === item
-                );
-
-                return (
-                  <div
-                    key={i}
-                    className="
-                      flex
-                      gap-2
-                      items-center
-                      justify-start
-                    "
-                  >
-                    <input
-                      type="radio"
-                      name={item}
-                      checked={item === filter.type}
-                      className="w-5 h-5"
-                      onChange={() => {
-                        setFilter({
-                          ...filter,
-                          type: item,
-                          count:
-                            item === "all"
-                              ? notification?.totalCount ?? 0
-                              : targetTypeInfo?.count ?? 0,
-                        });
-                        setPanelActive(false);
-                      }}
-                    />
-                    <p>{item}</p>
-
-                    {/* 目標 type 通知數 */}
-                    {targetTypeInfo?.count ? (
-                      <span>({targetTypeInfo.count})</span>
-                    ) : (
-                      ""
-                    )}
-                  </div>
-                );
-              })}
-            </div>
           </div>
         )}
+
+        {/* Other Options */}
+        <div className="relative">
+          <button
+            onBlur={handleOptionsPanelOnBlur}
+            onClick={handleActiveNotificationPanel}
+            className="
+              mt-1
+              text-grey-dark/80
+              hover:text-grey-dark/100
+            "
+          >
+            <FlatIcons name="fi fi-rr-menu-dots-vertical" />
+          </button>
+
+          {activeNotificationPanel && <NotificationOptionsPanel />}
+        </div>
       </div>
+
+      {/* Filters Options (小於 400px)*/}
+      <>
+        {collapse && (
+          // 當遊覽器寬度小於 400px
+          <div
+            ref={filterPanelRef}
+            className={`
+              grid
+              p-6
+              pt-0
+              gap-2
+              ${
+                activeFilterPanel
+                  ? `
+                      block
+                      border-b
+                      border-grey-custom
+                    `
+                  : "hidden"
+              }
+              ${windowInnerWidth > 300 ? "grid-cols-2" : "grid-cols-1"}
+            `}
+          >
+            {filters.map((item, i) => {
+              const targetTypeInfo = notification?.countByType.find(
+                (t) => t.type === item
+              );
+
+              return (
+                <div
+                  key={i}
+                  className="
+                    flex
+                    gap-2
+                    items-center
+                    justify-start
+                  "
+                >
+                  <input
+                    type="radio"
+                    name={item}
+                    checked={item === filter.type}
+                    className="w-5 h-5"
+                    onChange={() => {
+                      setFilter({
+                        ...filter,
+                        type: item,
+                        count:
+                          item === "all"
+                            ? notification?.totalCount ?? 0
+                            : targetTypeInfo?.count ?? 0,
+                      });
+                      setActiveFilterPanel(false);
+                    }}
+                  />
+                  <p>{item}</p>
+
+                  {/* 目標 type 通知數 */}
+                  {targetTypeInfo?.count ? (
+                    <span>({targetTypeInfo.count})</span>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </>
 
       {/* Notification Contents */}
       <>

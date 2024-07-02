@@ -22,6 +22,7 @@ interface DashboardProps {
   };
   filter: NotificationFilterPropsType;
   isDeleteReply: boolean;
+  isMarked: boolean;
 
   setNotificationsInfo: (
     info: NotificationStructureType[] | GenerateToLoadStructureType | null
@@ -38,6 +39,7 @@ interface DashboardProps {
   }) => void;
   setFilter: (filter: NotificationFilterPropsType) => void;
   setIsDeleteReply: (isDelete: boolean) => void;
+  setIsMarked: (isMarkRead: boolean) => void;
 }
 
 const useDashboardStore = create<DashboardProps>((set) => ({
@@ -58,6 +60,7 @@ const useDashboardStore = create<DashboardProps>((set) => ({
     count: 0,
   },
   isDeleteReply: false,
+  isMarked: false,
 
   setNotificationsInfo: (info) => set({ notificationsInfo: info }),
   setActiveRemoveWarningModal: (active) =>
@@ -67,6 +70,7 @@ const useDashboardStore = create<DashboardProps>((set) => ({
   },
   setFilter: (filter) => set({ filter }),
   setIsDeleteReply: (isDelete) => set({ isDeleteReply: isDelete }),
+  setIsMarked: (isMarkRead) => set({ isMarked: isMarkRead }),
 }));
 
 export default useDashboardStore;

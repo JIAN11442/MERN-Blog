@@ -140,7 +140,6 @@ export const getCountOfNotificationsByFilter: RequestHandler = async (req, res, 
       notification_for: userId,
       user: { $ne: userId },
       removed: false,
-      seen: false,
     } as unknown as NotificationQueryProps;
 
     if (filter !== 'all') {
@@ -176,6 +175,70 @@ export const removeNotificationById: RequestHandler = async (req, res, next) => 
     }
 
     res.status(200).json({ message: 'Notification removed successfully', notification: updateNotification });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+//
+export const updateRelateNotificationSeenStateByUser: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { seen } = req.body;
+
+    if (!userId) {
+      throw createHttpError(401, 'Unauthorized');
+    }
+
+    if (seen === undefined) {
+      throw createHttpError(400, 'Please provide a seen state');
+    }
+
+    const findQuery = {
+      notification_for: userId,
+      user: { $ne: userId },
+      removed: false,
+    } as unknown as NotificationQueryProps;
+
+    const updateNotificationSeen = await NotificationSchema.updateMany(findQuery, { seen: seen });
+
+    if (!updateNotificationSeen) {
+      throw createHttpError(500, 'Failed to mark all notifications as unseen');
+    }
+
+    res.status(200).json({ message: 'notifications is marked ' });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+export const updateNotificationSeenStateById: RequestHandler = async (req, res, next) => {
+  try {
+    const { seen, notificationId } = req.body;
+
+    if (seen === undefined) {
+      throw createHttpError(400, 'Please provide a seen state');
+    }
+
+    if (!notificationId) {
+      throw createHttpError(400, 'Please provide a notification id');
+    }
+
+    const notificationIdSeenState = await NotificationSchema.findById({ _id: notificationId }).select('seen');
+
+    if (notificationIdSeenState?.seen) {
+      return res.status(200).json({ message: 'Notification already marked ' });
+    }
+
+    const updateNotificationSeen = await NotificationSchema.findOneAndUpdate({ _id: notificationId }, { seen: seen });
+
+    if (!updateNotificationSeen) {
+      throw createHttpError(500, 'Failed to mark all notifications as unseen');
+    }
+
+    res.status(200).json({ message: 'All notifications already marked ' });
   } catch (error) {
     console.log(error);
     next(error);

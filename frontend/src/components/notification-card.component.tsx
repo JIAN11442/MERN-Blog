@@ -17,6 +17,7 @@ import {
   NotificationStructureType,
 } from "../commons/types.common";
 import { getTimeAgo } from "../commons/date.common";
+import { FlatIcons } from "../icons/flaticons";
 
 interface NotificationCardProps {
   index: number;
@@ -43,6 +44,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     blog,
     comment: notificationComment,
     reply: notificationReply,
+    seen,
     createdAt,
   } = data;
 
@@ -146,6 +148,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   return (
     <div
       className={`
+        relative
         p-6
         ${
           state === "warning"
@@ -157,16 +160,19 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               `
             : `
                 border-b
-                max-w-[600px]
+                pr-20
               `
         }
         border-grey-custom
+        ${seen ? "opacity-55" : "relative"}
       `}
     >
+      {/* Content */}
       <div
         className="
           flex
           gap-5
+          max-w-[700px]
         "
       >
         {/* Avatar */}
@@ -180,16 +186,16 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             border-grey-custom
           "
         />
-
-        {/* Content */}
+        {/* Notification content */}
         <div
           className="
             flex
             flex-col
+            w-full
             gap-5
           "
         >
-          {/* Notification Content */}
+          {/* Notification */}
           <div
             className={`
               w-full
@@ -294,6 +300,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                 // Reply Content
                 <div
                   className="
+
                     mt-5
                     p-4
                     border
@@ -532,6 +539,51 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           </>
         </div>
       </div>
+
+      {/* Unread reminder */}
+      <>
+        {!seen ? (
+          <div
+            className="
+              absolute
+              top-1/2
+              right-0
+              w-3
+              h-3
+              bg-blue-500
+              rounded-full
+              border-2
+              shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+            shadow-grey-dark/20
+            "
+          ></div>
+        ) : (
+          <div
+            className="
+              absolute
+              bottom-6
+              right-0
+              flex
+              gap-1
+            "
+          >
+            <FlatIcons
+              name="fi fi-sr-check-double"
+              className="text-green-500"
+              size="text-sm"
+            />
+
+            <img
+              src={authUser?.profile_img}
+              className="
+                w-5
+                h-5
+                rounded-full
+              "
+            />
+          </div>
+        )}
+      </>
     </div>
   );
 };
