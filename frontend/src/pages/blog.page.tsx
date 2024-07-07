@@ -66,10 +66,12 @@ const BlogPage = () => {
     // 與上述一樣，同樣初始化加載的回覆數
     setTotalRepliesLoaded([]);
 
-    // 當切換 BlogId 時，要重新初始化 Blog 資訊與留言
-    // 避免看到上一篇 Blog 的資訊與留言
-    initialBlogInfo();
-    initialCommentState();
+    return () => {
+      // 當切換 BlogId 時，要重新初始化 Blog 資訊與留言
+      // 避免看到上一篇 Blog 的資訊與留言
+      initialBlogInfo();
+      initialCommentState();
+    };
   }, [blogId]);
 
   // 當確定 totalParentCommentsLoaded 已初始化後

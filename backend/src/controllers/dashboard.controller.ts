@@ -5,9 +5,10 @@ import { RequestHandler } from 'express';
 import createHttpError from 'http-errors';
 import { Types } from 'mongoose';
 
-import env from '../utils/validateEnv.util';
-
 import NotificationSchema from '../schemas/notification.schema';
+import BlogSchema from '../schemas/blog.schema';
+
+import env from '../utils/validateEnv.util';
 import { NotificationQueryProps } from '../utils/types.util';
 
 // 根據 userId 取得通知情況，
@@ -99,7 +100,6 @@ export const getNotificationsByFilter: RequestHandler = async (req, res, next) =
       findQuery.type = filter;
     }
 
-    // ??
     if (deleteDocCount) {
       skipDocs -= deleteDocCount;
     }
@@ -155,7 +155,7 @@ export const getCountOfNotificationsByFilter: RequestHandler = async (req, res, 
   }
 };
 
-// 移除通知
+// 根據 notificationId 移除通知
 export const removeNotificationById: RequestHandler = async (req, res, next) => {
   try {
     const { notificationId } = req.body;
@@ -181,7 +181,7 @@ export const removeNotificationById: RequestHandler = async (req, res, next) => 
   }
 };
 
-//
+// 根據 userId 更新其下通知的已讀狀態
 export const updateRelateNotificationSeenStateByUser: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
@@ -214,6 +214,7 @@ export const updateRelateNotificationSeenStateByUser: RequestHandler = async (re
   }
 };
 
+// 根據 notificationId 更新通知已讀狀態
 export const updateNotificationSeenStateById: RequestHandler = async (req, res, next) => {
   try {
     const { seen, notificationId } = req.body;
@@ -239,6 +240,74 @@ export const updateNotificationSeenStateById: RequestHandler = async (req, res, 
     }
 
     res.status(200).json({ message: 'All notifications already marked ' });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得用戶的 blogs 資料
+export const getUserWrittenBlogs: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { page, draft, query, deleteDocCount } = req.body;
+    const maxLimit = env.GET_USER_BLOGS_LIMIT;
+    let skipDocs = (page - 1) * maxLimit;
+
+    if (!userId) {
+      throw createHttpError(401, 'Unauthorized');
+    }
+
+    if (page === undefined || page < 1) {
+      throw createHttpError(400, 'Please provide a page number from 1');
+    }
+
+    if (draft === undefined) {
+      throw createHttpError(400, 'Please provide a draft state');
+    }
+
+    if (deleteDocCount) {
+      skipDocs -= deleteDocCount;
+    }
+
+    const getBlogs = await BlogSchema.find({ author: userId, draft, title: new RegExp(query, 'i') })
+      .limit(maxLimit)
+      .skip(skipDocs)
+      .select('blog_id title banner des draft activity publishedAt -_id')
+      .sort({ publishedAt: -1 });
+
+    if (!getBlogs) {
+      throw createHttpError(500, 'No blogs found with this filter');
+    }
+
+    res.status(200).json({ blogs: getBlogs });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得用戶的 blogs 數量
+export const getCountOfUserWrittenBlogs: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { draft, query } = req.body;
+
+    if (!userId) {
+      throw createHttpError(401, 'Unauthorized');
+    }
+
+    if (draft === undefined) {
+      throw createHttpError(400, 'Please provide a draft state');
+    }
+
+    if (query === undefined) {
+      throw createHttpError(400, 'Please provide a query');
+    }
+
+    const blogsCount = await BlogSchema.countDocuments({ author: userId, draft, title: new RegExp(query, 'i') });
+
+    res.status(200).json({ totalDocs: blogsCount });
   } catch (error) {
     console.log(error);
     next(error);

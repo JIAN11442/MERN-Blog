@@ -16,11 +16,13 @@ interface LoadOptionsProps {
   query?: string;
   authorId?: string;
   filter?: string;
+  draft?: boolean;
   loadFunction: ({
     page,
     state,
     authorId,
     filter,
+    draft,
   }: LoadFunctionPropsType) => Promise<void>;
   className?: string;
 }
@@ -32,6 +34,7 @@ const LoadOptions: React.FC<LoadOptionsProps> = ({
   query,
   authorId,
   filter,
+  draft,
   loadFunction,
   className,
 }) => {
@@ -53,6 +56,7 @@ const LoadOptions: React.FC<LoadOptionsProps> = ({
         query={query}
         authorId={authorId}
         filter={filter}
+        draft={draft}
         loadFunction={loadFunction}
       />
 
@@ -63,6 +67,7 @@ const LoadOptions: React.FC<LoadOptionsProps> = ({
         authorId={authorId}
         filter={filter}
         loadLimit={loadLimit}
+        draft={draft}
         loadFunction={loadFunction}
       />
 

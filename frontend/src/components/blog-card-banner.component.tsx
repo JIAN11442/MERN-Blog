@@ -240,6 +240,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
             w-full 
             h-full 
             object-cover
+            rounded-md
           "
         />
       </div>

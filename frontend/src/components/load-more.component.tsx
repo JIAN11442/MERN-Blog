@@ -11,6 +11,7 @@ interface LoadMoreBtnProps {
   query?: string;
   authorId?: string;
   filter?: string;
+  draft?: boolean;
   loadFunction: ({
     category,
     query,
@@ -18,6 +19,7 @@ interface LoadMoreBtnProps {
     filter,
     page,
     state,
+    draft,
   }: LoadFunctionPropsType) => void;
 }
 
@@ -26,12 +28,13 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
   query,
   authorId,
   filter,
+  draft,
   state = "loadmore",
   loadFunction: LoadMoreFunction,
 }) => {
   const { inPageNavState: category } = useHomeBlogStore();
 
-  if ((data?.results?.length ?? 0) < data.totalDocs) {
+  if ((data?.results?.length ?? 0) < (data.totalDocs ?? 0)) {
     return (
       <div
         onClick={() =>
@@ -42,6 +45,7 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
             filter,
             page: data.page + 1,
             state,
+            draft,
           })
         }
         className="

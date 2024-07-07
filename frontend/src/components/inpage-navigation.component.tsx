@@ -2,6 +2,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { useEffect, useRef } from "react";
+import { twMerge } from "tailwind-merge";
+
 import useHomeBlogStore from "../states/home-blog.state";
 
 interface InpageNavigationProps {
@@ -10,6 +12,7 @@ interface InpageNavigationProps {
   initialActiveIndex?: number;
   adaptiveAdjustment?: boolean;
   children: React.ReactNode;
+  className?: string;
 }
 
 export let activeButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
@@ -21,6 +24,7 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
   initialActiveIndex = 0,
   adaptiveAdjustment = false,
   children,
+  className,
 }) => {
   activeButtonRef = useRef<HTMLButtonElement>(null);
   activeTabLineRef = useRef<HTMLHRElement>(null);
@@ -76,7 +80,8 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
     <>
       {/* Bookmark */}
       <div
-        className="
+        className={twMerge(
+          `
           relative
           flex
           flex-nowrap
@@ -85,7 +90,9 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
           border-grey-custom
           bg-white
           overflow-x-auto
-        "
+          `,
+          className
+        )}
       >
         {/* 頁簽切換 Button */}
         {routes.map((route, i) => {

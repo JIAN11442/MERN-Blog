@@ -16,6 +16,7 @@ import EditProfilePage from "./pages/edit-profile.page";
 import NotificationPage from "./pages/notification.page";
 
 import useAuthFetch from "./fetchs/auth.fetch";
+import BlogManagementPage from "./pages/blog-management.page";
 
 function App() {
   const { GetAuthUserWithToken } = useAuthFetch();
@@ -35,6 +36,7 @@ function App() {
 
         <Route path="dashboard" element={<SideNavbar />}>
           <Route path="notifications" element={<NotificationPage />} />
+          <Route path="blogs" element={<BlogManagementPage />} />
         </Route>
 
         {/* Settings route */}

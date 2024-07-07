@@ -20,7 +20,13 @@ const useDashboardFetch = () => {
   const { notification } = (authUser as GenerateAuthDataType) ?? {};
   const { countByType, totalCount } = notification ?? {};
 
-  const { notificationsInfo, setNotificationsInfo } = useDashboardStore();
+  const {
+    notificationsInfo,
+    publishedBlogs,
+    setNotificationsInfo,
+    setPublishedBlogs,
+    setDraftBlogs,
+  } = useDashboardStore();
 
   // 根據用戶 ID 取得通知情況
   const GetNotificationsByUserId = async () => {
@@ -47,7 +53,7 @@ const useDashboardFetch = () => {
     page = 1,
     filter,
     deleteDocCount = 0,
-    state,
+    state = "initial",
   }: FetchDashboardPropsType) => {
     const requestUrl = DASHBOARD_SERVER_ROUTE + "/notifications-filter-info";
 
@@ -148,12 +154,49 @@ const useDashboardFetch = () => {
     });
   };
 
+  // 取得用戶撰寫的所有 blogs
+  const GetUserWrittenBlogsById = async ({
+    page = 1,
+    draft,
+    query = "",
+    deleteDocCount = 0,
+    state = "initial",
+  }: FetchDashboardPropsType) => {
+    const requestUrl = DASHBOARD_SERVER_ROUTE + "/get-user-written-blogs-info";
+
+    await axios
+      .post(requestUrl, { page, draft, query, deleteDocCount })
+      .then(async ({ data }) => {
+        if (data) {
+          const formattedData = (await FormatDataForLoadMoreOrLess({
+            prevArr: publishedBlogs,
+            fetchData: data.blogs,
+            page,
+            countRoute: "/get-user-written-blogs-count",
+            fetchRoute: "dashboard",
+            data_to_send: { draft, query },
+            state,
+          })) as GenerateToLoadStructureType;
+
+          if (draft) {
+            setDraftBlogs(formattedData);
+          } else {
+            setPublishedBlogs(formattedData);
+          }
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   return {
     GetNotificationsByUserId,
     GetNotificationByFilter,
     UpdateNotificationRemoveState,
     UpdateNotificationSeenStateByUser,
     UpdateNotificationSeenStateById,
+    GetUserWrittenBlogsById,
   };
 };
 

@@ -4,10 +4,12 @@ import toast from "react-hot-toast";
 import { FlatIcons } from "../icons/flaticons";
 import useAuthStore from "../states/user-auth.state";
 import AnimationWrapper from "./page-animation.component";
+import useEditorBlogStore from "../states/blog-editor.state";
 
 const UserNavigationPanel = () => {
   const navigate = useNavigate();
   const { authUser, setAuthUser } = useAuthStore();
+  const { initialEditBlog } = useEditorBlogStore();
 
   // Sign out function
   const handleSignOut = () => {
@@ -43,7 +45,11 @@ const UserNavigationPanel = () => {
         "
       >
         {/* Editor */}
-        <Link to="/editor" className="flex gap-4 link md:hidden pl-8">
+        <Link
+          to="/editor"
+          onClick={initialEditBlog}
+          className="flex gap-4 link md:hidden pl-8"
+        >
           <FlatIcons name="fi fi-rr-file-edit" />
           <p>Write</p>
         </Link>

@@ -4,6 +4,7 @@ import { NavLink, Navigate, Outlet } from "react-router-dom";
 import useAuthStore from "../states/user-auth.state";
 import { FlatIcons } from "../icons/flaticons";
 import toast from "react-hot-toast";
+import useCollapseStore from "../states/collapse.state";
 
 const SideNavbar = () => {
   const pathName = location.pathname.split("/")[2];
@@ -12,8 +13,10 @@ const SideNavbar = () => {
   const sideNavbarBtnRef = useRef<HTMLButtonElement>(null);
   const pageStateBtnRef = useRef<HTMLButtonElement>(null);
 
-  const [pageState, setPageState] = useState(pathName.replace("-", " "));
   const [sideBarVisible, setSideBarVisible] = useState(false);
+  const [pageState, setPageState] = useState(pathName.replace("-", " "));
+
+  const { searchBarVisibility } = useCollapseStore();
 
   const { authUser } = useAuthStore();
   const { access_token, notification } = authUser ?? {};
@@ -28,8 +31,10 @@ const SideNavbar = () => {
         "You can't change account's password because you logged in through Google account."
       );
     }
-    // 反之，只要不是 Change Password 那就正常導向
-    setPageState(e.currentTarget.innerText);
+
+    // 不是的話會正常導向
+    // 然後 pathName 會改變，而觸發 useEffect 來改變 pageState
+    // 所以這一步要先將 sideBarVisible 設為 false，讓 sideBar 隱藏
     setSideBarVisible(false);
 
     if (pageStateBtnRef.current) {
@@ -51,6 +56,17 @@ const SideNavbar = () => {
       setSideBarVisible(false);
     }
   };
+
+  // 當 pathName 改變時，改變 pageState
+  useEffect(() => {
+    if (pathName) {
+      if (pathName.slice(-1) === "s") {
+        setPageState(pathName.slice(0, -1).replace("-", " "));
+      } else {
+        setPageState(pathName.replace("-", " "));
+      }
+    }
+  }, [pathName]);
 
   // 當切換頁簽時，自動點擊 pageStateBtnRef
   // 這樣就可以讓 activeTabLine 跟著移動
@@ -97,14 +113,17 @@ const SideNavbar = () => {
       ) : (
         <>
           <section
-            className="
+            className={`
               relative
               flex
               gap-10
               py-0
               m-0
               max-md:flex-col
-            "
+              ${
+                searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""
+              }
+            `}
           >
             {/* InpageNavigation categories tab - max-md screen */}
             <div

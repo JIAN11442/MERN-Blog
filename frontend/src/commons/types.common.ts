@@ -97,6 +97,7 @@ export interface LoadFunctionPropsType extends FetchLoadPropsType {
   category?: string;
   authorId?: string;
   filter?: string;
+  draft?: boolean;
 }
 
 export interface AuthorProfileStructureType {
@@ -247,4 +248,6 @@ export interface FetchDashboardPropsType {
   state?: string;
   notificationId?: string;
   seen?: boolean;
+  draft?: boolean;
+  query?: string;
 }

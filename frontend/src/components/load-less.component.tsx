@@ -12,6 +12,7 @@ interface LoadLessBtnProps {
   authorId?: string;
   filter?: string;
   loadLimit: number;
+  draft?: boolean;
   loadFunction: ({
     category,
     query,
@@ -19,6 +20,7 @@ interface LoadLessBtnProps {
     filter,
     page,
     state,
+    draft,
   }: LoadFunctionPropsType) => void;
 }
 
@@ -29,6 +31,7 @@ const LoadLessBtn: React.FC<LoadLessBtnProps> = ({
   authorId,
   filter,
   loadLimit,
+  draft,
   loadFunction: LoadLessFunction,
 }) => {
   const { inPageNavState: category } = useHomeBlogStore();
@@ -44,6 +47,7 @@ const LoadLessBtn: React.FC<LoadLessBtnProps> = ({
             filter,
             page: data.page,
             state,
+            draft,
           })
         }
         className="

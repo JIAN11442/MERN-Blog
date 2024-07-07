@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  BlogStructureType,
   GenerateToLoadStructureType,
   NotificationFilterPropsType,
   NotificationStructureType,
@@ -23,6 +24,8 @@ interface DashboardProps {
   filter: NotificationFilterPropsType;
   isDeleteReply: boolean;
   isMarked: boolean;
+  publishedBlogs: BlogStructureType[] | GenerateToLoadStructureType | null;
+  draftBlogs: BlogStructureType[] | GenerateToLoadStructureType | null;
 
   setNotificationsInfo: (
     info: NotificationStructureType[] | GenerateToLoadStructureType | null
@@ -40,6 +43,12 @@ interface DashboardProps {
   setFilter: (filter: NotificationFilterPropsType) => void;
   setIsDeleteReply: (isDelete: boolean) => void;
   setIsMarked: (isMarkRead: boolean) => void;
+  setPublishedBlogs: (
+    blogs: BlogStructureType[] | GenerateToLoadStructureType | null
+  ) => void;
+  setDraftBlogs: (
+    blogs: BlogStructureType[] | GenerateToLoadStructureType | null
+  ) => void;
 }
 
 const useDashboardStore = create<DashboardProps>((set) => ({
@@ -61,6 +70,8 @@ const useDashboardStore = create<DashboardProps>((set) => ({
   },
   isDeleteReply: false,
   isMarked: false,
+  publishedBlogs: null,
+  draftBlogs: null,
 
   setNotificationsInfo: (info) => set({ notificationsInfo: info }),
   setActiveRemoveWarningModal: (active) =>
@@ -71,6 +82,8 @@ const useDashboardStore = create<DashboardProps>((set) => ({
   setFilter: (filter) => set({ filter }),
   setIsDeleteReply: (isDelete) => set({ isDeleteReply: isDelete }),
   setIsMarked: (isMarkRead) => set({ isMarked: isMarkRead }),
+  setPublishedBlogs: (blogs) => set({ publishedBlogs: blogs }),
+  setDraftBlogs: (blogs) => set({ draftBlogs: blogs }),
 }));
 
 export default useDashboardStore;

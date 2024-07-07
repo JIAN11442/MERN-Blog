@@ -18,6 +18,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const currPath = useLocation().pathname;
   const searchBarRef = useRef<HTMLInputElement>(null);
+  const searchBtnRef = useRef<HTMLButtonElement>(null);
 
   const { authUser } = useAuthStore();
   const { access_token, notification } = authUser ?? {};
@@ -33,12 +34,12 @@ const Navbar = () => {
   const { GetNotificationsByUserId } = useDashBoardFetch();
 
   // 控制 SearchBar 的顯示與隱藏
-  const handleSearchButton = () => {
+  const handleSearchBar = () => {
     setSearchBarVisibility(!searchBarVisibility);
   };
 
   // SearchBar 按下 Enter 後跳轉至搜尋結果頁面
-  const handleSearchBar = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleSearchBarSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const query = (e.target as HTMLInputElement).value;
 
     if (e.key === "Enter" && query.length) {
@@ -78,6 +79,27 @@ const Navbar = () => {
       searchBarRef.current?.focus();
     }
   }, [searchBarVisibility, searchBarRef]);
+
+  // 點擊頁面其他地方，隱藏 SearchBar
+  useEffect(() => {
+    const handleOnBlur = (e: MouseEvent) => {
+      if (
+        searchBarVisibility &&
+        searchBtnRef.current &&
+        searchBarRef.current &&
+        !searchBtnRef.current.contains(e.target as Node) &&
+        !searchBarRef.current.contains(e.target as Node)
+      ) {
+        setSearchBarVisibility(false);
+      }
+    };
+
+    window.addEventListener("click", handleOnBlur);
+
+    return () => {
+      window.removeEventListener("click", handleOnBlur);
+    };
+  }, [searchBarVisibility, searchBtnRef]);
 
   // 取得通知
   useEffect(() => {
@@ -143,12 +165,13 @@ const Navbar = () => {
             <input
               ref={searchBarRef}
               type="text"
-              placeholder="Search"
-              onKeyDown={(e) => handleSearchBar(e)}
+              placeholder="Search..."
+              onKeyDown={(e) => handleSearchBarSubmit(e)}
               className="
                 w-full
                 bg-grey-custom
-                placeholder-grey-dark
+                placeholder:text-grey-dark/50
+                focus:placeholder:opacity-0
                 p-4
                 pl-6
                 pr-[12%]
@@ -167,7 +190,7 @@ const Navbar = () => {
                 top-1/2
                 -translate-y-1/2
                 text-md
-                text-grey-dark
+                text-grey-dark/50
                 md:pointer-events-none
                 md:left-5
               "
@@ -187,7 +210,8 @@ const Navbar = () => {
         >
           {/* Search Button */}
           <button
-            onClick={() => handleSearchButton()}
+            ref={searchBtnRef}
+            onClick={handleSearchBar}
             className="
               md:hidden
               bg-grey-custom

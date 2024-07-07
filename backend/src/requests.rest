@@ -1,24 +1,3 @@
-# POST http://localhost:5000/api/blog/get-similar-blogs
-# Content-Type: application/json
-
-# {
-#     "categories": ["aws s3", "react", "nodejs"],
-#     "limit": 6,
-#     "page": 1,
-#     "eliminate_blogId":"How-to-upload-images-to-AWS-S3-using-React-JS-and-Node-JS-express-server-7ydpM41veb2rMI2hM9Egf"
-# }
-
-# GET http://localhost:5000/api/blog/trending-tags
-
-# POST http://localhost:5000/api/notification/get-user-like-status
-# Content-Type: application/json
-
-# {
-#     "blogId": "Inside-DBRX-Databricks-Impressive-Open-Source-LLM-nymCInERsHZoV3izAFvRe"
-# }
-
-
-
 # POST http://localhost:5000/api/auth/signin
 # Content-Type: application/json
 
@@ -28,14 +7,12 @@
 # }
 
 
-# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiMDIyZGM4NTQ3ZDgwZTMyOTMwNDAiLCJpYXQiOjE3MTg3OTU2OTgsImV4cCI6MTcxOTM5NTY5OH0.LREI1mFmad1fZZ0bJ8tAlYu7VNKisJTGfHSZZK9XSGY
 
-POST http://localhost:5000/api/setting/change-profile
+POST http://localhost:5000/api/dashboard/get-user-written-blogs
 Content-Type: application/json
-# Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiMDIyZGM4NTQ3ZDgwZTMyOTMwNDAiLCJpYXQiOjE3MTg3OTU2OTgsImV4cCI6MTcxOTM5NTY5OH0.LREI1mFmad1fZZ0bJ8tAlYu7VNKisJTGfHSZZK9XSGY`
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjZiMDIyZGM4NTQ3ZDgwZTMyOTMwNDAiLCJpYXQiOjE3MjAwNzA1MDIsImV4cCI6MTcyMDY3MDUwMn0.2ouCVSxYCNb6uC1fgNtWe7PVuTsybaCMfdwKoOpBydQ
 
 {
-    "username": "test35",
-    "bio": "This is a new bio",
-    "social_links": {"youtube":"https://www.youtube.com/","linkedin":"https://www.youtube.com/","twitter":"https://www.twitter.com/","github":"","facebook":"https://www.facebook.com/","instagram":"https://www.instagram.com/","website":"https://www.google.com/?L=1"}
+    "page": 1,
+    "draft": false
 }

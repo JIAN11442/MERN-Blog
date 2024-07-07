@@ -8,6 +8,8 @@ import {
   removeNotificationById,
   updateRelateNotificationSeenStateByUser,
   updateNotificationSeenStateById,
+  getUserWrittenBlogs,
+  getCountOfUserWrittenBlogs,
 } from '../controllers/dashboard.controller';
 
 const dashboardRoute = express.Router();
@@ -19,5 +21,8 @@ dashboardRoute.post('/notifications-filter-count', jwtVerify, getCountOfNotifica
 dashboardRoute.post('/remove-notification', jwtVerify, removeNotificationById);
 dashboardRoute.post('/update-notifications-seen-user', jwtVerify, updateRelateNotificationSeenStateByUser);
 dashboardRoute.post('/update-notifications-seen-id', jwtVerify, updateNotificationSeenStateById);
+
+dashboardRoute.post('/get-user-written-blogs-info', jwtVerify, getUserWrittenBlogs);
+dashboardRoute.post('/get-user-written-blogs-count', jwtVerify, getCountOfUserWrittenBlogs);
 
 export default dashboardRoute;

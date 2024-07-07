@@ -48,3 +48,9 @@ export interface NotificationQueryProps {
   removed: boolean;
   type?: string;
 }
+
+export interface GetUserBlogsQueryProps {
+  author: ObjectId;
+  draft?: boolean;
+  title: string;
+}
