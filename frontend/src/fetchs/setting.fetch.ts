@@ -1,7 +1,7 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-import useToastLoadingStore from "../states/toast-loading.state";
+import useToastLoadingStore from "../states/provider.state";
 import useAuthStore from "../states/user-auth.state";
 import useAuthorProfileStore from "../states/author-profile.state";
 

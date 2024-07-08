@@ -14,7 +14,7 @@ import type {
 } from "../commons/types.common";
 import useCommentFetch from "./comment.fetch";
 import { FormatDataForLoadMoreOrLess } from "../commons/generate.common";
-import useToastLoadingStore from "../states/toast-loading.state";
+import useToastLoadingStore from "../states/provider.state";
 
 const useBlogFetch = () => {
   const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/blog";

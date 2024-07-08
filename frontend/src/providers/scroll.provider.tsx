@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
-import useHomeBlogStore from '../states/home-blog.state';
+import { useEffect } from "react";
+import useProviderStore from "../states/provider.state";
 
 interface ScrollProviderProps {
   children?: React.ReactNode;
 }
 
 const ScrollProvider: React.FC<ScrollProviderProps> = ({ children }) => {
-  const { setScrollbarVisible } = useHomeBlogStore();
+  const { setScrollbarVisible } = useProviderStore();
 
   useEffect(() => {
     const checkScroll = () => {
@@ -17,9 +17,9 @@ const ScrollProvider: React.FC<ScrollProviderProps> = ({ children }) => {
       }
     };
 
-    window.addEventListener('scroll', checkScroll);
+    window.addEventListener("scroll", checkScroll);
     return () => {
-      window.removeEventListener('scroll', checkScroll);
+      window.removeEventListener("scroll", checkScroll);
     };
   }, []);
 

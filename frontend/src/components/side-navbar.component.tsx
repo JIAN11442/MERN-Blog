@@ -4,7 +4,7 @@ import { NavLink, Navigate, Outlet } from "react-router-dom";
 import useAuthStore from "../states/user-auth.state";
 import { FlatIcons } from "../icons/flaticons";
 import toast from "react-hot-toast";
-import useCollapseStore from "../states/collapse.state";
+import useNavbarStore from "../states/navbar.state";
 
 const SideNavbar = () => {
   const pathName = location.pathname.split("/")[2];
@@ -16,7 +16,7 @@ const SideNavbar = () => {
   const [sideBarVisible, setSideBarVisible] = useState(false);
   const [pageState, setPageState] = useState(pathName.replace("-", " "));
 
-  const { searchBarVisibility } = useCollapseStore();
+  const { searchBarVisibility } = useNavbarStore();
 
   const { authUser } = useAuthStore();
   const { access_token, notification } = authUser ?? {};

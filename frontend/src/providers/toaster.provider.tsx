@@ -1,5 +1,5 @@
 import { Toaster } from "react-hot-toast";
-import useToastLoadingStore from "../states/toast-loading.state";
+import useToastLoadingStore from "../states/provider.state";
 // import useEditorBlogStore from '../states/blog.state';
 
 interface ToasterProviderProps {

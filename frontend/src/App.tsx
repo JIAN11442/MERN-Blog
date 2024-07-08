@@ -14,12 +14,16 @@ import BlogPage from "./pages/blog.page";
 import ChangePasswordPage from "./pages/change-password.page";
 import EditProfilePage from "./pages/edit-profile.page";
 import NotificationPage from "./pages/notification.page";
+import OfflinePage from "./pages/offline.page";
+import BlogManagementPage from "./pages/blog-management.page";
+
+import useProviderStore from "./states/provider.state";
 
 import useAuthFetch from "./fetchs/auth.fetch";
-import BlogManagementPage from "./pages/blog-management.page";
 
 function App() {
   const { GetAuthUserWithToken } = useAuthFetch();
+  const { isOnline } = useProviderStore();
 
   useEffect(() => {
     // 每一次刷新都會重新檢查使用者的登入狀態
@@ -28,32 +32,38 @@ function App() {
 
   return (
     <Routes>
-      <Route path="editor" element={<BlogEditorPage />} />
-      <Route path="editor/:blogId" element={<BlogEditorPage />} />
-      <Route path="/" element={<Navbar />}>
-        {/* index 為 true 的路由 route 將預設為父路由下的子路由，建議只指定一個*/}
-        <Route index element={<Homepage />} />
+      {isOnline ? (
+        <>
+          <Route path="editor" element={<BlogEditorPage />} />
+          <Route path="editor/:blogId" element={<BlogEditorPage />} />
+          <Route path="/" element={<Navbar />}>
+            {/* index 為 true 的路由 route 將預設為父路由下的子路由，建議只指定一個*/}
+            <Route index element={<Homepage />} />
 
-        <Route path="dashboard" element={<SideNavbar />}>
-          <Route path="notifications" element={<NotificationPage />} />
-          <Route path="blogs" element={<BlogManagementPage />} />
-        </Route>
+            <Route path="dashboard" element={<SideNavbar />}>
+              <Route path="notifications" element={<NotificationPage />} />
+              <Route path="blogs" element={<BlogManagementPage />} />
+            </Route>
 
-        {/* Settings route */}
-        <Route path="settings" element={<SideNavbar />}>
-          <Route path="edit-profile" element={<EditProfilePage />} />
-          <Route path="change-password" element={<ChangePasswordPage />} />
-        </Route>
+            {/* Settings route */}
+            <Route path="settings" element={<SideNavbar />}>
+              <Route path="edit-profile" element={<EditProfilePage />} />
+              <Route path="change-password" element={<ChangePasswordPage />} />
+            </Route>
 
-        <Route path="signin" element={<UserAuthPage type="sign-in" />} />
-        <Route path="signup" element={<UserAuthPage type="sign-up" />} />
-        <Route path="search/:query" element={<SearchPage />} />
-        <Route path="user/:authorId" element={<ProfilePage />} />
-        <Route path="blog/:blogId" element={<BlogPage />} />
+            <Route path="signin" element={<UserAuthPage type="sign-in" />} />
+            <Route path="signup" element={<UserAuthPage type="sign-up" />} />
+            <Route path="search/:query" element={<SearchPage />} />
+            <Route path="user/:authorId" element={<ProfilePage />} />
+            <Route path="blog/:blogId" element={<BlogPage />} />
 
-        {/* 如果當前的路徑都不是上面那些，就會來到這頁 */}
-        <Route path="*" element={<PageNotFound />} />
-      </Route>
+            {/* 如果當前的路徑都不是上面那些，就會來到這頁 */}
+            <Route path="*" element={<PageNotFound />} />
+          </Route>
+        </>
+      ) : (
+        <Route path="*" element={<OfflinePage />} />
+      )}
     </Routes>
   );
 }

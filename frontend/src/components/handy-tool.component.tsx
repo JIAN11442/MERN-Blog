@@ -1,6 +1,6 @@
-import { twMerge } from 'tailwind-merge';
-import useHomeBlogStore from '../states/home-blog.state';
-import { FlatIcons } from '../icons/flaticons';
+import { twMerge } from "tailwind-merge";
+import { FlatIcons } from "../icons/flaticons";
+import useProviderStore from "../states/provider.state";
 
 interface HandyToolBtnProps {
   name: string;
@@ -15,18 +15,18 @@ const HandyToolBtn: React.FC<HandyToolBtnProps> = ({
   textBtnContainer,
   iconBtnContainer,
 }) => {
-  const { scrollbarVisible } = useHomeBlogStore();
+  const { scrollbarVisible } = useProviderStore();
 
   const position = scrollbarVisible.position;
-  const names = ['BackToTop', 'BackToTopAndBottom'];
-  const types = ['textBtn', 'IconBtn'];
+  const names = ["BackToTop", "BackToTopAndBottom"];
+  const types = ["textBtn", "IconBtn"];
 
   const handleBackToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleBackToBottom = () => {
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
   };
 
   if (!scrollbarVisible.visible) return;
@@ -64,15 +64,15 @@ const HandyToolBtn: React.FC<HandyToolBtnProps> = ({
           `
             fixed
             ${
-              iconBtnContainer?.position && iconBtnContainer.position === 'left'
-                ? 'left-5'
-                : 'right-5'
+              iconBtnContainer?.position && iconBtnContainer.position === "left"
+                ? "left-5"
+                : "right-5"
             }
             ${
               // 當捲軸到底時，將按鈕定位在底部，其他時候則定位在右中
               position + window.innerHeight === document.body.scrollHeight
-                ? 'md:bottom-10 max-md:bottom-[7rem]'
-                : 'translate-y-1/2 bottom-1/2'
+                ? "md:bottom-10 max-md:bottom-[7rem]"
+                : "translate-y-1/2 bottom-1/2"
             }
             flex
             flex-col

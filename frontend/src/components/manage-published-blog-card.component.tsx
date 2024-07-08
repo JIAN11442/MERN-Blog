@@ -9,10 +9,12 @@ import BlogStats from "./blog-stats.component";
 import AnimationWrapper from "./page-animation.component";
 
 interface ManagePublishedBlogCardProps {
+  index: number;
   blog: BlogStructureType;
 }
 
 const ManagePublishedBlogCard: React.FC<ManagePublishedBlogCardProps> = ({
+  index,
   blog,
 }) => {
   const { blog_id, banner, title, activity, publishedAt } = blog;
@@ -29,8 +31,9 @@ const ManagePublishedBlogCard: React.FC<ManagePublishedBlogCardProps> = ({
       <div
         className={`
           flex
-          gap-10
+          gap-5
           py-6
+          ${index === 0 && "pt-0"}
           max-md:px-4
           border-b
           border-grey-custom
@@ -44,7 +47,6 @@ const ManagePublishedBlogCard: React.FC<ManagePublishedBlogCardProps> = ({
             w-28
             h-28
             flex-none
-
             bg-grey-custom
             object-cover
             rounded-md
@@ -57,7 +59,6 @@ const ManagePublishedBlogCard: React.FC<ManagePublishedBlogCardProps> = ({
             flex
             flex-col
             w-full
-            py-2
             min-w-[200px]
             justify-between
           "
@@ -135,11 +136,11 @@ const ManagePublishedBlogCard: React.FC<ManagePublishedBlogCardProps> = ({
           </div>
         </div>
 
-        {/* Blog Stats */}
+        {/* Blog Stats - lg screen */}
         <div
           className="
             xl:ml-10
-            -mt-10
+            -mt-7
             max-lg:hidden
           "
         >
@@ -147,21 +148,23 @@ const ManagePublishedBlogCard: React.FC<ManagePublishedBlogCardProps> = ({
         </div>
       </div>
 
-      {/* Blog Stats */}
-      {activeStats && (
-        <AnimationWrapper
-          key={`blog-stats-${blog_id}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="
-            lg:hidden
-            -mb-6
-          "
-        >
-          <BlogStats stats={activity as ActivityStructureType} />
-        </AnimationWrapper>
-      )}
+      {/* Blog Stats - max-lg screen */}
+      <>
+        {activeStats && (
+          <AnimationWrapper
+            key={`blog-stats-${blog_id}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="
+              lg:hidden
+              -mb-6
+            "
+          >
+            <BlogStats stats={activity as ActivityStructureType} />
+          </AnimationWrapper>
+        )}
+      </>
     </>
   );
 };

@@ -12,7 +12,7 @@ import MinimalBlogPostCard from "../components/blog-card-nobanner.component";
 import NoDataMessage from "../components/blog-nodata.component";
 import LoadOptions from "../components/load-options.components";
 
-import useCollapseStore from "../states/collapse.state";
+import useNavbarStore from "../states/navbar.state";
 import useHomeBlogStore from "../states/home-blog.state";
 
 import { FlatIcons } from "../icons/flaticons";
@@ -23,7 +23,7 @@ import type {
 } from "../commons/types.common";
 
 const Homepage = () => {
-  const { searchBarVisibility } = useCollapseStore();
+  const { searchBarVisibility } = useNavbarStore();
   const {
     latestBlogs,
     trendingBlogs,

@@ -9,7 +9,7 @@ import AnimationWrapper from "./page-animation.component";
 import UserNavigationPanel from "./user-navigation-panel.component";
 
 import useAuthStore from "../states/user-auth.state";
-import useCollapseStore from "../states/collapse.state";
+import useNavbarStore from "../states/navbar.state";
 import useEditorBlogStore from "../states/blog-editor.state";
 
 import useDashBoardFetch from "../fetchs/dashboard.fetch";
@@ -28,7 +28,7 @@ const Navbar = () => {
     setPanelCollapsed,
     searchBarVisibility,
     setSearchBarVisibility,
-  } = useCollapseStore();
+  } = useNavbarStore();
   const { initialEditBlog } = useEditorBlogStore();
 
   const { GetNotificationsByUserId } = useDashBoardFetch();

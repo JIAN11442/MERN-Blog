@@ -15,7 +15,7 @@ import useAwsFetch from "../fetchs/aws.fetch";
 import useBlogFetch from "../fetchs/blog.fetch";
 
 import useEditorBlogStore from "../states/blog-editor.state";
-import useToastLoadingStore from "../states/toast-loading.state";
+import useToastLoadingStore from "../states/provider.state";
 
 const BlogEditor = () => {
   const { blogId: paramsBlogId } = useParams();

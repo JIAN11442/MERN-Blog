@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-interface CollapseState {
+interface NavbarProps {
   panelCollapsed: boolean;
   searchBarVisibility: boolean;
 
@@ -8,7 +8,7 @@ interface CollapseState {
   setSearchBarVisibility: (searchBarVisibility: boolean) => void;
 }
 
-const useCollapseStore = create<CollapseState>((set) => ({
+const useNavbarStore = create<NavbarProps>((set) => ({
   panelCollapsed: false,
   searchBarVisibility: false,
 
@@ -16,4 +16,4 @@ const useCollapseStore = create<CollapseState>((set) => ({
   setSearchBarVisibility: (searchBarVisibility) => set({ searchBarVisibility }),
 }));
 
-export default useCollapseStore;
+export default useNavbarStore;

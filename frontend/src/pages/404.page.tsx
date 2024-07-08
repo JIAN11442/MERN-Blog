@@ -6,12 +6,12 @@ import Loader from "../components/loader.component";
 import pageNotFoundImage from "../imgs/404-2.png";
 import fullLogo from "../imgs/full-logo.png";
 
-import useCollapseStore from "../states/collapse.state";
+import useNavbarStore from "../states/navbar.state";
 
 const PageNotFound = () => {
   const navigate = useNavigate();
 
-  const { searchBarVisibility } = useCollapseStore();
+  const { searchBarVisibility } = useNavbarStore();
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleGoBack = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {

@@ -12,7 +12,7 @@ import LoadOptions from "../components/load-options.components";
 import UserCardWrapper from "../components/user-card-wrapper.component";
 
 import useHomeBlogStore from "../states/home-blog.state";
-import useCollapseStore from "../states/collapse.state";
+import useNavbarStore from "../states/navbar.state";
 
 import useBlogFetch from "../fetchs/blog.fetch";
 import useUserFetch from "../fetchs/user.fetch";
@@ -27,7 +27,7 @@ import type {
 const SearchPage = () => {
   const { query } = useParams();
 
-  const { searchBarVisibility } = useCollapseStore();
+  const { searchBarVisibility } = useNavbarStore();
   const { loadBlogsLimit, queryBlogs } = useHomeBlogStore();
 
   const { GetLatestBlogsByQuery } = useBlogFetch();

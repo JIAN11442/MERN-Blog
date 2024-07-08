@@ -1,10 +1,15 @@
 import { BlogStructureType } from "../commons/types.common";
 
 interface ManageDraftBlogCardProps {
+  index: number;
   blog: BlogStructureType;
 }
 
-const ManageDraftBlogCard: React.FC<ManageDraftBlogCardProps> = ({ blog }) => {
+const ManageDraftBlogCard: React.FC<ManageDraftBlogCardProps> = ({
+  index,
+  blog,
+}) => {
+  const newIndex = index + 1;
   const { banner, title } = blog;
 
   return (
@@ -13,28 +18,15 @@ const ManageDraftBlogCard: React.FC<ManageDraftBlogCardProps> = ({ blog }) => {
         flex
         gap-10
         py-6
+        ${index === 0 && "pt-0"}
         max-md:px-4
         border-b
         border-grey-custom
-        items-center
       `}
     >
-      <img
-        src={banner}
-        className="
-          w-28
-          h-28
-          flex-none
-          max-md:hidden
-          lg:hidden
-          xl:block
-          bg-grey-custom
-          object-cover
-          rounded-md
-        "
-      />
-
-      <p>{title}</p>
+      <h1 className="blog-index">
+        {newIndex < 10 ? `0${newIndex}` : newIndex}
+      </h1>
     </div>
   );
 };

@@ -12,7 +12,7 @@ import NoDataMessage from "../components/blog-nodata.component";
 import useUserFetch from "../fetchs/user.fetch";
 import useBlogFetch from "../fetchs/blog.fetch";
 
-import useCollapseStore from "../states/collapse.state";
+import useNavbarStore from "../states/navbar.state";
 import useAuthStore from "../states/user-auth.state";
 import useHomeBlogStore from "../states/home-blog.state";
 import useAuthorProfileStore from "../states/author-profile.state";
@@ -37,7 +37,7 @@ const ProfilePage = () => {
     createdAt,
   } = authorProfileInfo as AuthorProfileStructureType;
 
-  const { searchBarVisibility } = useCollapseStore();
+  const { searchBarVisibility } = useNavbarStore();
   const { latestBlogs, loadBlogsLimit, setLatestBlogs } = useHomeBlogStore();
   const { isProfileUpdated, setIsProfileUpdated } = useSettingStore();
 

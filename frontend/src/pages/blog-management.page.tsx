@@ -43,6 +43,20 @@ const BlogManagementPage = () => {
     }
   };
 
+  // 如果搜索框失去焦點，並且搜索框的值為空，
+  // 則清空搜索結果，且觸發 useEffect 重新獲取數據
+  // 簡單來說就是還原初始資料
+  const handleInputOnBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    if (value.length === 0) {
+      setPublishedBlogs(null);
+      setDraftBlogs(null);
+
+      setQuery(value);
+    }
+  };
+
   // 切換 inpageNavIndex
   const handleSwitchInpageNav = (index: number) => {
     setInPageNavIndex(index);
@@ -66,6 +80,12 @@ const BlogManagementPage = () => {
         deleteDocCount: 0,
       });
     }
+
+    return () => {
+      setPublishedBlogs(null);
+      setDraftBlogs(null);
+      setQuery("");
+    };
   }, [query]);
 
   // 當 inpageNavIndex 改變時，
@@ -119,6 +139,7 @@ const BlogManagementPage = () => {
         <input
           type="text"
           placeholder={`Search blogs...`}
+          onBlur={(e) => handleInputOnBlur(e)}
           onKeyDown={(e) => handleInputSubmit(e)}
           className="
             w-full
@@ -155,6 +176,7 @@ const BlogManagementPage = () => {
           flex
           gap-4
           pt-5
+          pb-6
           md:hidden
         "
       >
@@ -180,7 +202,7 @@ const BlogManagementPage = () => {
         routes={inpageNavOptions}
         className="
           max-md:hidden
-          mb-0
+          mb-6
         "
       >
         {/* Published Blogs */}
@@ -196,7 +218,10 @@ const BlogManagementPage = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                 >
-                  <ManagePublishedBlogCard blog={blog as BlogStructureType} />
+                  <ManagePublishedBlogCard
+                    index={i}
+                    blog={blog as BlogStructureType}
+                  />
                 </AnimationWrapper>
               ))}
             </>
@@ -218,7 +243,10 @@ const BlogManagementPage = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                 >
-                  <ManageDraftBlogCard blog={blog as BlogStructureType} />
+                  <ManageDraftBlogCard
+                    index={i}
+                    blog={blog as BlogStructureType}
+                  />
                 </AnimationWrapper>
               ))}
             </>

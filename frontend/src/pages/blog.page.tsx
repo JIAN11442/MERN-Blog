@@ -13,9 +13,9 @@ import DeleteCommentWarningModal from "../components/delete-blog-comment-warning
 import EditCommentWarningModal from "../components/edit-blog-comment-warning.component";
 
 import useTargetBlogStore from "../states/target-blog.state";
-import useCollapseStore from "../states/collapse.state";
-import useHomeBlogStore from "../states/home-blog.state";
+import useNavbarStore from "../states/navbar.state";
 import useBlogCommentStore from "../states/blog-comment.state";
+import useProviderStore from "../states/provider.state";
 
 import useBlogFetch from "../fetchs/blog.fetch";
 
@@ -27,8 +27,8 @@ import type {
 
 const BlogPage = () => {
   const { blogId } = useParams();
-  const { searchBarVisibility } = useCollapseStore();
-  const { scrollbarVisible } = useHomeBlogStore();
+  const { searchBarVisibility } = useNavbarStore();
+  const { scrollbarVisible } = useProviderStore();
   const {
     commentsWrapper,
     deletedComment,

@@ -41,6 +41,7 @@ const BlogStats: React.FC<BlogStatsProps> = ({ stats, className }) => {
                 `
                   border-l
                   border-grey-custom
+                  
                 `
               }
             `}
