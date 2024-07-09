@@ -1,7 +1,7 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-import useToastLoadingStore from "../states/provider.state";
+import useProviderStore from "../states/provider.state";
 import useAuthStore from "../states/user-auth.state";
 import useAuthorProfileStore from "../states/author-profile.state";
 
@@ -15,7 +15,7 @@ import {
 
 const useSettingFetch = () => {
   const { authUser, setAuthUser } = useAuthStore();
-  const { setToastLoading } = useToastLoadingStore();
+  const { setToastLoading } = useProviderStore();
   const { authorProfileInfo, setAuthorProfileInfo } = useAuthorProfileStore();
 
   const { UploadImageToAWS } = useAwsFetch();

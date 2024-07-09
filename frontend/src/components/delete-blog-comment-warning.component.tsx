@@ -180,7 +180,7 @@ const DeleteCommentWarningModal: React.FC<DeleteCommentWarningProps> = ({
           index={1}
           commentData={data}
           leftVal={10}
-          options={false}
+          for_warning={true}
         />
 
         {/* Buttons */}

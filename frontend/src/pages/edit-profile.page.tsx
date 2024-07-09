@@ -427,9 +427,7 @@ const EditProfilePage = () => {
                   gap-y-3
                 "
               >
-                <p className="text-grey-dark">
-                  Add your social handles below:{" "}
-                </p>
+                <p className="text-grey-dark">Add your social handles below:</p>
 
                 <div
                   className="

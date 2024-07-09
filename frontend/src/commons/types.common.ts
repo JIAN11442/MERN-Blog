@@ -10,6 +10,7 @@ export interface GenerateAuthDataType {
     countByType: { count: number; type: string }[];
     totalCount: number;
   };
+  userId?: string;
 }
 
 export interface PersonalInfoStructureType {
@@ -91,6 +92,7 @@ export interface FetchBlogsPropsType extends FetchLoadPropsType {
   blogId?: string;
   draft?: boolean;
   mode?: string;
+  userId?: string;
 }
 
 export interface LoadFunctionPropsType extends FetchLoadPropsType {
@@ -250,4 +252,7 @@ export interface FetchDashboardPropsType {
   seen?: boolean;
   draft?: boolean;
   query?: string;
+  blogObjId?: string;
+  deleteBtnRef?: React.RefObject<HTMLButtonElement> | null;
+  index?: number;
 }

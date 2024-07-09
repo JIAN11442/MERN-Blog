@@ -15,7 +15,7 @@ import useAwsFetch from "../fetchs/aws.fetch";
 import useBlogFetch from "../fetchs/blog.fetch";
 
 import useEditorBlogStore from "../states/blog-editor.state";
-import useToastLoadingStore from "../states/provider.state";
+import useProviderStore from "../states/provider.state";
 
 const BlogEditor = () => {
   const { blogId: paramsBlogId } = useParams();
@@ -30,7 +30,7 @@ const BlogEditor = () => {
     setTextEditor,
     setEditorState,
   } = useEditorBlogStore();
-  const { setToastLoading } = useToastLoadingStore();
+  const { setToastLoading } = useProviderStore();
 
   const { UploadImageToAWS } = useAwsFetch();
   const { UploadSaveDraftBlog } = useBlogFetch();
@@ -130,10 +130,12 @@ const BlogEditor = () => {
     }
   };
 
+  const textEditorElement = document.getElementById("textEditor");
+
   // Initialize the EditorJs
   useEffect(() => {
     // Initialize the EditorJs for once(because useEffect cause rending twice)
-    if (!editorRef.current) {
+    if (!editorRef.current && textEditorElement) {
       const editor = new EditorJS({
         holder: "textEditor",
         tools: tools,
@@ -158,7 +160,7 @@ const BlogEditor = () => {
         editorRef.current.destroy();
       }
     };
-  }, []);
+  }, [textEditorElement]);
 
   // Change Code Box Style and Auto Resize
   useEffect(() => {

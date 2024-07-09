@@ -278,7 +278,7 @@ const BlogCommentField: React.FC<BlogCommentFieldProps> = ({
             index={1}
             commentData={editComment.data as GenerateCommentStructureType}
             leftVal={10}
-            options={false}
+            for_warning={true}
           />
         </div>
       )}

@@ -14,7 +14,7 @@ import type {
 } from "../commons/types.common";
 import useCommentFetch from "./comment.fetch";
 import { FormatDataForLoadMoreOrLess } from "../commons/generate.common";
-import useToastLoadingStore from "../states/provider.state";
+import useProviderStore from "../states/provider.state";
 
 const useBlogFetch = () => {
   const BLOG_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/blog";
@@ -34,7 +34,7 @@ const useBlogFetch = () => {
   } = useHomeBlogStore();
 
   const { setEditorBlog } = useEditorBlogStore();
-  const { setToastLoading } = useToastLoadingStore();
+  const { setToastLoading } = useProviderStore();
   const { setTargetBlogInfo, setSimilarBlogsInfo } = useTargetBlogStore();
 
   const { GetAndGenerateCommentsData } = useCommentFetch();
@@ -167,8 +167,8 @@ const useBlogFetch = () => {
             skip: 0,
           });
 
-          // 為了在不重新向後端請求取得 latestBlogs 的情況下，即時改變目標 blog 的閲讀數
           // 這裡直接在本地更新 zustand 管理的 latestBlogs 數據
+          // 只有儅不是編輯模式且不是作者本人訪問時，才會增加 total_reads
           if (latestBlogs && "results" in latestBlogs && latestBlogs.results) {
             const updateTargetBlogTotalReads = latestBlogs.results.map(
               (blog: BlogStructureType) => {
@@ -177,7 +177,10 @@ const useBlogFetch = () => {
                     ...blog,
                     activity: {
                       ...blog.activity,
-                      total_reads: (blog?.activity?.total_reads ?? 0) + 1,
+                      total_reads:
+                        mode === "edit"
+                          ? blog?.activity?.total_reads ?? 0
+                          : (blog?.activity?.total_reads ?? 0) + 1,
                     },
                   };
                 } else {

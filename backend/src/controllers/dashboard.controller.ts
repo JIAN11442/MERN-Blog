@@ -7,6 +7,8 @@ import { Types } from 'mongoose';
 
 import NotificationSchema from '../schemas/notification.schema';
 import BlogSchema from '../schemas/blog.schema';
+import CommentSchema from '../schemas/comment.schema';
+import UserSchema from '../schemas/user.schema';
 
 import env from '../utils/validateEnv.util';
 import { NotificationQueryProps } from '../utils/types.util';
@@ -273,7 +275,7 @@ export const getUserWrittenBlogs: RequestHandler = async (req, res, next) => {
     const getBlogs = await BlogSchema.find({ author: userId, draft, title: new RegExp(query, 'i') })
       .limit(maxLimit)
       .skip(skipDocs)
-      .select('blog_id title banner des draft activity publishedAt -_id')
+      .select('_id blog_id title banner des draft activity publishedAt')
       .sort({ publishedAt: -1 });
 
     if (!getBlogs) {
@@ -308,6 +310,74 @@ export const getCountOfUserWrittenBlogs: RequestHandler = async (req, res, next)
     const blogsCount = await BlogSchema.countDocuments({ author: userId, draft, title: new RegExp(query, 'i') });
 
     res.status(200).json({ totalDocs: blogsCount });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 刪除目標 blog
+export const deleteBlogById: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { blogObjId } = req.body;
+
+    if (!userId) {
+      throw createHttpError(401, 'Unauthorized');
+    }
+
+    if (!blogObjId) {
+      throw createHttpError(400, 'Please provide a blog id');
+    }
+
+    // 先確認目標 blog 是否存在
+    // 因為之後會用到 blog 中的 total_reads 數據
+    const targetBlog = await BlogSchema.findById({ _id: blogObjId });
+
+    if (!targetBlog) {
+      throw createHttpError(404, 'Blog not found');
+    }
+
+    // 刪除與該 blog 有關的所有通知
+    const deleteRelateNotification = await NotificationSchema.deleteMany({ blog: blogObjId });
+
+    if (!deleteRelateNotification) {
+      throw createHttpError(500, 'Failed to delete relate notification');
+    }
+
+    // 刪除與該 blog 有關的所有留言
+    const deleteRelateComment = await CommentSchema.deleteMany({ blog_id: blogObjId, blog_author: userId });
+
+    if (!deleteRelateComment) {
+      throw createHttpError(500, 'Failed to delete relate comment');
+    }
+
+    const incrementVal = targetBlog.draft ? 0 : -1;
+
+    // 刪除記錄在用戶 schema 中 blog list 中的目標 blogId
+    const updateUserSchema = await UserSchema.findByIdAndUpdate(
+      { _id: userId },
+      {
+        $pull: { blogs: blogObjId },
+        $inc: {
+          'account_info.total_posts': incrementVal,
+          'account_info.total_reads': incrementVal * (targetBlog.activity?.total_reads ?? 0),
+        },
+      },
+    );
+
+    if (!updateUserSchema) {
+      throw createHttpError(500, 'Failed to delete relate user schema');
+    }
+
+    // 最後刪除目標 blog
+    const deleteTargetBlog = await BlogSchema.findByIdAndDelete({ _id: blogObjId });
+
+    if (!deleteTargetBlog) {
+      throw createHttpError(500, 'Failed to delete target blog');
+    }
+
+    res.status(200).json({ message: 'Blog deleted successfully' });
   } catch (error) {
     console.log(error);
     next(error);

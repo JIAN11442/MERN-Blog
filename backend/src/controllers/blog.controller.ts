@@ -37,11 +37,18 @@ export const createBlog: RequestHandler = async (req, res, next) => {
     // 如果是從創建狀態那 publish， 根據 title 產生 blog id
     const generateBlogId = paramsBlogId || generateBlogID(title);
 
+    // 如果是編輯狀態，更新該 blog 的資料
     if (paramsBlogId) {
-      // 如果是編輯狀態，更新該 blog 的資料
+      const targetBlog = await BlogSchema.findOne({ blog_id: paramsBlogId });
+
+      if (!targetBlog) {
+        throw createHttpError(500, 'No blog found with this id.');
+      }
+
       const updatedBlog = await BlogSchema.findOneAndUpdate(
         { blog_id: generateBlogId },
         { banner, title, content, des, tags, draft: Boolean(draft) },
+        { new: true },
       );
 
       // 如果更新失敗，拋出錯誤
@@ -49,10 +56,28 @@ export const createBlog: RequestHandler = async (req, res, next) => {
         throw createHttpError(500, 'Failed to update blog.');
       }
 
+      // 如果更新前後的 draft 都一樣，則不增加 user 的 total_posts
+      // 反之，如果更新前是草稿，但後來決定發佈，那就要增加 user 的 total_posts
+      // 而如果更新前是發佈狀態，但後來決定改為草稿，那就要減少 user 的 total_posts
+      if (targetBlog.draft !== updatedBlog.draft) {
+        const val = targetBlog.draft && !updatedBlog.draft ? 1 : -1;
+        const incrementVal = val * (updatedBlog.activity?.total_reads ?? 0);
+
+        const updateUserTotalReads = await UserSchema.findOneAndUpdate(
+          { _id: authorId },
+          { $inc: { 'account_info.total_reads': incrementVal, 'account_info.total_posts': val } },
+        );
+
+        if (!updateUserTotalReads) {
+          throw createHttpError(500, 'Failed to update total reads number in user account info.');
+        }
+      }
+
       // 反之，回傳成功訊息
       res.status(200).json({ message: 'Blog updated successfully', blogId: updatedBlog.blog_id });
-    } else {
-      // 如果是創建狀態，則上傳 Blog 資料到資料庫
+    }
+    // 如果是創建狀態，則上傳 Blog 資料到資料庫
+    else {
       const newBlog = await BlogSchema.create({
         banner,
         title,

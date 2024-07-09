@@ -33,8 +33,8 @@ const NotificationPage = () => {
   const {
     filter,
     notificationsInfo,
-    activeRemoveWarningModal,
-    activeDeleteWarningModal,
+    activeRemoveNtfWarningModal,
+    activeDeleteNtfWarningModal,
     isDeleteReply,
     isMarked,
     setFilter,
@@ -178,10 +178,15 @@ const NotificationPage = () => {
   return (
     <div>
       {/* Warning Modal */}
-      {activeRemoveWarningModal.state && <RemoveNotificationWarningModal />}
-      {activeDeleteWarningModal.state && (
-        <DeleteNotificationCommentWarningModal />
-      )}
+      <>
+        {activeRemoveNtfWarningModal.state && (
+          <RemoveNotificationWarningModal />
+        )}
+        {activeDeleteNtfWarningModal.state && (
+          <DeleteNotificationCommentWarningModal />
+        )}
+      </>
+
       {/* Title */}
       <h1
         className="

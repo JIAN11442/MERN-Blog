@@ -1,5 +1,5 @@
 import { Toaster } from "react-hot-toast";
-import useToastLoadingStore from "../states/provider.state";
+import useProviderStore from "../states/provider.state";
 // import useEditorBlogStore from '../states/blog.state';
 
 interface ToasterProviderProps {
@@ -8,7 +8,7 @@ interface ToasterProviderProps {
 
 const ToasterProvider: React.FC<ToasterProviderProps> = ({ children }) => {
   // const { editorState } = useEditorBlogStore();
-  const { toastLoading } = useToastLoadingStore();
+  const { toastLoading } = useProviderStore();
   return (
     <>
       <Toaster

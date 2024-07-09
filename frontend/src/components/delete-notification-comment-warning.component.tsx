@@ -20,12 +20,12 @@ const DeleteNotificationCommentWarningModal = () => {
   const { authUser } = useAuthStore();
   const {
     notificationsInfo,
-    activeDeleteWarningModal,
+    activeDeleteNtfWarningModal,
     setNotificationsInfo,
-    setActiveDeleteWarningModal,
+    setActiveDeleteNtfWarningModal,
     setIsDeleteReply,
   } = useDashboardStore();
-  const { index, data } = activeDeleteWarningModal;
+  const { index, data } = activeDeleteNtfWarningModal;
   const { reply } = data as NotificationStructureType;
   const { _id, comment, children } = reply as GenerateCommentStructureType;
 
@@ -37,7 +37,7 @@ const DeleteNotificationCommentWarningModal = () => {
 
   // 取消刪除
   const handleCancel = () => {
-    setActiveDeleteWarningModal({ state: false, index: 0, data: null });
+    setActiveDeleteNtfWarningModal({ state: false, index: 0, data: null });
   };
 
   // 刪除

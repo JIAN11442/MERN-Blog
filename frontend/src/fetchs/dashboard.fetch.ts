@@ -1,7 +1,9 @@
 import axios from "axios";
+import toast from "react-hot-toast";
 
 import useAuthStore from "../states/user-auth.state";
 import useDashboardStore from "../states/dashboard.state";
+import useProviderStore from "../states/provider.state";
 
 import {
   GenerateAuthDataType,
@@ -10,7 +12,6 @@ import {
   NotificationStructureType,
 } from "../commons/types.common";
 import { FormatDataForLoadMoreOrLess } from "../commons/generate.common";
-import toast from "react-hot-toast";
 
 const useDashboardFetch = () => {
   const DASHBOARD_SERVER_ROUTE =
@@ -20,12 +21,20 @@ const useDashboardFetch = () => {
   const { notification } = (authUser as GenerateAuthDataType) ?? {};
   const { countByType, totalCount } = notification ?? {};
 
+  const { refreshBlogs, setRefreshBlogs } = useDashboardStore();
+  const { setToastLoading } = useProviderStore();
+
   const {
     notificationsInfo,
     publishedBlogs,
+    draftBlogs,
+    activeDeletePblogWarningModal,
+    activeDeleteDfblogWarningModal,
     setNotificationsInfo,
     setPublishedBlogs,
     setDraftBlogs,
+    setActiveDeletePblogWarningModal,
+    setActiveDeleteDfblogWarningModal,
   } = useDashboardStore();
 
   // 根據用戶 ID 取得通知情況
@@ -116,16 +125,21 @@ const useDashboardFetch = () => {
 
     const taostLoading = toast.loading("Removing...");
 
+    setToastLoading(true);
+
     await axios
       .post(requestUrl, { notificationId })
       .then(({ data }) => {
         if (data) {
           toast.dismiss(taostLoading);
           toast.success(data.message);
+
+          setToastLoading(false);
         }
       })
       .catch((error) => {
         toast.dismiss(taostLoading);
+        setToastLoading(false);
         console.log(error);
       });
   };
@@ -169,7 +183,7 @@ const useDashboardFetch = () => {
       .then(async ({ data }) => {
         if (data) {
           const formattedData = (await FormatDataForLoadMoreOrLess({
-            prevArr: publishedBlogs,
+            prevArr: draft ? draftBlogs : publishedBlogs,
             fetchData: data.blogs,
             page,
             countRoute: "/get-user-written-blogs-count",
@@ -190,6 +204,76 @@ const useDashboardFetch = () => {
       });
   };
 
+  // 刪除目標 blog
+  const DeleteTargetBlogById = async ({
+    blogObjId,
+    deleteBtnRef,
+    state,
+  }: FetchDashboardPropsType) => {
+    const requestUrl = DASHBOARD_SERVER_ROUTE + "/delete-target-blog-id";
+
+    // 顯示刪除中
+    const taostLoading = toast.loading("Deleting...");
+
+    setToastLoading(true);
+
+    // 禁用刪除按鈕
+    if (deleteBtnRef?.current) {
+      deleteBtnRef.current.disabled = true;
+    }
+
+    // 開始刪除
+    await axios
+      .post(requestUrl, { blogObjId })
+      .then(({ data }) => {
+        if (data) {
+          // 恢復刪除按鈕
+          if (deleteBtnRef?.current) {
+            deleteBtnRef.current.disabled = false;
+          }
+
+          // 關閉 loading 並顯示成功訊息
+          toast.dismiss(taostLoading);
+          toast.success(data.message);
+
+          // 關閉刪除警告視窗
+          if (state === "published") {
+            setActiveDeletePblogWarningModal({
+              ...activeDeletePblogWarningModal,
+              state: false,
+              index: 0,
+              data: null,
+              deleteBtnRef: null,
+            });
+          } else {
+            setActiveDeleteDfblogWarningModal({
+              ...activeDeleteDfblogWarningModal,
+              state: false,
+              index: 0,
+              data: null,
+              deleteBtnRef: null,
+            });
+          }
+
+          setPublishedBlogs(null);
+          setDraftBlogs(null);
+
+          // 強制重新加載
+          setRefreshBlogs(!refreshBlogs);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+
+        if (deleteBtnRef?.current) {
+          deleteBtnRef.current.disabled = false;
+        }
+
+        toast.dismiss(taostLoading);
+        toast.error("Failed to delete this blog.");
+      });
+  };
+
   return {
     GetNotificationsByUserId,
     GetNotificationByFilter,
@@ -197,6 +281,7 @@ const useDashboardFetch = () => {
     UpdateNotificationSeenStateByUser,
     UpdateNotificationSeenStateById,
     GetUserWrittenBlogsById,
+    DeleteTargetBlogById,
   };
 };
 

@@ -28,7 +28,7 @@ interface BlogCommentCardProps {
   commentData: GenerateCommentStructureType;
   leftVal: number;
   paddingLeftIncrementVal?: number;
-  options?: boolean;
+  for_warning?: boolean;
   optionsCollapse?: boolean;
   allowLoadMoreReplies?: boolean;
   children?: ReactNode;
@@ -40,7 +40,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
   commentData,
   leftVal,
   paddingLeftIncrementVal = 1,
-  options = true,
+  for_warning = false,
   optionsCollapse = false,
   allowLoadMoreReplies = true,
   children,
@@ -302,7 +302,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
       )}
       style={{
         paddingLeft: `${
-          options ? `${leftVal * paddingLeftIncrementVal}px` : ""
+          !for_warning ? `${leftVal * paddingLeftIncrementVal}px` : ""
         }`,
       }}
     >
@@ -398,7 +398,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
 
         {/* Reply && Delete && Comments && Edit*/}
         <>
-          {options && (
+          {!for_warning && (
             <div
               ref={commentOptionsRef}
               className="

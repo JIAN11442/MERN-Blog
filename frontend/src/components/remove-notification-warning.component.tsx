@@ -17,12 +17,12 @@ const RemoveNotificationWarningModal = () => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   const {
-    activeRemoveWarningModal,
+    activeRemoveNtfWarningModal,
     notificationsInfo,
-    setActiveRemoveWarningModal,
+    setActiveRemoveNtfWarningModal,
     setNotificationsInfo,
   } = useDashboardStore();
-  const { data, index } = activeRemoveWarningModal;
+  const { data, index } = activeRemoveNtfWarningModal;
   const { results, totalDocs: totalNums } =
     notificationsInfo as GenerateToLoadStructureType;
 
@@ -34,7 +34,7 @@ const RemoveNotificationWarningModal = () => {
 
   // 取消移除
   const handleCancel = () => {
-    setActiveRemoveWarningModal({ state: false, index: 0, data: null });
+    setActiveRemoveNtfWarningModal({ state: false, index: 0, data: null });
   };
 
   // 移除
@@ -169,7 +169,7 @@ const RemoveNotificationWarningModal = () => {
         <div>
           <NotificationCard
             index={1}
-            state="warning"
+            for_warning={true}
             data={data as NotificationStructureType}
           />
         </div>

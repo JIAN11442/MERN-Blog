@@ -102,7 +102,7 @@ const EditCommentWarningModal = () => {
           {/* Warning Content */}
           <p
             className="
-              mt-2
+              my-2
               text-xl
               text-red-custom/80
               line-clamp-2

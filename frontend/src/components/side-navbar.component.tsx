@@ -14,7 +14,7 @@ const SideNavbar = () => {
   const pageStateBtnRef = useRef<HTMLButtonElement>(null);
 
   const [sideBarVisible, setSideBarVisible] = useState(false);
-  const [pageState, setPageState] = useState(pathName.replace("-", " "));
+  const [pageState, setPageState] = useState(pathName?.replace("-", " "));
 
   const { searchBarVisibility } = useNavbarStore();
 

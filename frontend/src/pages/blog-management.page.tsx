@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import InpageNavigation, {
   activeTabLineRef,
@@ -7,6 +7,10 @@ import Loader from "../components/loader.component";
 import NoDataMessage from "../components/blog-nodata.component";
 import AnimationWrapper from "../components/page-animation.component";
 import ManagePublishedBlogCard from "../components/manage-published-blog-card.component";
+import LoadOptions from "../components/load-options.components";
+import ManageDraftBlogCard from "../components/manage-draft-blogs-card.component";
+import DeleteBlogWarningModal from "../components/delete-blog-warning.component";
+
 import { FlatIcons } from "../icons/flaticons";
 
 import useDashboardStore from "../states/dashboard.state";
@@ -17,17 +21,22 @@ import {
   BlogStructureType,
   GenerateToLoadStructureType,
 } from "../commons/types.common";
-import LoadOptions from "../components/load-options.components";
-import ManageDraftBlogCard from "../components/manage-draft-blogs-card.component";
 
 const BlogManagementPage = () => {
   const inpageNavOptions = ["Published Blogs", "Drafts"];
 
-  const [query, setQuery] = useState("");
-
   const { inPageNavIndex, setInPageNavIndex } = useHomeBlogStore();
-  const { publishedBlogs, draftBlogs, setPublishedBlogs, setDraftBlogs } =
-    useDashboardStore();
+  const {
+    query,
+    publishedBlogs,
+    draftBlogs,
+    activeDeletePblogWarningModal,
+    activeDeleteDfblogWarningModal,
+    refreshBlogs,
+    setQuery,
+    setPublishedBlogs,
+    setDraftBlogs,
+  } = useDashboardStore();
 
   const { GetUserWrittenBlogsById } = useDashboardFetch();
 
@@ -49,7 +58,7 @@ const BlogManagementPage = () => {
   const handleInputOnBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
-    if (value.length === 0) {
+    if (query.length > 0 && value.length === 0) {
       setPublishedBlogs(null);
       setDraftBlogs(null);
 
@@ -84,9 +93,8 @@ const BlogManagementPage = () => {
     return () => {
       setPublishedBlogs(null);
       setDraftBlogs(null);
-      setQuery("");
     };
-  }, [query]);
+  }, [query, refreshBlogs]);
 
   // 當 inpageNavIndex 改變時，
   // 檢查 activeTabLineRef 是否在正確的位置
@@ -116,6 +124,16 @@ const BlogManagementPage = () => {
 
   return (
     <div>
+      {/* Warning */}
+      <>
+        {activeDeletePblogWarningModal.state && (
+          <DeleteBlogWarningModal state="published" />
+        )}
+        {activeDeleteDfblogWarningModal.state && (
+          <DeleteBlogWarningModal state="draft" />
+        )}
+      </>
+
       {/* Title */}
       <h1
         className="

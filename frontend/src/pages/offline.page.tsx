@@ -1,8 +1,12 @@
+import useBase64Image from "../imgs/Base64/base64.img";
+
 const OfflinePage = () => {
-  const network =
-    "https://mern-blogging-yt.s3.ap-southeast-1.amazonaws.com/yhB6TXVcK_UTaFn6Dsv8_-1720441417899.jpeg";
-  const img =
-    "https://mern-blogging-yt.s3.ap-southeast-1.amazonaws.com/DiS2iXQGdhW7ugXJn_3vL-1720440644045.jpeg";
+  // const network =
+  //   "https://mern-blogging-yt.s3.ap-southeast-1.amazonaws.com/yhB6TXVcK_UTaFn6Dsv8_-1720441417899.jpeg";
+  // const img =
+  //   "https://mern-blogging-yt.s3.ap-southeast-1.amazonaws.com/DiS2iXQGdhW7ugXJn_3vL-1720440644045.jpeg";
+
+  const { networkImg, offlineImg } = useBase64Image();
 
   const handleReload = () => {
     window.location.reload();
@@ -30,14 +34,19 @@ const OfflinePage = () => {
       >
         {/* Image */}
         <img
-          src={network}
+          rel="preload"
+          src={networkImg}
           className="
-            max-w-[15%]
+            max-w-[10%]
             ml-9
             -mb-12
           "
         />
-        <img src={img} className="select-none min-w-[400px] max-w-[70%]" />
+        <img
+          src={offlineImg}
+          rel="preload"
+          className="select-none min-w-[400px] max-w-[70%]"
+        />
 
         {/* Text */}
         <div

@@ -21,15 +21,14 @@ import { FlatIcons } from "../icons/flaticons";
 
 interface NotificationCardProps {
   index: number;
-  state?: string;
   data: NotificationStructureType;
-  currFilterBtn?: React.RefObject<HTMLButtonElement>;
+  for_warning?: boolean;
 }
 
 const NotificationCard: React.FC<NotificationCardProps> = ({
   index,
-  state = "notification",
   data,
+  for_warning,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -76,7 +75,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     },
   };
 
-  const { setActiveRemoveWarningModal, setActiveDeleteWarningModal } =
+  const { setActiveRemoveNtfWarningModal, setActiveDeleteNtfWarningModal } =
     useDashboardStore();
 
   const { AddCommentToBlog } = useCommentFetch();
@@ -126,12 +125,12 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
   // 開啟移除警告視窗
   const handleActiveRemoveWarningModal = () => {
-    setActiveRemoveWarningModal({ state: true, index, data });
+    setActiveRemoveNtfWarningModal({ state: true, index, data });
   };
 
   // 開啟刪除警告視窗
   const handleActiveDeleteWarningModal = () => {
-    setActiveDeleteWarningModal({
+    setActiveDeleteNtfWarningModal({
       state: true,
       index,
       data,
@@ -151,7 +150,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         relative
         p-6
         ${
-          state === "warning"
+          for_warning
             ? `
                 border
                 rounded-md
@@ -169,11 +168,12 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     >
       {/* Content */}
       <div
-        className="
+        className={`
           flex
           gap-5
           max-w-[700px]
-        "
+          ${type === "like" && for_warning ? "items-center" : ""}
+        `}
       >
         {/* Avatar */}
         <img
@@ -370,7 +370,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
           {/* Date && Options Button */}
           <>
-            {state !== "warning" && (
+            {!for_warning && (
               <div
                 className={`
                   flex
@@ -542,9 +542,10 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
       {/* Unread reminder */}
       <>
-        {!seen ? (
-          <div
-            className="
+        {!for_warning ? (
+          !seen ? (
+            <div
+              className="
               absolute
               top-1/2
               right-0
@@ -556,32 +557,35 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
             shadow-grey-dark/20
             "
-          ></div>
-        ) : (
-          <div
-            className="
+            ></div>
+          ) : (
+            <div
+              className="
               absolute
               bottom-6
               right-0
               flex
               gap-1
             "
-          >
-            <FlatIcons
-              name="fi fi-sr-check-double"
-              className="text-green-500"
-              size="text-sm"
-            />
+            >
+              <FlatIcons
+                name="fi fi-sr-check-double"
+                className="text-green-500"
+                size="text-sm"
+              />
 
-            <img
-              src={authUser?.profile_img}
-              className="
+              <img
+                src={authUser?.profile_img}
+                className="
                 w-5
                 h-5
                 rounded-full
               "
-            />
-          </div>
+              />
+            </div>
+          )
+        ) : (
+          ""
         )}
       </>
     </div>

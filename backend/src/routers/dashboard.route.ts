@@ -10,6 +10,7 @@ import {
   updateNotificationSeenStateById,
   getUserWrittenBlogs,
   getCountOfUserWrittenBlogs,
+  deleteBlogById,
 } from '../controllers/dashboard.controller';
 
 const dashboardRoute = express.Router();
@@ -24,5 +25,7 @@ dashboardRoute.post('/update-notifications-seen-id', jwtVerify, updateNotificati
 
 dashboardRoute.post('/get-user-written-blogs-info', jwtVerify, getUserWrittenBlogs);
 dashboardRoute.post('/get-user-written-blogs-count', jwtVerify, getCountOfUserWrittenBlogs);
+
+dashboardRoute.post('/delete-target-blog-id', jwtVerify, deleteBlogById);
 
 export default dashboardRoute;

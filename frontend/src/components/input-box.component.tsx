@@ -2,6 +2,8 @@ import { forwardRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 import { FlatIcons } from "../icons/flaticons";
+import useAuthorProfileStore from "../states/author-profile.state";
+import { AuthorProfileStructureType } from "../commons/types.common";
 
 interface InputBoxProps {
   id: string;
@@ -36,6 +38,11 @@ const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
   ) => {
     const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
     const [passwordValue, setPasswordValue] = useState<string>("");
+
+    const { authorProfileInfo } = useAuthorProfileStore();
+    const { social_links } =
+      (authorProfileInfo as AuthorProfileStructureType) ?? {};
+    const links = Object.keys(social_links);
 
     return (
       <div
@@ -75,6 +82,7 @@ const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
             name={icon}
             className={`
               input-icon
+              ${links.includes(name) ? "text-grey-dark/50" : ""}
               ${disabled && "opacity-50"}
               ${
                 content?.length &&
