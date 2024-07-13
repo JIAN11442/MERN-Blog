@@ -3,16 +3,28 @@ import { Link, useNavigate } from "react-router-dom";
 
 import Loader from "../components/loader.component";
 
-import pageNotFoundImage from "../imgs/404-2.png";
-import fullLogo from "../imgs/full-logo.png";
+import pageNotFoundImageForLightTheme from "../imgs/404-2-light.png";
+import pageNotFoundImageForDarkTheme from "../imgs/404-2-dark.png";
+import fullLogoForLightTheme from "../imgs/full-logo-light.png";
+import fullLogoForDarkTheme from "../imgs/full-logo-dark.png";
 
 import useNavbarStore from "../states/navbar.state";
+import useProviderStore from "../states/provider.state";
 
 const PageNotFound = () => {
   const navigate = useNavigate();
 
-  const { searchBarVisibility } = useNavbarStore();
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  const { searchBarVisibility } = useNavbarStore();
+  const { theme } = useProviderStore();
+
+  const pageNotFoundImage =
+    theme === "light"
+      ? pageNotFoundImageForLightTheme
+      : pageNotFoundImageForDarkTheme;
+  const fullLogo =
+    theme === "light" ? fullLogoForLightTheme : fullLogoForDarkTheme;
 
   const handleGoBack = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     e.preventDefault();

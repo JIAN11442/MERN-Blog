@@ -3,6 +3,8 @@ import { twMerge } from "tailwind-merge";
 
 import { FlatIcons } from "../icons/flaticons";
 
+import useProviderStore from "../states/provider.state";
+
 import { getFullDay } from "../commons/date.common";
 import type { AuthorProfileStructureType } from "../commons/types.common";
 
@@ -19,6 +21,8 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
   createdAt,
   className,
 }) => {
+  const { theme } = useProviderStore();
+
   return (
     <div className={twMerge(`md:w-[90%]`, className)}>
       {/* Bio */}
@@ -32,9 +36,19 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
               : `
                   p-5
                   border-l-4
-                  border-orange-200
-                  bg-orange-100/30
-                  text-orange-900
+                  ${
+                    theme === "light"
+                      ? `
+                        text-orange-900
+                        border-orange-200
+                        bg-orange-100/30
+                        `
+                      : `
+                        text-orange-100
+                        border-orange-300/80
+                        bg-orange-100/60
+                        `
+                  }
                   whitespace-pre-wrap
                   rounded-md
                 `
@@ -88,7 +102,9 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
                         : key === "twitter"
                         ? "hover:text-twitter"
                         : key === "github"
-                        ? "hover:text-github"
+                        ? theme === "light"
+                          ? "hover:text-github"
+                          : "hover:text-black"
                         : "hover:text-website"
                     }
                     transition

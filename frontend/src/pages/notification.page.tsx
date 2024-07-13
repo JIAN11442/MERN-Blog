@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FlatIcons } from "../icons/flaticons";
 
-import useAuthStore from "../states/user-auth.state";
-import useDashboardStore from "../states/dashboard.state";
-
 import NoDataMessage from "../components/blog-nodata.component";
 import Loader from "../components/loader.component";
 import AnimationWrapper from "../components/page-animation.component";
@@ -11,11 +8,14 @@ import NotificationCard from "../components/notification-card.component";
 import LoadOptions from "../components/load-options.components";
 import RemoveNotificationWarningModal from "../components/remove-notification-warning.component";
 import DeleteNotificationCommentWarningModal from "../components/delete-notification-comment-warning.component";
+import NotificationOptionsPanel from "../components/notification-options-panel.component";
+
+import useProviderStore from "../states/provider.state";
+import useAuthStore from "../states/user-auth.state";
+import useDashboardStore from "../states/dashboard.state";
 
 import useDashboardFetch from "../fetchs/dashboard.fetch";
-
 import { NotificationStructureType } from "../commons/types.common";
-import NotificationOptionsPanel from "../components/notification-options-panel.component";
 
 const NotificationPage = () => {
   const filters = ["all", "like", "comment", "reply"];
@@ -42,6 +42,8 @@ const NotificationPage = () => {
     setIsDeleteReply,
     setIsMarked,
   } = useDashboardStore();
+
+  const { theme } = useProviderStore();
 
   const { GetNotificationByFilter, GetNotificationsByUserId } =
     useDashboardFetch();
@@ -246,7 +248,7 @@ const NotificationPage = () => {
                   {/* Notification number of type */}
                   {targetTypeInfo?.count ? (
                     <span
-                      className="
+                      className={`
                         absolute
                         -top-2
                         -right-1
@@ -258,8 +260,12 @@ const NotificationPage = () => {
                         items-center
                         justify-center
                         text-[11px]
-                        text-white-custom
-                      "
+                        ${
+                          theme === "light"
+                            ? "text-white-custom"
+                            : "text-black-custom"
+                        }
+                      `}
                     >
                       {targetTypeInfo.count}
                     </span>

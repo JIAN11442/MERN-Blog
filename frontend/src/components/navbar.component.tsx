@@ -1,16 +1,17 @@
 import { useEffect, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import { FlatIcons } from "../icons/flaticons";
-
-import logo from "../imgs/logo.png";
-
 import AnimationWrapper from "./page-animation.component";
 import UserNavigationPanel from "./user-navigation-panel.component";
+
+import logoForDarkTheme from "../imgs/logo-light.png";
+import logoForLightTheme from "../imgs/logo-dark.png";
+import { FlatIcons } from "../icons/flaticons";
 
 import useAuthStore from "../states/user-auth.state";
 import useNavbarStore from "../states/navbar.state";
 import useEditorBlogStore from "../states/blog-editor.state";
+import useProviderStore from "../states/provider.state";
 
 import useDashBoardFetch from "../fetchs/dashboard.fetch";
 
@@ -25,13 +26,17 @@ const Navbar = () => {
 
   const {
     panelCollapsed,
-    setPanelCollapsed,
     searchBarVisibility,
+    setPanelCollapsed,
     setSearchBarVisibility,
   } = useNavbarStore();
+
   const { initialEditBlog } = useEditorBlogStore();
+  const { setTheme, theme } = useProviderStore();
 
   const { GetNotificationsByUserId } = useDashBoardFetch();
+
+  const logo = theme === "light" ? logoForLightTheme : logoForDarkTheme;
 
   // 控制 SearchBar 的顯示與隱藏
   const handleSearchBar = () => {
@@ -71,6 +76,17 @@ const Navbar = () => {
     e.preventDefault();
     // 再重新載入頁面，以便重新取得資料，數據也能得到重置
     window.location.href = "/";
+  };
+
+  // 切換主題
+  const handleChangeTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+
+    document.body.setAttribute("class", newTheme);
+
+    sessionStorage.setItem("theme", newTheme);
+
+    setTheme(newTheme);
   };
 
   // 搜尋欄顯示時，自動 focus
@@ -129,7 +145,13 @@ const Navbar = () => {
           className="flex-none w-10"
           onClick={(e) => handleBacktoHome(e)}
         >
-          <img src={logo} alt="Blogging" />
+          <img
+            src={logo}
+            alt="Blogging"
+            className={`
+              ${theme === "dark" && "opacity-80"}
+            `}
+          />
         </Link>
 
         {/* Search Bar */}
@@ -268,7 +290,7 @@ const Navbar = () => {
                   />
                   {notification?.totalCount ? (
                     <span
-                      className="
+                      className={`
                         absolute
                         -top-2
                         -right-1
@@ -280,9 +302,13 @@ const Navbar = () => {
                         items-center
                         justify-center
                         text-[11px]
-                        text-white-custom
+                        ${
+                          theme === "light"
+                            ? "text-white-custom"
+                            : "text-black-custom"
+                        }
                         z-10
-                      "
+                      `}
                     >
                       {notification.totalCount}
                     </span>
@@ -291,6 +317,28 @@ const Navbar = () => {
                   )}
                 </button>
               </Link>
+
+              {/* Theme */}
+              <button
+                onClick={handleChangeTheme}
+                className="
+                  bg-grey-custom
+                  w-12
+                  h-12
+                  rounded-full
+                  items-center
+                  justify-center
+                  hover:opacity-80
+                  transition
+                "
+              >
+                <FlatIcons
+                  name={`fi fi-rr-${
+                    theme === "dark" ? "eclipse" : "moon-stars"
+                  }`}
+                  className="scale-[1.25] pt-0.5 block"
+                />
+              </button>
 
               {/* Avatar && NavigationPanel */}
               <div className="relative">
@@ -317,6 +365,28 @@ const Navbar = () => {
             </>
           ) : (
             <>
+              {/* Theme */}
+              <button
+                onClick={handleChangeTheme}
+                className="
+                  bg-grey-custom
+                  w-12
+                  h-12
+                  rounded-full
+                  items-center
+                  justify-center
+                  hover:opacity-80
+                  transition
+                "
+              >
+                <FlatIcons
+                  name={`fi fi-rr-${
+                    theme === "dark" ? "eclipse" : "moon-stars"
+                  }`}
+                  className="scale-[1.25] pt-0.5 block"
+                />
+              </button>
+
               {/* Login Button */}
               <Link
                 to={"/signin"}

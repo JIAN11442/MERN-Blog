@@ -6,6 +6,7 @@ import AnimationWrapper from "./page-animation.component";
 
 import useAuthStore from "../states/user-auth.state";
 import useDashboardStore from "../states/dashboard.state";
+import useProviderStore from "../states/provider.state";
 
 import useCommentFetch from "../fetchs/comment.fetch";
 
@@ -77,6 +78,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
   const { setActiveRemoveNtfWarningModal, setActiveDeleteNtfWarningModal } =
     useDashboardStore();
+
+  const { theme } = useProviderStore();
 
   const { AddCommentToBlog } = useCommentFetch();
 
@@ -154,8 +157,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             ? `
                 border
                 rounded-md
-                shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
-               shadow-grey-dark/5
+                shadow-[0px_0px_5px_1px]
+                shadow-grey-dark/5
               `
             : `
                 border-b
@@ -299,16 +302,15 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               {type === "reply" && (
                 // Reply Content
                 <div
-                  className="
-
+                  className={`
                     mt-5
                     p-4
                     border
-                    border-grey-custom
                     rounded-md
-                    shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
-                  shadow-grey-dark/5
-                  "
+                    border-grey-custom
+                    shadow-[0px_0px_5px_1px]
+                    shadow-grey-dark/5
+                  `}
                 >
                   <div
                     className="
@@ -323,8 +325,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                         w-9
                         h-9
                         rounded-full
-                        shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
-                      shadow-grey-dark/10
+                        shadow-[0px_0px_5px_1px]
+                        shadow-grey-dark/10
                       "
                     />
 
@@ -468,7 +470,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                       h-9
                       rounded-full
                       shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
-                    shadow-grey-dark/5
+                      shadow-grey-dark/5
                     "
                   />
 
@@ -545,18 +547,28 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         {!for_warning ? (
           !seen ? (
             <div
-              className="
-              absolute
-              top-1/2
-              right-0
-              w-3
-              h-3
-              bg-blue-500
-              rounded-full
-              border-2
-              shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
-            shadow-grey-dark/20
-            "
+              className={`
+                absolute
+                top-1/2
+                right-0
+                w-3
+                h-3
+                bg-blue-500
+                rounded-full
+                border-2
+                shadow-[0px_0px_5px_1px]
+                ${
+                  theme === "light"
+                    ? `
+                        shadow-grey-dark/5
+                      `
+                    : `
+                        border-white-custom
+                       shadow-blue-500
+                        animate-blink
+                      `
+                }
+              `}
             ></div>
           ) : (
             <div

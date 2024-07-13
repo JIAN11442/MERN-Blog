@@ -22,8 +22,9 @@ import useProviderStore from "./states/provider.state";
 import useAuthFetch from "./fetchs/auth.fetch";
 
 function App() {
-  const { GetAuthUserWithToken } = useAuthFetch();
   const { isOnline } = useProviderStore();
+
+  const { GetAuthUserWithToken } = useAuthFetch();
 
   useEffect(() => {
     // 每一次刷新都會重新檢查使用者的登入狀態

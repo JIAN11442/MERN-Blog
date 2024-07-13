@@ -180,6 +180,7 @@ const DeleteBlogWarningModal: React.FC<DeleteBlogWarningModalProps> = ({
             onClick={handleCancel}
             className="
               btn-dark
+              text-white
               px-10
               bg-grey-dark/30
               rounded-md
@@ -192,6 +193,7 @@ const DeleteBlogWarningModal: React.FC<DeleteBlogWarningModalProps> = ({
             onClick={handleDelete}
             className="
               btn-dark
+              text-white
               px-10
               bg-red-500/80
               rounded-md

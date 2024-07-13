@@ -528,7 +528,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
                         disabled={deleteBtnDisabled}
                         onClick={handleDeleteWarning}
                         className="
-                          p-2
+                          py-3
                           px-3
                           rounded-md
                           border
@@ -538,7 +538,7 @@ const BlogCommentCard: React.FC<BlogCommentCardProps> = ({
                           hover:text-red-custom
                         "
                       >
-                        <FlatIcons name="fi fi-rr-trash" />
+                        <FlatIcons name="fi fi-rr-trash" className="flex" />
                       </button>
                     ) : (
                       ""

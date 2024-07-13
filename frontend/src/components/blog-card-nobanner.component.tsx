@@ -37,14 +37,12 @@ const MinimalBlogPostCard: React.FC<MinimalBlogPostCardProps> = ({
         <div className="flex items-center gap-3 mb-7">
           {/* author image */}
           <img src={profile_img} className="w-8 h-8 rounded-full" />
+
           {/* author fullname && username*/}
           <p className="flex gap-x-1 text-nowrap">
             <span>{fullname}</span>
-            {/* <span>·</span> */}
-            {/* <span className="hidden xl:flex gap-x-1 text-blue-500">
-              <span>@{username}</span>
-            </span> */}
           </p>
+
           {/* blog post date */}
           <p className="min-w-fit text-grey-dark/60 ">
             {getTimeAgo(publishedAt!)}

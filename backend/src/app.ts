@@ -35,18 +35,18 @@ app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
 
 // Session Configuration
-app.use(
-  session({
-    secret: env.SECRET_SESSION_KEY,
-    name: 'jian.uid',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 1000 * 60 * 10, // 1 minute
-    },
-    store: new MongoStore({ mongoUrl: env.MONGODB_CONNECTION_STRING }),
-  }),
-);
+// app.use(
+//   session({
+//     secret: env.SECRET_SESSION_KEY,
+//     name: 'jian.uid',
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       maxAge: 1000 * 60 * 10, // 1 minute
+//     },
+//     store: new MongoStore({ mongoUrl: env.MONGODB_CONNECTION_STRING }),
+//   }),
+// );
 
 app.use('/api/aws', awsRoute);
 app.use('/api/auth', authRoute);

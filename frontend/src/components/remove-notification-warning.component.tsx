@@ -188,6 +188,7 @@ const RemoveNotificationWarningModal = () => {
             onClick={handleCancel}
             className="
               btn-dark
+              text-white
               px-10
               bg-grey-dark/30
               rounded-md
@@ -200,6 +201,7 @@ const RemoveNotificationWarningModal = () => {
             onClick={(e) => handleRemoveNotification(e)}
             className="
               btn-dark
+              text-white
               px-10
               bg-red-500/80
               rounded-md

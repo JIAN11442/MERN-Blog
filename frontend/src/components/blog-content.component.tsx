@@ -1,6 +1,10 @@
 import hljs from "highlight.js";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import * as codeBlockThemes from "react-syntax-highlighter/dist/cjs/styles/prism";
+
 import type { OutputBlockData } from "@editorjs/editorjs";
+
+import useProviderStore from "../states/provider.state";
 
 interface BlogContentProps {
   block: OutputBlockData;
@@ -8,6 +12,8 @@ interface BlogContentProps {
 
 const BlogContent: React.FC<BlogContentProps> = ({ block }) => {
   const { type, data } = block;
+
+  const { theme } = useProviderStore();
 
   // Paragraph
   if (type === "paragraph") {
@@ -39,6 +45,7 @@ const BlogContent: React.FC<BlogContentProps> = ({ block }) => {
 
     return (
       <SyntaxHighlighter
+        style={codeBlockThemes.oneDark}
         language={detectedLanguage}
         showLineNumbers={true}
         codeTagProps={{ style: { fontFamily: "Comic Sans" } }}
@@ -86,21 +93,23 @@ const BlogContent: React.FC<BlogContentProps> = ({ block }) => {
         className="
           p-5
           pl-5
-          bg-[#fbf3db]
+          bg-[#fbf3db80]
           border-l-4
           border-[#fbcf4a]
           rounded-r-md
         "
       >
         <p
-          className="
+          className={`
             font-mono
             max-md:text-[15px]
             max-md:leading-6 
             md:text-[16px]
             md:leading-8
             lg:text-[17px]
-          "
+            font-medium
+            ${theme === "dark" ? "text-orange-100" : "text-orange-400"}
+          `}
         >
           {quote}
         </p>

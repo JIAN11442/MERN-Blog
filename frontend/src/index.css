@@ -19,7 +19,7 @@
   }
 
   body {
-    @apply font-inter font-normal text-black-custom;
+    @apply font-inter font-normal text-black-custom bg-white-custom;
   }
 
   i {
@@ -67,7 +67,7 @@
   .btn-dark {
     @apply whitespace-nowrap
       bg-black-custom
-      text-white-custom 
+      text-white-custom
       rounded-full
       py-3 
       px-6
@@ -94,6 +94,10 @@
       focus:bg-transparent
       placeholder:text-grey-dark/40
       focus:placeholder:text-transparent;
+  }
+
+  body[class="dark"] .input-box {
+    @apply outline-none focus:outline-purple-500/20;
   }
 
   input:disabled,
@@ -195,9 +199,14 @@
     @apply font-inter max-md:text-[15px] max-md:leading-8 md:text-[16px] md:leading-9 lg:text-[17px];
   }
 
-  #textEditor a,
+  body[class="light"] #textEditor a,
   .blog-page-content a {
     @apply text-purple-custom underline hover:opacity-50;
+  }
+
+  body[class="dark"] #textEditor a,
+  .blog-page-content a {
+    @apply text-orange-400 underline hover:opacity-50;
   }
 
   .tag {
@@ -209,7 +218,7 @@
   }
 
   .blog-index {
-    @apply text-5xl font-bold text-gray-200 leading-none;
+    @apply text-5xl font-bold text-grey-index leading-none;
   }
 }
 
@@ -233,10 +242,10 @@
     resize-none
     font-mono
     text-lg
-    text-gray-600
+    text-grey-dark
     leading-6
     max-h-[500px]
-    bg-gray-50
+    bg-grey-custom/80
     !important;
 }
 
@@ -305,4 +314,118 @@
 /* 調整 codeblock 選單 */
 .codeBoxSelectInput {
   @apply rounded-md bg-opacity-0 text-end p-2 text-grey-dark/30 absolute;
+}
+
+/* 調整 mark */
+.cdx-marker {
+  @apply text-black-custom;
+}
+
+/* editorjs 的加號及選單快捷鍵 */
+.ce-toolbar__plus,
+.ce-toolbar__settings-btn {
+  @apply m-2;
+}
+
+body[class="dark"] .ce-toolbar__plus,
+body[class="dark"] .ce-toolbar__settings-btn {
+  @apply hover:bg-grey-custom;
+}
+
+/* 選項視窗 */
+.ce-popover {
+  @apply flex
+  p-3
+  w-[250px]
+  border-0
+  bg-white-custom/90
+  shadow-[0px_0px_3px_0.5px]
+  shadow-grey-dark/30;
+}
+
+/* 選項視窗的搜索框 */
+.cdx-search-field {
+  @apply flex mb-3 bg-grey-custom text-[14px] border-none !important;
+}
+
+/* 選項視窗中搜索框的 Icon */
+.cdx-search-field__icon {
+  @apply flex mt-1;
+}
+
+/* 選項列表框 */
+.ce-popover__items {
+  @apply flex flex-col pr-2;
+}
+
+/* 選項卡 */
+body[class="dark"] .ce-popover-item {
+  @apply flex py-0 pl-2 hover:bg-gray-600/20 transition;
+}
+
+/* 選項列表中的選項 Icon */
+.ce-popover-item__icon {
+  @apply flex
+  w-8
+  h-8
+  bg-grey-custom 
+  text-black-custom 
+  shadow-[0px_0px_5px_1px]
+  shadow-grey-custom
+  rounded-full;
+}
+
+/* 選項列表中的選項文字 */
+.ce-popover-item__title {
+  @apply flex text-black-custom text-[14px] !important;
+}
+
+/* 自定义滚动条的宽度 */
+.ce-popover__items::-webkit-scrollbar {
+  @apply w-1;
+}
+
+/* 自定义滚动条轨道的样式 */
+.ce-popover__items::-webkit-scrollbar-track {
+  @apply bg-grey-custom rounded-full;
+}
+
+/* 自定义滚动条滑块的样式 */
+.ce-popover__items::-webkit-scrollbar-thumb {
+  @apply bg-grey-dark/30 rounded-full;
+}
+
+/* 当鼠标悬停在滚动条滑块上时，改变滑块的样式 */
+.ce-popover__items::-webkit-scrollbar-thumb:hover {
+  @apply bg-grey-dark/60;
+}
+
+.cdx-block {
+  @apply bg-white-custom;
+}
+
+/* 呼叫的編輯按鈕，比如 import image */
+body[class="dark"] .cdx-button {
+  @apply bg-grey-custom hover:bg-grey-custom/50 border-none;
+}
+
+body[class="dark"] .image-tool__image {
+  @apply bg-grey-custom border-none;
+}
+
+/* -------- codeblock 的 scrollbar styles */
+pre::-webkit-scrollbar {
+  @apply w-1 h-1;
+}
+
+pre::-webkit-scrollbar-track {
+  @apply bg-grey-custom rounded-full;
+}
+
+pre::-webkit-scrollbar-thumb {
+  @apply bg-grey-dark/30 rounded-full;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+  @apply bg-grey-dark/60;
 }

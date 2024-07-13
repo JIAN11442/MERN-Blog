@@ -160,7 +160,7 @@ const ProfilePage = () => {
               </div>
             )}
 
-            <hr className="my-2 text-grey-custom" />
+            <hr className="my-2 border-grey-custom" />
 
             {/* Profile info */}
             <AuthProfileInfo

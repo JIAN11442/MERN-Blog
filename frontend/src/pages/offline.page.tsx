@@ -1,12 +1,12 @@
 import useBase64Image from "../imgs/Base64/base64.img";
+import useProviderStore from "../states/provider.state";
 
 const OfflinePage = () => {
-  // const network =
-  //   "https://mern-blogging-yt.s3.ap-southeast-1.amazonaws.com/yhB6TXVcK_UTaFn6Dsv8_-1720441417899.jpeg";
-  // const img =
-  //   "https://mern-blogging-yt.s3.ap-southeast-1.amazonaws.com/DiS2iXQGdhW7ugXJn_3vL-1720440644045.jpeg";
+  const { theme } = useProviderStore();
 
-  const { networkImg, offlineImg } = useBase64Image();
+  const { offlineImgForDarkTheme, offlineImgForLightTheme } = useBase64Image();
+  const offlineImg =
+    theme === "dark" ? offlineImgForDarkTheme : offlineImgForLightTheme;
 
   const handleReload = () => {
     window.location.reload();
@@ -18,65 +18,51 @@ const OfflinePage = () => {
         fixed
         inset-0
         flex
+        flex-col
         items-center
         justify-center
       "
     >
+      <img
+        src={offlineImg}
+        className="
+          -mt-20
+          select-none
+          max-w-[450px]
+          max-h-[450px]
+        "
+      />
+
+      {/* Text */}
       <div
         className="
           flex
           flex-col
-          gap-10
-          items-center
-          justify-center
-          text-center
+          gap-5
+          -mt-20
+          mb-5
         "
       >
-        {/* Image */}
-        <img
-          rel="preload"
-          src={networkImg}
+        <h1
           className="
-            max-w-[10%]
-            ml-9
-            -mb-12
-          "
-        />
-        <img
-          src={offlineImg}
-          rel="preload"
-          className="select-none min-w-[400px] max-w-[70%]"
-        />
-
-        {/* Text */}
-        <div
-          className="
-            flex
-            flex-col
-            gap-5
+            text-[2rem]
+            font-semibold
           "
         >
-          <h1
-            className="
-              text-[2rem]
-              font-semibold
-            "
-          >
-            Connect to the internet
-          </h1>
-          <p>You're offline. Please check your connection</p>
-        </div>
-
-        {/* Button */}
-        <button
-          onClick={handleReload}
-          className="
-            btn-dark
-          "
-        >
-          Retry
-        </button>
+          Connect to the internet
+        </h1>
+        <p>You're offline. Please check your connection</p>
       </div>
+
+      {/* Button */}
+      <button
+        onClick={handleReload}
+        className="
+          btn-dark
+        "
+      >
+        Retry
+      </button>
     </div>
   );
 };

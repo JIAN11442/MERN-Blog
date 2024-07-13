@@ -132,7 +132,7 @@ const SideNavbar = () => {
                md:hidden
                flex
                flex-nowrap
-               bg-white
+               bg-white-custom
                py-1
                border-b
                border-grey-custom
@@ -189,7 +189,7 @@ const SideNavbar = () => {
                 flex-col
                 gap-20
                 p-6
-                bg-white
+                bg-white-custom
                 overflow-y-auto
                 md:sticky
                 md:pr-0

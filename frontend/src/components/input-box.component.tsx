@@ -2,7 +2,10 @@ import { forwardRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 import { FlatIcons } from "../icons/flaticons";
+
 import useAuthorProfileStore from "../states/author-profile.state";
+import useProviderStore from "../states/provider.state";
+
 import { AuthorProfileStructureType } from "../commons/types.common";
 
 interface InputBoxProps {
@@ -43,6 +46,8 @@ const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
     const { social_links } =
       (authorProfileInfo as AuthorProfileStructureType) ?? {};
     const links = Object.keys(social_links);
+
+    const { theme } = useProviderStore();
 
     return (
       <div
@@ -95,7 +100,9 @@ const InputBox = forwardRef<HTMLInputElement, InputBoxProps>(
                   : name === "twitter"
                   ? "text-twitter"
                   : name === "github"
-                  ? "text-github"
+                  ? theme === "light"
+                    ? "text-github"
+                    : "text-black-custom"
                   : name === "website"
                   ? "text-website"
                   : "text-grey-dark")

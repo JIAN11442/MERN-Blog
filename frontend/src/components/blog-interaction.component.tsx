@@ -122,14 +122,17 @@ const BlogInteraction = () => {
                         text-red-custom
                       `
                     : `
-                      bg-grey-custom/80
-                      hover:shadow-grey-dark/20
-                      hover:-rotate-90
+                        bg-grey-custom/80
+                        hover:shadow-grey-dark/20
+                        hover:-rotate-90
                       `
                 }
               `}
             >
-              <FlatIcons name={`fi fi-${isLikedByUser ? "sr" : "rr"}-heart`} />
+              <FlatIcons
+                name={`fi fi-${isLikedByUser ? "sr" : "rr"}-heart`}
+                className="flex"
+              />
             </button>
             <p>{total_likes}</p>
           </div>

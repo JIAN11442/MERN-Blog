@@ -30,7 +30,6 @@ export const formatDatatoSend = (user: UserRequestType) => {
     });
 
     return {
-      userId: user._id,
       access_token,
       profile_img: user.personal_info?.profile_img,
       username: user.personal_info?.username,

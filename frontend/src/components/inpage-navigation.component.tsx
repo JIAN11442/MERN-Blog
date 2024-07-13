@@ -88,7 +88,7 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
           mb-8
           border-b
           border-grey-custom
-          bg-white
+          bg-white-custom
           overflow-x-auto
           `,
           className

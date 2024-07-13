@@ -5,11 +5,13 @@ import { Link, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import EditorJS from "@editorjs/editorjs";
 
-import logo from "../imgs/logo.png";
-import defaultBanner from "../imgs/banner-2.png";
-
 import AnimationWrapper from "./page-animation.component";
 import tools from "./tools.component";
+
+import logoForDarkTheme from "../imgs/logo-light.png";
+import logoForLightTheme from "../imgs/logo-dark.png";
+import defaultBannerForLightTheme from "../imgs/banner-2-light.png";
+import defaultBannerForDarkTheme from "../imgs/banner-2-dark.png";
 
 import useAwsFetch from "../fetchs/aws.fetch";
 import useBlogFetch from "../fetchs/blog.fetch";
@@ -32,8 +34,14 @@ const BlogEditor = () => {
   } = useEditorBlogStore();
   const { setToastLoading } = useProviderStore();
 
+  const { theme } = useProviderStore();
+
   const { UploadImageToAWS } = useAwsFetch();
   const { UploadSaveDraftBlog } = useBlogFetch();
+
+  const logo = theme === "dark" ? logoForDarkTheme : logoForLightTheme;
+  const defaultBanner =
+    theme === "dark" ? defaultBannerForDarkTheme : defaultBannerForLightTheme;
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -216,7 +224,11 @@ const BlogEditor = () => {
       <nav className="navbar">
         {/* Logo */}
         <Link to="/" className=" flex-none w-10">
-          <img src={logo} alt="Blogging" />
+          <img
+            src={logo}
+            alt="Blogging"
+            className={`${theme === "dark" && "opacity-80"}`}
+          />
         </Link>
 
         {/* Navbar Title */}
@@ -242,9 +254,12 @@ const BlogEditor = () => {
             ml-auto
           "
         >
+          {/* Publish button */}
           <button onClick={handlePublishEvent} className="btn-dark">
             Publish
           </button>
+
+          {/* Save draft button */}
           <button
             onClick={(e) => UploadSaveDraftBlog({ e, paramsBlogId })}
             className="btn-light"
@@ -274,7 +289,7 @@ const BlogEditor = () => {
               className="
                 relative
                 aspect-video
-                bg-white
+                bg-white-custom
                 border-4
                 border-grey-custom
                 hover:opacity-80
@@ -319,6 +334,7 @@ const BlogEditor = () => {
                 text-2xl
                 md:text-3xl
                 font-medium
+                bg-white-custom
                 outline-none
                 resize-none
                 leading-tight
@@ -328,7 +344,7 @@ const BlogEditor = () => {
             />
 
             {/* Separate Line */}
-            <hr className="w-full my-2 md:my-5" />
+            <hr className="w-full my-2 md:my-5 border-grey-custom" />
 
             {/* EditorJs */}
             <div id="textEditor" />
