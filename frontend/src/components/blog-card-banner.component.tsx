@@ -97,7 +97,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
               w-10
               h-10
               rounded-full
-              shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+              shadow-[0px_0px_5px_1px]
               shadow-grey-dark/10
               hover:shadow-grey-dark/20
             "

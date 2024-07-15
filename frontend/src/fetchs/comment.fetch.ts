@@ -88,7 +88,6 @@ const useCommentFetch = () => {
     replying_to,
     index,
     replyState,
-    notificationId,
     notificationIndex,
   }: FetchCommentPropsType) => {
     const requestURL = COMMENT_SERVER_ROUTE + "/create-new-comment";
@@ -99,13 +98,12 @@ const useCommentFetch = () => {
         comment,
         blog_author,
         replying_to,
-        notificationId,
       })
       .then(({ data }) => {
         if (data) {
           // 如果是從 notification 那裡回覆並新增的留言，
-          // 就會有 notificationId 和 notificationIndex
-          if (notificationId && notificationIndex !== undefined) {
+          // 就會有 notificationIndex
+          if (notificationIndex !== undefined) {
             if (
               notificationsInfo &&
               "results" in notificationsInfo &&

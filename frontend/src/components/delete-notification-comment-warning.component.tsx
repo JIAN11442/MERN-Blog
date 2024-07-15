@@ -183,7 +183,7 @@ const DeleteNotificationCommentWarningModal = () => {
                 w-9
                 h-9
                 rounded-full
-                shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+                shadow-[0px_0px_5px_1px]
               shadow-grey-dark/5
               "
             />

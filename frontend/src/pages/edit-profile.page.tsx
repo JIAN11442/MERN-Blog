@@ -41,7 +41,8 @@ const EditProfilePage = () => {
   const { authUser } = useAuthStore();
   const { access_token } = authUser as GenerateAuthDataType;
 
-  const { authorProfileInfo, resetAuthorProfileInfo } = useAuthorProfileStore();
+  const { authorProfileInfo, initialAuthorProfileInfo } =
+    useAuthorProfileStore();
   const {
     personal_info: { username, fullname, profile_img, email, bio },
     social_links,
@@ -180,7 +181,7 @@ const EditProfilePage = () => {
       // 重置作者資訊
       // 這樣可以避免下次進入頁面時，因為上次的資料殘留而導致錯誤
       return () => {
-        resetAuthorProfileInfo();
+        initialAuthorProfileInfo();
       };
     }
   }, [access_token]);

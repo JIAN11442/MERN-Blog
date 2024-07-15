@@ -5,6 +5,7 @@ import useAuthStore from "../states/user-auth.state";
 import { FlatIcons } from "../icons/flaticons";
 import toast from "react-hot-toast";
 import useNavbarStore from "../states/navbar.state";
+import useEditorBlogStore from "../states/blog-editor.state";
 
 const SideNavbar = () => {
   const pathName = location.pathname.split("/")[2];
@@ -21,6 +22,8 @@ const SideNavbar = () => {
   const { authUser } = useAuthStore();
   const { access_token, notification } = authUser ?? {};
 
+  const { initialEditBlog } = useEditorBlogStore();
+
   const handleNavigatePage = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const { innerText } = e.currentTarget;
 
@@ -31,6 +34,12 @@ const SideNavbar = () => {
         "You can't change account's password because you logged in through Google account."
       );
     }
+
+    if (innerText === "Write") {
+      initialEditBlog();
+    }
+
+    setPageState(innerText);
 
     // 不是的話會正常導向
     // 然後 pathName 會改變，而觸發 useEffect 來改變 pageState
@@ -175,7 +184,7 @@ const SideNavbar = () => {
                   absolute
                   bottom-0
                   duration-300
-                border-black-custom
+                  border-black-custom
                 "
               />
             </div>
@@ -226,7 +235,7 @@ const SideNavbar = () => {
                     這樣我們只要事先在 css 設定好 active 的樣式，就可以在點擊後立馬套用
                 */}
                 <NavLink
-                  to="/dashboard/blogs"
+                  to={"/dashboard/blogs"}
                   onClick={(e) => handleNavigatePage(e)}
                   className="sidebar-link"
                 >
@@ -236,7 +245,7 @@ const SideNavbar = () => {
 
                 {/* Notification */}
                 <NavLink
-                  to="/dashboard/notifications"
+                  to={"/dashboard/notifications"}
                   onClick={(e) => handleNavigatePage(e)}
                   className="sidebar-link"
                 >
@@ -262,14 +271,14 @@ const SideNavbar = () => {
                   <p className="truncate">Notification</p>
                 </NavLink>
 
-                {/* Write */}
+                {/* Followers */}
                 <NavLink
-                  to="/editor"
+                  to={"/dashboard/friends"}
                   onClick={(e) => handleNavigatePage(e)}
                   className="sidebar-link"
                 >
-                  <FlatIcons name="fi-rr-file-edit" />
-                  <p className="truncate">Write</p>
+                  <FlatIcons name="fi fi-rr-following" />
+                  <p className="truncate">Friends</p>
                 </NavLink>
               </div>
 

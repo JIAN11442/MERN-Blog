@@ -113,8 +113,10 @@ const BlogInteraction = () => {
                 flex
                 items-center
                 justify-center
+                shadow-[0px_0px_5px_1px]
+                shadow-white-custom
+                hover:shadow-grey-dark/20
                 transition
-                shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
                 ${
                   isLikedByUser
                     ? `
@@ -155,9 +157,11 @@ const BlogInteraction = () => {
                 items-center
                 justify-center
                 bg-grey-custom/80
-                shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+                shadow-[0px_0px_5px_1px]
+                shadow-white-custom
                 hover:shadow-grey-dark/20
                 hover:rotate-90
+                transition
               "
             >
               <FlatIcons name="fi fi-rr-comment-dots" />

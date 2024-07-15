@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable consistent-return */
 /* eslint-disable import/prefer-default-export */
 
@@ -11,14 +12,14 @@ import CommentSchema from '../schemas/comment.schema';
 import UserSchema from '../schemas/user.schema';
 
 import env from '../utils/validateEnv.util';
-import { NotificationQueryProps } from '../utils/types.util';
+import { FindQueryProps } from '../utils/types.util';
 
 // 根據 userId 取得通知情況，
 // 並格式化成前端需要的格式
 export const getNotificationsByUserId: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
-    const objectUserId = new Types.ObjectId(userId);
+    const userObjId = new Types.ObjectId(userId);
 
     if (!userId) {
       throw createHttpError(401, 'Unauthorized');
@@ -28,10 +29,10 @@ export const getNotificationsByUserId: RequestHandler = async (req, res, next) =
       {
         // $match 用來過濾資料，只保留符合條件的資料
         $match: {
-          notification_for: objectUserId,
+          notification_for: userObjId,
           seen: false,
           removed: false,
-          user: { $ne: objectUserId },
+          user: { $ne: userObjId },
         },
       },
       {
@@ -94,7 +95,7 @@ export const getNotificationsByFilter: RequestHandler = async (req, res, next) =
       notification_for: userId,
       user: { $ne: userId },
       removed: false,
-    } as unknown as NotificationQueryProps;
+    } as unknown as FindQueryProps;
 
     // 如果 filter 是 all, 就不需要額外加上 type 來篩選資料
     // 如果 filter 不是 all, 就需要加上 type 來篩選資料
@@ -115,7 +116,7 @@ export const getNotificationsByFilter: RequestHandler = async (req, res, next) =
       .populate('reply', 'comment children')
       .populate('replied_on_comment', '_id comment commentedAt')
       .sort({ createdAt: -1 })
-      .select('createdAt type seen reply removed');
+      .select('type follow reply seen removed createdAt');
 
     if (!notificationsInfo) {
       throw createHttpError(500, 'No notifications found with this filter');
@@ -142,7 +143,7 @@ export const getCountOfNotificationsByFilter: RequestHandler = async (req, res, 
       notification_for: userId,
       user: { $ne: userId },
       removed: false,
-    } as unknown as NotificationQueryProps;
+    } as unknown as FindQueryProps;
 
     if (filter !== 'all') {
       findQuery.type = filter;
@@ -201,7 +202,7 @@ export const updateRelateNotificationSeenStateByUser: RequestHandler = async (re
       notification_for: userId,
       user: { $ne: userId },
       removed: false,
-    } as unknown as NotificationQueryProps;
+    } as unknown as FindQueryProps;
 
     const updateNotificationSeen = await NotificationSchema.updateMany(findQuery, { seen: seen });
 
@@ -252,9 +253,10 @@ export const updateNotificationSeenStateById: RequestHandler = async (req, res, 
 export const getUserWrittenBlogs: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
-    const { page, draft, query, deleteDocCount } = req.body;
+    const { page, draft, query } = req.body;
+
     const maxLimit = env.GET_USER_BLOGS_LIMIT;
-    let skipDocs = (page - 1) * maxLimit;
+    const skipDocs = (page - 1) * maxLimit;
 
     if (!userId) {
       throw createHttpError(401, 'Unauthorized');
@@ -266,10 +268,6 @@ export const getUserWrittenBlogs: RequestHandler = async (req, res, next) => {
 
     if (draft === undefined) {
       throw createHttpError(400, 'Please provide a draft state');
-    }
-
-    if (deleteDocCount) {
-      skipDocs -= deleteDocCount;
     }
 
     const getBlogs = await BlogSchema.find({ author: userId, draft, title: new RegExp(query, 'i') })
@@ -378,6 +376,175 @@ export const deleteBlogById: RequestHandler = async (req, res, next) => {
     }
 
     res.status(200).json({ message: 'Blog deleted successfully' });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得用戶關注的作者
+export const getFollowAuthors: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { page, authorUsername, query, fetchFor } = req.body;
+
+    const userObjId = new Types.ObjectId(userId);
+    const maxLimit = env.LOAD_AUTHOR_LIMIT;
+    const skipDocs = (page - 1) * maxLimit;
+
+    if (!userId) {
+      throw createHttpError(401, 'Unauthorized');
+    }
+
+    if (!authorUsername) {
+      throw createHttpError(400, 'Please provide an author username');
+    }
+
+    if (!fetchFor) {
+      throw createHttpError(400, 'Please provide a state');
+    }
+
+    if (page === undefined || page < 1) {
+      throw createHttpError(400, 'Please provide a page number from 1');
+    }
+
+    // 先根據提供的 author username 找到對應的 user
+    const targetUser = await UserSchema.findOne({ 'personal_info.username': authorUsername });
+
+    if (!targetUser) {
+      throw createHttpError(404, 'User not found');
+    }
+
+    const findQuery = {
+      $or: [{ 'personal_info.fullname': new RegExp(query, 'i') }, { 'personal_info.username': new RegExp(query, 'i') }],
+    } as unknown as FindQueryProps;
+
+    if (fetchFor === 'following') {
+      findQuery.followers = targetUser._id;
+    } else {
+      findQuery.following = targetUser._id;
+    }
+
+    console.log({ $in: [userObjId, `${fetchFor === 'following' ? '$followers' : '$following'}`] });
+
+    // 這裡並不像以往的概念，直接查詢目標用戶的 following 有哪些，或考慮 query 篩選
+    // 原因是因為 following 是一個 objectId array，且 query 是針對其對應的 user 中的 username 或 fullname 進行篩選
+    // 整個過程會變得非常複雜，因此這裡偷換了一個思路
+    // 由於 following 與 followers 是相對的，
+    // 因此如果想要查詢目標用戶的 following，我們其實也可以查詢所有用戶的 followers,
+    // 如果某個用戶的 followers 中有目標用戶，那麼這個用戶就是目標用戶的 following
+    // 另外，我們還需要判斷當前用戶是否已經關注了這個用戶，並添加一個 isFollowing 欄位
+    // 因此只能透過 aggregate 來進行查詢
+    const getAuthorsById = await UserSchema.aggregate([
+      // 先過濾出符合條件的用戶
+      {
+        $match: findQuery,
+      },
+
+      // 這裡是為了判斷當前用戶是否已經關注了這個用戶，並添加一個 isFollowing 欄位
+      // 做法是透過 $in 來判斷 "當前用戶" (userObjId) 是否在上一個結果輸出的 obj "目標用戶" 的 followers 中
+      // 另外的做法也可以寫成 { $in: [targetUser._id, user.following]}，
+      // 即判斷 "目標用戶" 是否在 "當前用戶" 的 following 中
+      {
+        $addFields: {
+          isFollowing: { $in: [userObjId, '$followers'] },
+        },
+      },
+
+      // 最後只輸出需要的欄位
+      {
+        $project: {
+          'personal_info.fullname': 1,
+          'personal_info.username': 1,
+          'personal_info.profile_img': 1,
+          isFollowing: 1,
+          _id: 0,
+        },
+      },
+      { $skip: skipDocs },
+      { $limit: maxLimit },
+    ]);
+
+    if (!getAuthorsById) {
+      throw createHttpError(500, `No ${fetchFor} found with this filter`);
+    }
+
+    res.status(200).json({ result: getAuthorsById });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 取得用戶關注的作者數量
+export const getFollowAuthorsCount: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId } = req;
+    const { authorUsername, query, fetchFor } = req.body;
+
+    if (!userId) {
+      throw createHttpError(401, 'Unauthorized');
+    }
+
+    if (!authorUsername) {
+      throw createHttpError(400, 'Please provide an author username');
+    }
+
+    if (!fetchFor) {
+      throw createHttpError(400, 'Please provide a state');
+    }
+
+    // 先根據提供的 author username 找到對應的 user
+    const targetUser = await UserSchema.findOne({ 'personal_info.username': authorUsername });
+
+    if (!targetUser) {
+      throw createHttpError(404, 'User not found');
+    }
+
+    const findQuery = {
+      $or: [{ 'personal_info.fullname': new RegExp(query, 'i') }, { 'personal_info.username': new RegExp(query, 'i') }],
+    } as unknown as FindQueryProps;
+
+    if (fetchFor === 'following') {
+      findQuery.followers = targetUser._id;
+    } else {
+      findQuery.following = targetUser._id;
+    }
+
+    const getfollowingAuthors = await UserSchema.countDocuments(findQuery);
+
+    res.status(200).json({ totalDocs: getfollowingAuthors });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+// 清除所有用戶的追踪名單
+export const clearAllUserFollowAuthors: RequestHandler = async (req, res, next) => {
+  try {
+    const clearAllFollowAuthor = await UserSchema.updateMany({}, { following: [], followers: [] });
+
+    if (!clearAllFollowAuthor) {
+      throw createHttpError(500, 'Failed to clear all follow authors');
+    }
+
+    const clearAllFollowNotification = await NotificationSchema.deleteMany({ type: 'follow' });
+
+    if (!clearAllFollowNotification) {
+      throw createHttpError(500, 'Failed to clear all follow notification');
+    }
+
+    const clearAllUserTotalFollowCount = await UserSchema.updateMany(
+      {},
+      { 'account_info.total_following': 0, 'account_info.total_followers': 0 },
+    );
+
+    if (!clearAllUserTotalFollowCount) {
+      throw createHttpError(500, 'Failed to clear all user total follow count');
+    }
+
+    res.status(200).json({ message: 'All follow authors cleared successfully' });
   } catch (error) {
     console.log(error);
     next(error);

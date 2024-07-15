@@ -38,6 +38,11 @@
     @apply w-full h-full object-cover;
   }
 
+  body[class="dark"] input,
+  .input-box {
+    @apply outline-none focus:outline-purple-400/40;
+  }
+
   /* sticky: 是一種混合型的定位方式，它在元素在滾動到某個位置之前表現得像相對定位（relative）；
   但是一旦元素滾動到該位置，元素就變得像固定定位（fixed）。 */
   .navbar {
@@ -96,8 +101,13 @@
       focus:placeholder:text-transparent;
   }
 
-  body[class="dark"] .input-box {
-    @apply outline-none focus:outline-purple-500/20;
+  /* 沒找到更好的辦法，所以直接强制延長[自動填充]背景色的時間,這樣在短時間内就看不到 */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-transition-delay: 99999s;
+    outline: none;
   }
 
   input:disabled,

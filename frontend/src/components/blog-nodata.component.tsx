@@ -17,7 +17,7 @@ const NoDataMessage: React.FC<NoDataMessageProps> = ({
           mt-4
           p-4
           rounded-full
-          bg-grey-custom/50
+          bg-grey-custom
           text-center
         `,
         className

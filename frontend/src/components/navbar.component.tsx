@@ -23,14 +23,12 @@ const Navbar = () => {
 
   const { authUser } = useAuthStore();
   const { access_token, notification } = authUser ?? {};
-
   const {
     panelCollapsed,
     searchBarVisibility,
     setPanelCollapsed,
     setSearchBarVisibility,
   } = useNavbarStore();
-
   const { initialEditBlog } = useEditorBlogStore();
   const { setTheme, theme } = useProviderStore();
 
@@ -55,17 +53,6 @@ const Navbar = () => {
   // 控制 NavigationPanel 的顯示與隱藏
   const handlePanelCollapse = () => {
     setPanelCollapsed(!panelCollapsed);
-  };
-
-  // 控制 NavigationPanel 在失焦後隱藏
-  const handlePanelBlur = () => {
-    const timeout = setTimeout(() => {
-      setPanelCollapsed(false);
-    }, 100);
-
-    return () => {
-      clearTimeout(timeout);
-    };
   };
 
   // 點擊 Logo 返回首頁
@@ -345,8 +332,13 @@ const Navbar = () => {
                 {/* Avatar */}
                 <button
                   onClick={handlePanelCollapse}
-                  onBlur={handlePanelBlur}
-                  className="w-12 h-12 mt-1"
+                  className="
+                    w-12 
+                    h-12 
+                    mt-1
+                    hover:opacity-80
+                    transition
+                  "
                 >
                   <img
                     src={authUser.profile_img}

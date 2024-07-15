@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import InpageNavigation, {
   activeButtonRef,
@@ -14,6 +14,7 @@ import LoadOptions from "../components/load-options.components";
 
 import useNavbarStore from "../states/navbar.state";
 import useHomeBlogStore from "../states/home-blog.state";
+import useProviderStore from "../states/provider.state";
 
 import { FlatIcons } from "../icons/flaticons";
 import useBlogFetch from "../fetchs/blog.fetch";
@@ -23,7 +24,10 @@ import type {
 } from "../commons/types.common";
 
 const Homepage = () => {
+  const [inpageNavIndex, setInPageNavIndex] = useState(0);
+
   const { searchBarVisibility } = useNavbarStore();
+  const { theme } = useProviderStore();
   const {
     latestBlogs,
     trendingBlogs,
@@ -40,17 +44,6 @@ const Homepage = () => {
     GetLatestBlogsByCategory,
     GetTrendingTags,
   } = useBlogFetch();
-
-  // const categories = [
-  //   'programming',
-  //   'hollywood',
-  //   'film making',
-  //   'social media',
-  //   'cooking',
-  //   'tech',
-  //   'finance',
-  //   'travel',
-  // ];
 
   const loadBlogByCategory = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 取得 Button 的文字內容
@@ -103,7 +96,7 @@ const Homepage = () => {
     if (!allCategories || !allCategories.length) {
       GetTrendingTags();
     }
-  }, [inPageNavState]);
+  }, [inPageNavState, latestBlogs, trendingBlogs]);
 
   return (
     <AnimationWrapper
@@ -125,8 +118,10 @@ const Homepage = () => {
         <div className="w-full">
           <InpageNavigation
             routes={[inPageNavState, "trending blogs"]}
+            inPageNavIndex={inpageNavIndex}
+            setInPageNavIndex={setInPageNavIndex}
             defaultHiddenIndex={1}
-            adaptiveAdjustment={true}
+            adaptiveAdjustment={{ initialToFirstTab: true }}
           >
             {/* Latest blogs */}
             <>
@@ -239,7 +234,15 @@ const Homepage = () => {
                       text-nowrap
                       ${
                         category === inPageNavState
-                          ? "btn-dark text-white"
+                          ? theme === "light"
+                            ? `
+                              btn-dark 
+                              text-white-custom
+                            `
+                            : ` btn-dark
+                                bg-[#1DA1F2]
+                                text-white
+                              `
                           : "tag"
                       }`}
                       onClick={(e) => loadBlogByCategory(e)}

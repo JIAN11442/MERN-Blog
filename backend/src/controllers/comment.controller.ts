@@ -46,7 +46,7 @@ export const getCommentsByBlogId: RequestHandler = async (req, res, next) => {
 export const createNewComment: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
-    const { blogObjId, comment: reqComment, blog_author, replying_to, notificationId } = req.body;
+    const { blogObjId, comment: reqComment, blog_author, replying_to } = req.body;
 
     if (!userId) {
       throw createHttpError(401, 'Please login first');
@@ -121,18 +121,17 @@ export const createNewComment: RequestHandler = async (req, res, next) => {
         throw createHttpError(500, 'Failed to update replied comment children');
       }
 
-      // 如果是從 notification 那裡回复的，
-      // 那要在回覆目標 notification 更新 reply 為新增的回覆留言 ID
-      // 這樣才能分辨哪些 notification 已回覆
-      if (notificationId) {
-        const updateNotificationReply = await NotificationSchema.findOneAndUpdate(
-          { _id: notificationId },
-          { reply: newComment._id },
-        );
+      // 不管是留言框中回覆還是通知訊息中回覆，都要更新通知中的 reply 屬性
+      // 這樣就不會因為其中一方留言而另一方通知沒有更新到 reply 屬性
+      // 比如在留言框中回覆後，通知中依舊顯示可以 Reply，這樣就會造成混淆
+      const parentNotification = await NotificationSchema.findOneAndUpdate(
+        { blog: blogObjId, comment: replying_to },
+        { reply: newComment._id },
+        { new: true },
+      );
 
-        if (!updateNotificationReply) {
-          throw createHttpError(500, 'Failed to update replied id to notification');
-        }
+      if (!parentNotification) {
+        throw createHttpError(404, 'Parent notification not found');
       }
 
       // 雖然前面的 notificationObj 設定過了 notification_for，但那是適用於頭留言

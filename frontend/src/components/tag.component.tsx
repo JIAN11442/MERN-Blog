@@ -57,11 +57,11 @@ const Tag: React.FC<TagProps> = ({ tag, index }) => {
           isTagEdit.state
             ? isTagEdit.index === index &&
               `
-                shadow-[0px_0px_10px_2px_rgba(0,0,0,0)]
+                shadow-[0px_0px_10px_2px]
                 shadow-purple-custom/30
               `
             : `
-                shadow-[0px_0px_10px_2px_rgba(0,0,0,0)]
+                shadow-[0px_0px_10px_2px]
                 shadow-grey-dark/20
               `
         }

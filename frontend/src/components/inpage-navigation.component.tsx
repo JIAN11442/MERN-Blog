@@ -4,13 +4,13 @@
 import { useEffect, useRef } from "react";
 import { twMerge } from "tailwind-merge";
 
-import useHomeBlogStore from "../states/home-blog.state";
-
 interface InpageNavigationProps {
   routes: string[];
+  inPageNavIndex: number;
+  setInPageNavIndex: React.Dispatch<React.SetStateAction<number>>;
   defaultHiddenIndex?: number;
   initialActiveIndex?: number;
-  adaptiveAdjustment?: boolean;
+  adaptiveAdjustment?: { initialToFirstTab: boolean };
   children: React.ReactNode;
   className?: string;
 }
@@ -20,16 +20,16 @@ export let activeTabLineRef: React.MutableRefObject<HTMLHRElement | null>;
 
 const InpageNavigation: React.FC<InpageNavigationProps> = ({
   routes,
+  inPageNavIndex,
+  setInPageNavIndex,
   defaultHiddenIndex,
   initialActiveIndex = 0,
-  adaptiveAdjustment = false,
+  adaptiveAdjustment = { initialToFirstTab: false },
   children,
   className,
 }) => {
   activeButtonRef = useRef<HTMLButtonElement>(null);
   activeTabLineRef = useRef<HTMLHRElement>(null);
-
-  const { inPageNavIndex, setInPageNavIndex } = useHomeBlogStore();
 
   const changePageState = (btn: HTMLButtonElement, i: number) => {
     // 取得當前 Button 的寬度和左側位置
@@ -60,8 +60,14 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
         // 如果當前頁面是 md-screen，即大於等於 768px，
         // 且 inPageNavIndex > 0，即不在第一個頁簽上
 
-        if (window.innerWidth >= 768 && inPageNavIndex > 0) {
-          const target = document.getElementById(routes[0]);
+        let target;
+
+        if (window.innerWidth >= 768) {
+          if (adaptiveAdjustment.initialToFirstTab) {
+            target = document.getElementById(routes[0]);
+          } else {
+            target = document.getElementById(routes[inPageNavIndex]);
+          }
 
           // 則自動切換到第一個頁簽上
           target?.click();
@@ -89,7 +95,7 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
           border-b
           border-grey-custom
           bg-white-custom
-          overflow-x-auto
+          overflow-hidden
           `,
           className
         )}

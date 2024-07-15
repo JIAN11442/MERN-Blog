@@ -5,7 +5,7 @@ interface AuthorProfileProps {
   authorProfileInfo: AuthorProfileStructureType | null;
 
   setAuthorProfileInfo: (profile: AuthorProfileStructureType | null) => void;
-  resetAuthorProfileInfo: () => void;
+  initialAuthorProfileInfo: () => void;
 }
 
 const initialAuthorProfileInfo = {
@@ -19,6 +19,8 @@ const initialAuthorProfileInfo = {
   account_info: {
     total_posts: 0,
     total_reads: 0,
+    total_followers: 0,
+    total_following: 0,
   },
   social_links: {
     youtube: "",
@@ -35,7 +37,7 @@ const useAuthorProfileStore = create<AuthorProfileProps>((set) => ({
   authorProfileInfo: initialAuthorProfileInfo,
 
   setAuthorProfileInfo: (profile) => set({ authorProfileInfo: profile }),
-  resetAuthorProfileInfo: () =>
+  initialAuthorProfileInfo: () =>
     set({ authorProfileInfo: initialAuthorProfileInfo }),
 }));
 

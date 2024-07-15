@@ -1,19 +1,39 @@
 import axios from "axios";
+import toast from "react-hot-toast";
 
 import useHomeBlogStore from "../states/home-blog.state";
+import useAuthorProfileStore from "../states/author-profile.state";
+import useSettingStore from "../states/setting.state";
+import useProviderStore from "../states/provider.state";
+import useDashboardStore from "../states/dashboard.state";
+
 import type {
+  AuthorProfileStructureType,
   FetchLoadPropsType,
+  FetchUserPropsType,
+  FollowAuthorsPropsType,
   GenerateToLoadStructureType,
+  NotificationStructureType,
 } from "../commons/types.common";
 
 import { FormatDataForLoadMoreOrLess } from "../commons/generate.common";
-import useAuthorProfileStore from "../states/author-profile.state";
 
 const useUserFetch = () => {
   const USER_SERVER_ROUTE = import.meta.env.VITE_SERVER_DOMAIN + "/user";
 
   const { queryUsers, setQueryUsers } = useHomeBlogStore();
-  const { setAuthorProfileInfo } = useAuthorProfileStore();
+  const { authorProfileInfo, setAuthorProfileInfo } = useAuthorProfileStore();
+  const { account_info } =
+    (authorProfileInfo as AuthorProfileStructureType) ?? {};
+
+  const { setIsFollowing } = useSettingStore();
+  const { setToastLoading } = useProviderStore();
+  const {
+    notificationsInfo,
+    followersAuthor,
+    followingAuthor,
+    setFollowingAuthor,
+  } = useDashboardStore();
 
   // Get related blogs author
   const GetRelatedBlogsAuthorByQuery = async ({
@@ -46,11 +66,11 @@ const useUserFetch = () => {
   };
 
   // Get author profile information
-  const GetAuthorProfileInfo = async (authorId: string) => {
+  const GetAuthorProfileInfo = async (authorUsername: string) => {
     const requestURL = USER_SERVER_ROUTE + "/get-author-profile-info";
 
     axios
-      .post(requestURL, { username: authorId })
+      .post(requestURL, { authorUsername })
       .then(({ data }) => {
         if (data.author) {
           setAuthorProfileInfo(data.author);
@@ -61,9 +81,143 @@ const useUserFetch = () => {
       });
   };
 
+  // Check user is following
+  const CheckAuthorIsFollowingByUser = async (authorUsername: string) => {
+    const requestUrl = USER_SERVER_ROUTE + "/check-author-is-following-by-user";
+
+    await axios
+      .post(requestUrl, { authorUsername })
+      .then(({ data }) => {
+        if (data) {
+          setIsFollowing(data.isFollowing);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // Follow author
+  const FollowAuthorByUsername = async ({
+    authorUsername,
+    submitBtn_e,
+    notificationIndex,
+    followAuthorCardIndex,
+  }: FetchUserPropsType) => {
+    const requestUrl = USER_SERVER_ROUTE + "/follow-author";
+    const target = submitBtn_e?.currentTarget as HTMLButtonElement;
+
+    // 顯示 Loading
+    const toastLoading = toast.loading("Following...");
+    setToastLoading(true);
+
+    // 禁用追蹤按鈕
+    target.disabled = true;
+
+    await axios
+      .post(requestUrl, { authorUsername })
+      .then(({ data }) => {
+        if (data) {
+          // 更新 zustand 中用戶的總追蹤數量
+          account_info.total_following += 1;
+          setIsFollowing(true);
+
+          // 如果有提供 notificationIndex，代表是從通知頁面進行追蹤
+          // 那就需要更新 zustand 中的通知數據
+          if (
+            notificationIndex !== undefined &&
+            notificationsInfo &&
+            "results" in notificationsInfo &&
+            notificationsInfo.results
+          ) {
+            (
+              notificationsInfo.results[
+                notificationIndex
+              ] as NotificationStructureType
+            ).follow = data.userId;
+          }
+
+          // 如果有提供 followAuthorCardIndex，代表是從追蹤作者卡片進行追蹤
+          // 那就需要更新 zustand 中的追蹤作者數據
+          if (
+            followAuthorCardIndex !== undefined &&
+            followersAuthor &&
+            "results" in followersAuthor &&
+            followersAuthor.results
+          ) {
+            (
+              followersAuthor.results[
+                followAuthorCardIndex
+              ] as FollowAuthorsPropsType
+            ).isFollowing = true;
+          }
+
+          toast.dismiss(toastLoading);
+          toast.success(data.message);
+
+          target.disabled = false;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+
+        toast.dismiss(toastLoading);
+        toast.error("Failed to follow this author.");
+
+        target.disabled = false;
+      });
+  };
+
+  // Unfollow author
+  const UnfollowAuthorByUsername = async ({
+    authorUsername,
+    submitBtn_e,
+    followAuthorCardIndex,
+  }: FetchUserPropsType) => {
+    const requestUrl = USER_SERVER_ROUTE + "/unfollow-author";
+    const target = submitBtn_e?.currentTarget as HTMLButtonElement;
+    // 顯示 Loading
+    const toastLoading = toast.loading("Unfollowing...");
+    setToastLoading(true);
+    // 禁用追蹤按鈕
+    target.disabled = true;
+    await axios
+      .post(requestUrl, { authorUsername })
+      .then(({ data }) => {
+        if (data) {
+          // 更新 zustand 中用戶的總追蹤數量
+          account_info.total_following -= 1;
+          setIsFollowing(false);
+          target.disabled = false;
+          if (
+            followAuthorCardIndex !== undefined &&
+            followingAuthor &&
+            "results" in followingAuthor &&
+            followingAuthor.results
+          ) {
+            followingAuthor.results.splice(followAuthorCardIndex, 1);
+            followingAuthor.totalDocs -= 1;
+            setFollowingAuthor(followingAuthor);
+          }
+          toast.dismiss(toastLoading);
+          setIsFollowing(false);
+          toast.success(data.message);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.dismiss(toastLoading);
+        setIsFollowing(false);
+        target.disabled = false;
+      });
+  };
+
   return {
     GetRelatedBlogsAuthorByQuery,
     GetAuthorProfileInfo,
+    CheckAuthorIsFollowingByUser,
+    FollowAuthorByUsername,
+    UnfollowAuthorByUsername,
   };
 };
 

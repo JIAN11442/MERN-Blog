@@ -1,50 +1,48 @@
 import { useEffect, useState } from "react";
+import { FlatIcons } from "../icons/flaticons";
 
 import InpageNavigation from "../components/inpage-navigation.component";
 import Loader from "../components/loader.component";
-import NoDataMessage from "../components/blog-nodata.component";
 import AnimationWrapper from "../components/page-animation.component";
-import ManagePublishedBlogCard from "../components/manage-published-blog-card.component";
-import LoadOptions from "../components/load-options.components";
-import ManageDraftBlogCard from "../components/manage-draft-blogs-card.component";
-import DeleteBlogWarningModal from "../components/delete-blog-warning.component";
-
-import { FlatIcons } from "../icons/flaticons";
+import NoDataMessage from "../components/blog-nodata.component";
+import ManageFollowAuthorCard from "../components/manage-follow-authors-cad.component";
 
 import useDashboardStore from "../states/dashboard.state";
+import useAuthStore from "../states/user-auth.state";
+
 import useDashboardFetch from "../fetchs/dashboard.fetch";
 import {
-  BlogStructureType,
+  FollowAuthorsPropsType,
   GenerateToLoadStructureType,
 } from "../commons/types.common";
+import LoadOptions from "../components/load-options.components";
 
-const BlogManagementPage = () => {
-  const inpageNavOptions = ["Published", "Drafts"];
+const AuthorManagementPage = () => {
+  const inpageNavOptions = ["Following", "Followers"];
 
   const [inPageNavIndex, setInPageNavIndex] = useState(0);
+
+  const { authUser } = useAuthStore();
   const {
-    blogQuery,
-    publishedBlogs,
-    draftBlogs,
-    activeDeletePblogWarningModal,
-    activeDeleteDfblogWarningModal,
-    refreshBlogs,
-    setBlogQuery,
-    setPublishedBlogs,
-    setDraftBlogs,
+    authorQuery,
+    followingAuthor,
+    followersAuthor,
+    setAuthorQuery,
+    setFollowingAuthor,
+    setFollowersAuthor,
   } = useDashboardStore();
 
-  const { GetUserWrittenBlogsById } = useDashboardFetch();
+  const { GetFollowAuthors, ClearAllFollowAuthors } = useDashboardFetch();
 
   // 搜索框的提交事件
   const handleInputSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const value = (e.target as HTMLInputElement).value;
 
-    if (e.key === "Enter" && value.length > 0 && value !== blogQuery) {
-      setPublishedBlogs(null);
-      setDraftBlogs(null);
+    if (e.key === "Enter" && value.length > 0 && value !== authorQuery) {
+      setFollowingAuthor(null);
+      setFollowersAuthor(null);
 
-      setBlogQuery(value);
+      setAuthorQuery(value);
     }
   };
 
@@ -54,11 +52,11 @@ const BlogManagementPage = () => {
   const handleInputOnBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
-    if (blogQuery.length > 0 && value.length === 0) {
-      setPublishedBlogs(null);
-      setDraftBlogs(null);
+    if (authorQuery.length > 0 && value.length === 0) {
+      setFollowingAuthor(null);
+      setFollowersAuthor(null);
 
-      setBlogQuery(value);
+      setAuthorQuery(value);
     }
   };
 
@@ -67,52 +65,62 @@ const BlogManagementPage = () => {
     setInPageNavIndex(index);
   };
 
-  // 根據 query 來取得用戶的已發佈或草稿的 blogs
+  const handleClearAllFollowAuthors = () => {
+    ClearAllFollowAuthors();
+  };
+
   useEffect(() => {
-    GetUserWrittenBlogsById({
+    GetFollowAuthors({
       page: 1,
-      draft: false,
-      query: blogQuery,
-      deleteDocCount: 0,
+      authorUsername: authUser?.username,
+      query: authorQuery,
+      fetchFor: "following",
     });
 
-    GetUserWrittenBlogsById({
+    GetFollowAuthors({
       page: 1,
-      draft: true,
-      query: blogQuery,
-      deleteDocCount: 0,
+      authorUsername: authUser?.username,
+      query: authorQuery,
+      fetchFor: "followers",
     });
-
-    return () => {
-      setPublishedBlogs(null);
-      setDraftBlogs(null);
-    };
-  }, [blogQuery, inPageNavIndex, refreshBlogs]);
+  }, [authUser, authorQuery, inPageNavIndex]);
 
   return (
     <div>
-      {/* Warning */}
-      <>
-        {activeDeletePblogWarningModal.state && (
-          <DeleteBlogWarningModal state="published" />
-        )}
-        {activeDeleteDfblogWarningModal.state && (
-          <DeleteBlogWarningModal state="draft" />
-        )}
-      </>
-
       {/* Title */}
-      <h1
+      <div
         className="
+          flex
+          items-center
+          justify-between
+        "
+      >
+        <h1
+          className="
           max-md:hidden
           mb-5
           text-xl
           font-medium
           truncate
         "
-      >
-        Manager Blogs
-      </h1>
+        >
+          Manager Friends
+        </h1>
+
+        <button
+          onClick={handleClearAllFollowAuthors}
+          className="
+            flex
+            max-md:pb-5
+            max-md:ml-auto
+            md:-mt-5
+            text-grey-dark/50
+            hover:text-grey-dark/30
+          "
+        >
+          clear all
+        </button>
+      </div>
 
       {/* SearchBar */}
       <div
@@ -152,7 +160,6 @@ const BlogManagementPage = () => {
             -translate-y-1/2
             text-md
             text-grey-dark/50
-            
           "
         />
       </div>
@@ -195,71 +202,76 @@ const BlogManagementPage = () => {
           mb-6
         "
       >
-        {/* Published Blogs */}
+        {/* Following */}
         <div>
-          {publishedBlogs === null ? (
+          {followingAuthor === null ? (
             <Loader />
-          ) : "results" in publishedBlogs && publishedBlogs.results?.length ? (
+          ) : "results" in followingAuthor &&
+            followingAuthor.results?.length ? (
             <>
-              {publishedBlogs.results.map((blog, i) => (
+              {followingAuthor.results.map((author, i) => (
                 <AnimationWrapper
-                  key={`published-blog-${i}`}
+                  key={`following-${i}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                 >
-                  <ManagePublishedBlogCard
+                  <ManageFollowAuthorCard
                     index={i}
-                    blog={blog as BlogStructureType}
+                    state="following"
+                    data={author as FollowAuthorsPropsType}
                   />
                 </AnimationWrapper>
               ))}
             </>
           ) : (
-            <NoDataMessage message="No published blogs" />
+            <NoDataMessage message="No following" />
           )}
         </div>
 
-        {/* Drafts Blogs */}
+        {/* Followers */}
         <div>
-          {draftBlogs === null ? (
+          {followersAuthor === null ? (
             <Loader />
-          ) : "results" in draftBlogs && draftBlogs.results?.length ? (
+          ) : "results" in followersAuthor &&
+            followersAuthor.results?.length ? (
             <>
-              {draftBlogs.results.map((blog, i) => (
+              {followersAuthor.results.map((author, i) => (
                 <AnimationWrapper
-                  key={`draft-blog-${i}`}
+                  key={`followers-${i}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                 >
-                  <ManageDraftBlogCard
+                  <ManageFollowAuthorCard
                     index={i}
-                    blog={blog as BlogStructureType}
+                    state="followers"
+                    data={author as FollowAuthorsPropsType}
                   />
                 </AnimationWrapper>
               ))}
             </>
           ) : (
-            <NoDataMessage message="No drafts blogs" />
+            <NoDataMessage message="No followers" />
           )}
         </div>
       </InpageNavigation>
 
       {/* Load Options */}
       <>
-        {publishedBlogs !== null && draftBlogs !== null ? (
+        {followingAuthor !== null && followersAuthor !== null ? (
           <LoadOptions
             id={inpageNavOptions[inPageNavIndex]}
             data={
               (inPageNavIndex === 0
-                ? publishedBlogs
-                : draftBlogs) as GenerateToLoadStructureType
+                ? followingAuthor
+                : followersAuthor) as GenerateToLoadStructureType
             }
-            loadLimit={import.meta.env.VITE_MANAGE_BLOGS_LIMIT}
-            loadFunction={GetUserWrittenBlogsById}
-            draft={inPageNavIndex === 0 ? false : true}
-            query={blogQuery}
+            loadLimit={import.meta.env.VITE_MANAGE_AUTHORS_LIMIT}
+            loadFunction={GetFollowAuthors}
+            query={authorQuery}
+            authorUsername={authUser?.username}
+            fetchFor={"following"}
           />
         ) : (
           ""
@@ -269,4 +281,4 @@ const BlogManagementPage = () => {
   );
 };
 
-export default BlogManagementPage;
+export default AuthorManagementPage;

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  AuthorProfileStructureType,
   BlogStructureType,
   GenerateToLoadStructureType,
   NotificationFilterPropsType,
@@ -13,11 +14,21 @@ interface DashboardProps {
     | null;
 
   filter: NotificationFilterPropsType;
-  query: string;
+  blogQuery: string;
   isDeleteReply: boolean;
   isMarked: boolean;
   publishedBlogs: BlogStructureType[] | GenerateToLoadStructureType | null;
   draftBlogs: BlogStructureType[] | GenerateToLoadStructureType | null;
+  refreshBlogs: boolean;
+  authorQuery: string;
+  followingAuthor:
+    | AuthorProfileStructureType[]
+    | GenerateToLoadStructureType
+    | null;
+  followersAuthor:
+    | AuthorProfileStructureType[]
+    | GenerateToLoadStructureType
+    | null;
 
   activeRemoveNtfWarningModal: {
     state: boolean;
@@ -41,13 +52,12 @@ interface DashboardProps {
     data: BlogStructureType | null;
     deleteBtnRef: React.RefObject<HTMLButtonElement> | null;
   };
-  refreshBlogs: boolean;
 
   setNotificationsInfo: (
     info: NotificationStructureType[] | GenerateToLoadStructureType | null
   ) => void;
   setFilter: (filter: NotificationFilterPropsType) => void;
-  setQuery: (query: string) => void;
+  setBlogQuery: (query: string) => void;
   setIsDeleteReply: (isDelete: boolean) => void;
   setIsMarked: (isMarkRead: boolean) => void;
   setPublishedBlogs: (
@@ -55,6 +65,14 @@ interface DashboardProps {
   ) => void;
   setDraftBlogs: (
     blogs: BlogStructureType[] | GenerateToLoadStructureType | null
+  ) => void;
+  setRefreshBlogs: (status: boolean) => void;
+  setAuthorQuery: (query: string) => void;
+  setFollowingAuthor: (
+    author: AuthorProfileStructureType[] | GenerateToLoadStructureType | null
+  ) => void;
+  setFollowersAuthor: (
+    author: AuthorProfileStructureType[] | GenerateToLoadStructureType | null
   ) => void;
 
   setActiveRemoveNtfWarningModal: (active: {
@@ -79,7 +97,6 @@ interface DashboardProps {
     data: BlogStructureType | null;
     deleteBtnRef: React.RefObject<HTMLButtonElement> | null;
   }) => void;
-  setRefreshBlogs: (status: boolean) => void;
 }
 
 const useDashboardStore = create<DashboardProps>((set) => ({
@@ -93,11 +110,15 @@ const useDashboardStore = create<DashboardProps>((set) => ({
     type: "all",
     count: 0,
   },
-  query: "",
+  blogQuery: "",
   isDeleteReply: false,
   isMarked: false,
   publishedBlogs: null,
   draftBlogs: null,
+  refreshBlogs: false,
+  authorQuery: "",
+  followingAuthor: null,
+  followersAuthor: null,
 
   activeRemoveNtfWarningModal: { state: false, index: 0, data: null },
   activeDeleteNtfWarningModal: { state: false, index: 0, data: null },
@@ -113,15 +134,18 @@ const useDashboardStore = create<DashboardProps>((set) => ({
     data: null,
     deleteBtnRef: null,
   },
-  refreshBlogs: false,
 
   setNotificationsInfo: (info) => set({ notificationsInfo: info }),
   setFilter: (filter) => set({ filter }),
-  setQuery: (query) => set({ query }),
+  setBlogQuery: (query) => set({ blogQuery: query }),
   setIsDeleteReply: (isDelete) => set({ isDeleteReply: isDelete }),
   setIsMarked: (isMarkRead) => set({ isMarked: isMarkRead }),
   setPublishedBlogs: (blogs) => set({ publishedBlogs: blogs }),
   setDraftBlogs: (blogs) => set({ draftBlogs: blogs }),
+  setRefreshBlogs: (status) => set({ refreshBlogs: status }),
+  setAuthorQuery: (query) => set({ authorQuery: query }),
+  setFollowingAuthor: (author) => set({ followingAuthor: author }),
+  setFollowersAuthor: (author) => set({ followersAuthor: author }),
 
   setActiveRemoveNtfWarningModal: (active) =>
     set({ activeRemoveNtfWarningModal: active }),
@@ -132,7 +156,6 @@ const useDashboardStore = create<DashboardProps>((set) => ({
     set({ activeDeletePblogWarningModal: isDelete }),
   setActiveDeleteDfblogWarningModal: (isDelete) =>
     set({ activeDeleteDfblogWarningModal: isDelete }),
-  setRefreshBlogs: (status) => set({ refreshBlogs: status }),
 }));
 
 export default useDashboardStore;

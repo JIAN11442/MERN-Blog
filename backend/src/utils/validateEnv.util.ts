@@ -20,4 +20,5 @@ export default cleanEnv(process.env, {
   BIO_CHAR_LIMIT: num(),
   NOTIFICATION_LOAD_LIMIT: num(),
   GET_USER_BLOGS_LIMIT: num(),
+  LOAD_AUTHOR_LIMIT: num(),
 });

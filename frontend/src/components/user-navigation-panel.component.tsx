@@ -5,21 +5,60 @@ import { FlatIcons } from "../icons/flaticons";
 import useAuthStore from "../states/user-auth.state";
 import AnimationWrapper from "./page-animation.component";
 import useEditorBlogStore from "../states/blog-editor.state";
+import useHomeBlogStore from "../states/home-blog.state";
+import useAuthorProfileStore from "../states/author-profile.state";
+import { useEffect, useRef } from "react";
+import useNavbarStore from "../states/navbar.state";
 
 const UserNavigationPanel = () => {
   const navigate = useNavigate();
+
+  const panelRef = useRef<HTMLDivElement>(null);
+
   const { authUser, setAuthUser } = useAuthStore();
   const { initialEditBlog } = useEditorBlogStore();
+  const { initialHomeBlogState } = useHomeBlogStore();
+  const { initialAuthorProfileInfo } = useAuthorProfileStore();
+  const { setPanelCollapsed } = useNavbarStore();
 
   // Sign out function
   const handleSignOut = () => {
+    // 離開前先清除所有的資料
+    // 這樣下次登入時就不會有任何資料殘留
+    // 也不會因爲殘留資料而沒抓取資料
     setAuthUser(null);
+    initialHomeBlogState();
+    initialEditBlog();
+    initialAuthorProfileInfo();
+    handleNavigate();
+
     sessionStorage.removeItem("access_token");
 
     toast.success("Signed out successfully!");
 
     navigate("/");
   };
+
+  const handleNavigate = () => {
+    setPanelCollapsed(false);
+  };
+
+  useEffect(() => {
+    const handleOnBlur = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setPanelCollapsed(false);
+      }
+    };
+
+    const timeout = setTimeout(() => {
+      document.addEventListener("click", handleOnBlur);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener("click", handleOnBlur);
+    };
+  }, [panelRef]);
 
   return (
     <AnimationWrapper
@@ -30,12 +69,13 @@ const UserNavigationPanel = () => {
         absolute
         right-0
         z-20
-        shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+        shadow-[0px_0px_5px_1px]
         shadow-grey-dark/15
         rounded-md
       "
     >
       <div
+        ref={panelRef}
         className="
           w-60
           border
@@ -47,7 +87,10 @@ const UserNavigationPanel = () => {
         {/* Editor */}
         <Link
           to="/editor"
-          onClick={initialEditBlog}
+          onClick={() => {
+            initialEditBlog();
+            setPanelCollapsed(false);
+          }}
           className="flex gap-4 link md:hidden pl-8"
         >
           <FlatIcons name="fi fi-rr-file-edit" />
@@ -56,6 +99,7 @@ const UserNavigationPanel = () => {
 
         {/* Profile */}
         <Link
+          onClick={handleNavigate}
           to={`/user/${authUser?.username}`}
           className="flex gap-4 link pl-8"
         >
@@ -64,13 +108,21 @@ const UserNavigationPanel = () => {
         </Link>
 
         {/* Dashboard */}
-        <Link to="/dashboard/blogs" className="flex gap-4 link pl-8">
+        <Link
+          onClick={handleNavigate}
+          to="/dashboard/blogs"
+          className="flex gap-4 link pl-8"
+        >
           <FlatIcons name="fi fi-rr-dashboard" />
           <p>Dashboard</p>
         </Link>
 
         {/* Settings */}
-        <Link to="/settings/edit-profile" className="flex gap-4 link pl-8">
+        <Link
+          onClick={handleNavigate}
+          to="/settings/edit-profile"
+          className="flex gap-4 link pl-8"
+        >
           <FlatIcons name="fi fi-rr-settings" />
           <p>Settings</p>
         </Link>

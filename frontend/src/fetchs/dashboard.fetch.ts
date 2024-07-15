@@ -21,7 +21,6 @@ const useDashboardFetch = () => {
   const { notification } = (authUser as GenerateAuthDataType) ?? {};
   const { countByType, totalCount } = notification ?? {};
 
-  const { refreshBlogs, setRefreshBlogs } = useDashboardStore();
   const { setToastLoading } = useProviderStore();
 
   const {
@@ -30,11 +29,17 @@ const useDashboardFetch = () => {
     draftBlogs,
     activeDeletePblogWarningModal,
     activeDeleteDfblogWarningModal,
+    refreshBlogs,
+    followingAuthor,
+    followersAuthor,
     setNotificationsInfo,
     setPublishedBlogs,
     setDraftBlogs,
     setActiveDeletePblogWarningModal,
     setActiveDeleteDfblogWarningModal,
+    setRefreshBlogs,
+    setFollowingAuthor,
+    setFollowersAuthor,
   } = useDashboardStore();
 
   // 根據用戶 ID 取得通知情況
@@ -274,6 +279,71 @@ const useDashboardFetch = () => {
       });
   };
 
+  // 取得追蹤作者
+  const GetFollowAuthors = async ({
+    page = 1,
+    authorUsername = "",
+    query = "",
+    fetchFor = "following",
+    state = "initial",
+  }: FetchDashboardPropsType) => {
+    const requestUrl = DASHBOARD_SERVER_ROUTE + "/get-follow-authors-info";
+
+    await axios
+      .post(requestUrl, { page, authorUsername, query, fetchFor })
+      .then(async ({ data }) => {
+        if (data) {
+          const formattedData = (await FormatDataForLoadMoreOrLess({
+            prevArr:
+              fetchFor === "following" ? followingAuthor : followersAuthor,
+            fetchData: data.result,
+            page,
+            fetchRoute: "dashboard",
+            countRoute: "/get-follow-authors-count",
+            data_to_send: { authorUsername, query, fetchFor },
+            state,
+          })) as GenerateToLoadStructureType;
+
+          if (fetchFor === "following") {
+            setFollowingAuthor(formattedData);
+          } else {
+            setFollowersAuthor(formattedData);
+          }
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // 清除所有用戶的追蹤名單
+  const ClearAllFollowAuthors = async () => {
+    const requestUrl = DASHBOARD_SERVER_ROUTE + "/clear-all-follow-authors";
+
+    const loadingToast = toast.loading("Clearing...");
+    setToastLoading(true);
+
+    await axios
+      .post(requestUrl)
+      .then(({ data }) => {
+        if (data) {
+          toast.dismiss(loadingToast);
+          setToastLoading(false);
+
+          setFollowingAuthor([]);
+          setFollowersAuthor([]);
+
+          toast.success(data.message);
+        }
+      })
+      .catch((error) => {
+        toast.dismiss(loadingToast);
+        setToastLoading(false);
+
+        console.log(error);
+      });
+  };
+
   return {
     GetNotificationsByUserId,
     GetNotificationByFilter,
@@ -282,6 +352,8 @@ const useDashboardFetch = () => {
     UpdateNotificationSeenStateById,
     GetUserWrittenBlogsById,
     DeleteTargetBlogById,
+    GetFollowAuthors,
+    ClearAllFollowAuthors,
   };
 };
 

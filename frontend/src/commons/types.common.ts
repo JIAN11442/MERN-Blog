@@ -100,6 +100,9 @@ export interface LoadFunctionPropsType extends FetchLoadPropsType {
   authorId?: string;
   filter?: string;
   draft?: boolean;
+  query?: string;
+  authorUsername?: string;
+  fetchFor?: string;
 }
 
 export interface AuthorProfileStructureType {
@@ -114,6 +117,8 @@ export interface AuthorProfileStructureType {
   account_info: {
     total_posts: number;
     total_reads: number;
+    total_followers: number;
+    total_following: number;
   };
   social_links: {
     youtube?: string;
@@ -167,7 +172,6 @@ export interface FetchCommentPropsType {
   totalDeletedCommentNum?: number;
   loadmore?: boolean;
   newCommentContent?: string;
-  notificationId?: string;
   notificationObjId?: string;
   notificationIndex?: number;
 }
@@ -233,6 +237,7 @@ export interface NotificationStructureType {
   comment?: string | CommentStructureType;
   reply?: string | GenerateCommentStructureType;
   replied_on_comment?: string | CommentStructureType;
+  follow?: string;
   seen?: boolean;
   removed?: boolean;
   createdAt?: string;
@@ -255,4 +260,18 @@ export interface FetchDashboardPropsType {
   blogObjId?: string;
   deleteBtnRef?: React.RefObject<HTMLButtonElement> | null;
   index?: number;
+  authorUsername?: string;
+  fetchFor?: string;
+}
+
+export interface FetchUserPropsType {
+  authorUsername?: string;
+  submitBtn_e?: React.MouseEvent<HTMLButtonElement>;
+  notificationIndex?: number;
+  followAuthorCardIndex?: number;
+}
+
+export interface FollowAuthorsPropsType {
+  personal_info: PersonalInfoStructureType;
+  isFollowing: boolean;
 }

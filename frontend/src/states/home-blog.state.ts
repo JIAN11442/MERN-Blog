@@ -6,7 +6,6 @@ import type {
 } from "../commons/types.common";
 
 interface HomeBlogProps {
-  inPageNavIndex: number;
   inPageNavState: string;
   latestBlogs: BlogStructureType[] | GenerateToLoadStructureType | null;
   trendingBlogs: BlogStructureType[] | GenerateToLoadStructureType | null;
@@ -16,7 +15,6 @@ interface HomeBlogProps {
   queryUsers: PersonalInfoStructureType[] | GenerateToLoadStructureType | null;
   loadUsersLimit: number;
 
-  setInPageNavIndex: (index: number) => void;
   setInPageNavState: (state: string) => void;
   setLatestBlogs: (
     blogs: BlogStructureType[] | GenerateToLoadStructureType | null
@@ -45,7 +43,6 @@ const useHomeBlogStore = create<HomeBlogProps>((set) => ({
   queryUsers: null,
   loadUsersLimit: import.meta.env.VITE_USERS_LIMIT,
 
-  setInPageNavIndex: (index) => set({ inPageNavIndex: index }),
   setInPageNavState: (state) => set({ inPageNavState: state }),
   setLatestBlogs: (blogs) => set({ latestBlogs: blogs }),
   setTrendingBlogs: (blogs) => set({ trendingBlogs: blogs }),
@@ -54,7 +51,6 @@ const useHomeBlogStore = create<HomeBlogProps>((set) => ({
   setQueryUsers: (users) => set({ queryUsers: users }),
   initialHomeBlogState: () =>
     set({
-      inPageNavIndex: 0,
       inPageNavState: "home",
       latestBlogs: null,
       trendingBlogs: null,

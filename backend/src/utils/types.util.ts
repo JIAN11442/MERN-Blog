@@ -1,5 +1,5 @@
 import type mongoose from 'mongoose';
-import type { InferSchemaType, ObjectId } from 'mongoose';
+import type { InferSchemaType, ObjectId, Types } from 'mongoose';
 import type { OutputData } from '@editorjs/editorjs';
 
 import { userSchema } from '../schemas/user.schema';
@@ -41,12 +41,15 @@ export interface ChangePasswordReqBody {
   newPassword: string;
 }
 
-export interface NotificationQueryProps {
-  notification_for: ObjectId;
-  user: ObjectId;
-  seen: boolean;
-  removed: boolean;
+export interface FindQueryProps {
+  notification_for: Types.ObjectId;
+  user?: Types.ObjectId;
+  seen?: boolean;
+  removed?: boolean;
   type?: string;
+  $or?: Array<{ [key: string]: RegExp }>;
+  following?: Types.ObjectId;
+  followers?: Types.ObjectId;
 }
 
 export interface GetUserBlogsQueryProps {

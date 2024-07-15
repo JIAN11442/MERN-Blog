@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import AnimationWrapper from "../components/page-animation.component";
@@ -26,6 +26,8 @@ import type {
 
 const SearchPage = () => {
   const { query } = useParams();
+
+  const [inPageNavIndex, setInPageNavIndex] = useState(0);
 
   const { searchBarVisibility } = useNavbarStore();
   const { loadBlogsLimit, queryBlogs } = useHomeBlogStore();
@@ -61,8 +63,11 @@ const SearchPage = () => {
         {/* searching related blogs(md-screen) and users(min-screen) */}
         <div className="w-full">
           <InpageNavigation
+            inPageNavIndex={inPageNavIndex}
+            setInPageNavIndex={setInPageNavIndex}
             routes={[`Search Results from "${query}"`, "Accounts Matched"]}
             defaultHiddenIndex={1}
+            adaptiveAdjustment={{ initialToFirstTab: true }}
           >
             {/* Search result of related blogs */}
             <>

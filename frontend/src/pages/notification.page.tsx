@@ -18,7 +18,7 @@ import useDashboardFetch from "../fetchs/dashboard.fetch";
 import { NotificationStructureType } from "../commons/types.common";
 
 const NotificationPage = () => {
-  const filters = ["all", "like", "comment", "reply"];
+  const filters = ["all", "like", "comment", "reply", "follow"];
 
   const filterPanelRef = useRef<HTMLDivElement>(null);
 
@@ -108,7 +108,7 @@ const NotificationPage = () => {
   // 以便知道什麼時候要 collapse filter
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth <= 400) {
+      if (window.innerWidth <= 950) {
         setCollapse(true);
       } else {
         setCollapse(false);
@@ -214,7 +214,7 @@ const NotificationPage = () => {
         "
       >
         {!collapse ? (
-          // 當遊覽器寬度大於 400px
+          // 當遊覽器寬度大於 950px
           <div
             className="
               flex
@@ -277,7 +277,7 @@ const NotificationPage = () => {
             })}
           </div>
         ) : (
-          // 當遊覽器寬度小於 400px
+          // 當遊覽器寬度小於 950px
           <div>
             {/* Filter state button */}
             <button

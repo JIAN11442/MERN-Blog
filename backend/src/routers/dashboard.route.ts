@@ -11,6 +11,9 @@ import {
   getUserWrittenBlogs,
   getCountOfUserWrittenBlogs,
   deleteBlogById,
+  getFollowAuthors,
+  getFollowAuthorsCount,
+  clearAllUserFollowAuthors,
 } from '../controllers/dashboard.controller';
 
 const dashboardRoute = express.Router();
@@ -27,5 +30,9 @@ dashboardRoute.post('/get-user-written-blogs-info', jwtVerify, getUserWrittenBlo
 dashboardRoute.post('/get-user-written-blogs-count', jwtVerify, getCountOfUserWrittenBlogs);
 
 dashboardRoute.post('/delete-target-blog-id', jwtVerify, deleteBlogById);
+
+dashboardRoute.post('/get-follow-authors-info', jwtVerify, getFollowAuthors);
+dashboardRoute.post('/get-follow-authors-count', jwtVerify, getFollowAuthorsCount);
+dashboardRoute.post('/clear-all-follow-authors', clearAllUserFollowAuthors);
 
 export default dashboardRoute;

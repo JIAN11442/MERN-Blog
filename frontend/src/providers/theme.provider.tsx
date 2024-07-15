@@ -15,9 +15,9 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const { setTheme } = useProviderStore();
 
   useEffect(() => {
-    const themeInSessionStrorage = sessionStorage.getItem("theme");
-    const state = themeInSessionStrorage
-      ? themeInSessionStrorage
+    const themeInStrorage = sessionStorage.getItem("theme");
+    const state = themeInStrorage
+      ? themeInStrorage
       : darkThemePreference()
       ? "dark"
       : "light";

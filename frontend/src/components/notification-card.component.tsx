@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import AnimationWrapper from "./page-animation.component";
+import { FlatIcons } from "../icons/flaticons";
 
 import useAuthStore from "../states/user-auth.state";
 import useDashboardStore from "../states/dashboard.state";
 import useProviderStore from "../states/provider.state";
 
 import useCommentFetch from "../fetchs/comment.fetch";
+import useUserFetch from "../fetchs/user.fetch";
 
 import {
   AuthorStructureType,
@@ -18,7 +20,6 @@ import {
   NotificationStructureType,
 } from "../commons/types.common";
 import { getTimeAgo } from "../commons/date.common";
-import { FlatIcons } from "../icons/flaticons";
 
 interface NotificationCardProps {
   index: number;
@@ -37,13 +38,13 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   const [content, setContent] = useState("");
 
   const {
-    _id,
     user,
     type,
     replied_on_comment,
     blog,
     comment: notificationComment,
     reply: notificationReply,
+    follow,
     seen,
     createdAt,
   } = data;
@@ -76,12 +77,12 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     },
   };
 
+  const { theme } = useProviderStore();
   const { setActiveRemoveNtfWarningModal, setActiveDeleteNtfWarningModal } =
     useDashboardStore();
 
-  const { theme } = useProviderStore();
-
   const { AddCommentToBlog } = useCommentFetch();
+  const { FollowAuthorByUsername } = useUserFetch();
 
   // 控制展開 Reply Box
   const handleReply = () => {
@@ -113,7 +114,6 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         comment: content,
         blog_author: blogAuthorId as string,
         replying_to: replyId,
-        notificationId: _id,
         notificationIndex: index,
       });
 
@@ -137,6 +137,14 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
       state: true,
       index,
       data,
+    });
+  };
+
+  const handleFollow = (e: React.MouseEvent<HTMLButtonElement>) => {
+    FollowAuthorByUsername({
+      authorUsername: username,
+      submitBtn_e: e,
+      notificationIndex: index,
     });
   };
 
@@ -166,7 +174,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               `
         }
         border-grey-custom
-        ${seen ? "opacity-55" : "relative"}
+        ${seen && !for_warning ? "opacity-55" : "relative"}
       `}
     >
       {/* Content */}
@@ -182,11 +190,13 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         <img
           src={profile_img}
           className="
-            w-12
-            h-12
+            w-14
+            h-14
             rounded-full
-            border
-            border-grey-custom
+            flex-none
+            object-cover
+            shadow-[0px_0px_5px_1px]
+            shadow-grey-dark/20
           "
         />
         {/* Notification content */}
@@ -255,6 +265,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               >
                 {type === "like"
                   ? "liked your blog"
+                  : type === "follow"
+                  ? "started following you"
                   : type === "comment"
                   ? `commented on a blog that you're created`
                   : "replied on blog"}
@@ -349,8 +361,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                         w-9
                         h-9
                         rounded-full
-                        shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
-                      shadow-grey-dark/10
+                        shadow-[0px_0px_5px_1px]
+                        shadow-grey-dark/10
                       "
                     />
                     <div
@@ -386,9 +398,29 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
                 {/* Options Button */}
                 <div className="flex gap-5">
-                  {!notificationReply && type !== "like" && (
+                  {/* Reply */}
+                  {(type === "comment" || type === "reply") &&
+                    !notificationReply && (
+                      <button
+                        onClick={handleReply}
+                        className="
+                          text-grey-dark/50
+                          hover:text-grey-dark/80
+                          hover:underline
+                          underline-offset-2
+                          transition
+                        "
+                      >
+                        Reply
+                      </button>
+                    )}
+
+                  {/* Follow */}
+                  {type === "follow" && follow === undefined && (
                     <button
-                      onClick={handleReply}
+                      onClick={(e) => {
+                        follow === undefined ? handleFollow(e) : null;
+                      }}
                       className="
                         text-grey-dark/50
                         hover:text-grey-dark/80
@@ -397,10 +429,11 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                         transition
                       "
                     >
-                      Reply
+                      {follow === undefined ? "Follow" : "Following"}
                     </button>
                   )}
 
+                  {/* Remove */}
                   <button
                     onClick={handleActiveRemoveWarningModal}
                     className="
@@ -469,7 +502,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                       w-9
                       h-9
                       rounded-full
-                      shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+                      shadow-[0px_0px_5px_1px]
                       shadow-grey-dark/5
                     "
                   />

@@ -8,17 +8,21 @@ interface ToasterProviderProps {
 
 const ToasterProvider: React.FC<ToasterProviderProps> = ({ children }) => {
   // const { editorState } = useEditorBlogStore();
-  const { toastLoading } = useProviderStore();
+  const { toastLoading, theme } = useProviderStore();
   return (
     <>
       <Toaster
-        // containerStyle={{
-        //   top: `${editorState === 'publish' ? '20px' : '100px'}`,
-        // }}
         toastOptions={{
           position: "top-center",
           duration: toastLoading ? undefined : 2000, //除了 loading 之外的 toast 2 秒後消失
+          style: {
+            background: theme === "dark" ? "#333" : "#fff",
+            color: theme === "dark" ? "#fff" : "#333",
+          },
         }}
+        // containerStyle={{
+        //   top: `${editorState === 'publish' ? '20px' : '100px'}`,
+        // }}
       />
       {children}
     </>

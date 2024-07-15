@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import AnimationWrapper from "../components/page-animation.component";
 import Loader from "../components/loader.component";
@@ -9,6 +9,8 @@ import BlogPostCard from "../components/blog-card-banner.component";
 import LoadOptions from "../components/load-options.components";
 import NoDataMessage from "../components/blog-nodata.component";
 
+import { FlatIcons } from "../icons/flaticons";
+
 import useUserFetch from "../fetchs/user.fetch";
 import useBlogFetch from "../fetchs/blog.fetch";
 
@@ -17,56 +19,97 @@ import useAuthStore from "../states/user-auth.state";
 import useHomeBlogStore from "../states/home-blog.state";
 import useAuthorProfileStore from "../states/author-profile.state";
 import useSettingStore from "../states/setting.state";
+import useProviderStore from "../states/provider.state";
 
 import {
   AuthorProfileStructureType,
   AuthorStructureType,
   type BlogStructureType,
 } from "../commons/types.common";
+import useDashboardFetch from "../fetchs/dashboard.fetch";
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
+
   const { authorId: paramsAuthor } = useParams();
+
+  const followBtnRef = useRef<HTMLButtonElement>(null);
+
   const [initialIndex, setInitialIndex] = useState(0);
+  const [inPageNavIndex, setInPageNavIndex] = useState(0);
+  const [maxMdScreen, setMaxMdScreen] = useState(false);
+
+  const categories = ["Blogs Published", "About", "Following"];
 
   const { authUser } = useAuthStore();
   const { authorProfileInfo } = useAuthorProfileStore();
   const {
-    personal_info: { username: profile_username, fullname, profile_img, bio },
-    account_info: { total_posts, total_reads },
+    personal_info: { username: profile_username, profile_img, bio },
+    account_info: { total_posts, total_reads, total_followers },
     social_links,
     createdAt,
   } = authorProfileInfo as AuthorProfileStructureType;
 
+  const { theme } = useProviderStore();
   const { searchBarVisibility } = useNavbarStore();
-  const { latestBlogs, loadBlogsLimit, setLatestBlogs } = useHomeBlogStore();
-  const { isProfileUpdated, setIsProfileUpdated } = useSettingStore();
+  const { isProfileUpdated, isFollowing } = useSettingStore();
+  const { latestBlogs, loadBlogsLimit, initialHomeBlogState } =
+    useHomeBlogStore();
 
-  const { GetAuthorProfileInfo } = useUserFetch();
   const { GetLatestBlogsByAuthor } = useBlogFetch();
+  const { GetFollowAuthors } = useDashboardFetch();
+  const {
+    GetAuthorProfileInfo,
+    CheckAuthorIsFollowingByUser,
+    FollowAuthorByUsername,
+  } = useUserFetch();
+
+  // 追蹤作者
+  const handleFollow = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!authUser) {
+      return navigate("/signin");
+    }
+
+    if (paramsAuthor) {
+      FollowAuthorByUsername({ authorUsername: paramsAuthor, submitBtn_e: e });
+    }
+  };
 
   // Fetch author profile info
   useEffect(() => {
     if (paramsAuthor) {
       GetAuthorProfileInfo(paramsAuthor);
+      GetFollowAuthors({
+        page: 1,
+        authorUsername: paramsAuthor,
+        fetchFor: "following",
+      });
+
+      // 如果已經登入且要查看的作者不是自己，則檢查是否已追蹤該作者
+      if (authUser && paramsAuthor !== authUser?.username) {
+        CheckAuthorIsFollowingByUser(paramsAuthor);
+      }
+
+      return () => {
+        initialHomeBlogState();
+      };
     }
-  }, [paramsAuthor]);
+  }, [authUser, paramsAuthor]);
 
   // Fetch latest blogs by author
   useEffect(() => {
     if (authorProfileInfo?._id) {
       GetLatestBlogsByAuthor({ authorId: authorProfileInfo._id, page: 1 });
     }
-
-    return () => {
-      setLatestBlogs(null);
-    };
   }, [authorProfileInfo]);
 
-  // Reset initialIndex when profile is updated
+  // 偵測螢幕寬度
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth <= 768 && isProfileUpdated) {
-        setInitialIndex(1);
+      if (window.innerWidth <= 768) {
+        setMaxMdScreen(true);
+      } else {
+        setMaxMdScreen(false);
       }
     };
 
@@ -76,9 +119,16 @@ const ProfilePage = () => {
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      setIsProfileUpdated(false);
     };
-  }, [isProfileUpdated]);
+  }, []);
+
+  // 如果是因為變更個人資料而傳送過來的，
+  // 則在 md-screen 時，自動切換到第二個頁簽，即 "About"
+  useEffect(() => {
+    if (maxMdScreen && isProfileUpdated) {
+      setInitialIndex(1);
+    }
+  }, [isProfileUpdated, maxMdScreen]);
 
   return (
     <AnimationWrapper
@@ -119,6 +169,7 @@ const ProfilePage = () => {
               md:sticky
               md:top-[100px]
               md:py-10
+              md:h-[85vh]
             "
           >
             {/* Profile image */}
@@ -139,26 +190,140 @@ const ProfilePage = () => {
             {/* Profile username */}
             <h1 className="text-xl font-medium">@{profile_username}</h1>
 
-            {/* Profile fullname */}
-            <p className="text-md text-grey-dark/50 capitalize">{fullname}</p>
+            {/* Profile followers && following */}
+            <p className="text-md text-grey-dark/50">
+              {total_followers.toLocaleString()} Followers
+            </p>
 
             {/* Profile total posts && total reads */}
             <p className="text-md text-grey-dark">
-              {total_posts.toLocaleString()} Blogs -{" "}
+              {total_posts.toLocaleString()} Blogs - {}
               {total_reads.toLocaleString()} Reads
             </p>
 
-            {/* Profile edit button - When the author being searched is the current user */}
-            {paramsAuthor === authUser?.username && (
-              <div className="flex gap-4 mt-2">
-                <Link
-                  to="/settings/edit-profile"
-                  className="btn-light rounded-md"
+            {/* Bio */}
+            <p
+              className={`
+                max-md:hidden
+                text-md
+                leading-7
+                ${
+                  !bio.length
+                    ? "text-grey-dark/50"
+                    : `
+                        p-5
+                        border-l-4
+                        ${
+                          theme === "light"
+                            ? `
+                              text-orange-900
+                              border-orange-200
+                              bg-orange-100/30
+                              `
+                            : `
+                              text-orange-100
+                              border-orange-300/80
+                              bg-orange-100/60
+                              `
+                        }
+                        whitespace-pre-wrap
+                        rounded-md
+                      `
+                }
+              `}
+            >
+              {bio.length ? bio : "Nothing to read here"}
+            </p>
+
+            {/* Profile edit button | Follow Button */}
+            <>
+              {paramsAuthor === authUser?.username ? (
+                <div
+                  className="
+                    flex 
+                    gap-4
+                    mt-2
+                  "
                 >
-                  Edit Profile
-                </Link>
-              </div>
-            )}
+                  <Link
+                    to={"/settings/edit-profile"}
+                    className="
+                      btn-light
+                      rounded-md
+                    "
+                  >
+                    Edit Profile
+                  </Link>
+                </div>
+              ) : isFollowing ? (
+                <div
+                  className="
+                    flex
+                    gap-4
+                    mt-2
+                  "
+                >
+                  {/* Following */}
+                  <Link
+                    to={"/dashboard/friends"}
+                    className={`
+                      flex
+                      gap-2
+                      btn-light
+                      md:rounded-md
+                      justify-center
+                      ${
+                        theme === "dark"
+                          ? `
+                            bg-[#1DA1F2]
+                            opacity-100
+                            `
+                          : ``
+                      }
+                    `}
+                  >
+                    <FlatIcons
+                      name="fi fi-ss-circle-star"
+                      className={`
+                        flex
+                        mt-[3px]
+                      `}
+                    />
+                    <p>Following</p>
+                  </Link>
+                </div>
+              ) : (
+                <div
+                  className="
+                    flex 
+                    gap-4 
+                    mt-2
+                  "
+                >
+                  <button
+                    ref={followBtnRef}
+                    onClick={(e) => handleFollow(e)}
+                    className={`
+                      btn-light
+                      md:rounded-md
+                      animate-bounce
+                      shadow-[0px_1px_5px_0px]
+                      shadow-grey-dark/30
+                      ${
+                        theme === "dark"
+                          ? `
+                            bg-[#1DA1F2] 
+                              opacity-100
+                            `
+                          : ``
+                      }
+                    `}
+                  >
+                    Follow
+                  </button>
+                </div>
+              )}
+            </>
 
             <hr className="my-2 border-grey-custom" />
 
@@ -168,16 +333,24 @@ const ProfilePage = () => {
               social_links={social_links}
               createdAt={createdAt}
               className="max-md:hidden"
+              for_profile={true}
             />
           </div>
 
           {/* latest blogs(min-screen && md-screen) && author profile info(min-screen) */}
-          <div className="max-md:mt-12 w-full">
+          <div
+            className="
+              w-full
+              max-md:mt-12 
+            "
+          >
             <InpageNavigation
-              routes={["Blogs Published", "About"]}
+              routes={maxMdScreen ? categories : categories.slice(0, 2)}
+              inPageNavIndex={inPageNavIndex}
+              setInPageNavIndex={setInPageNavIndex}
               defaultHiddenIndex={1}
               initialActiveIndex={initialIndex}
-              adaptiveAdjustment={true}
+              adaptiveAdjustment={{ initialToFirstTab: true }}
             >
               {/* latest blogs */}
               <>

@@ -161,9 +161,9 @@ const BlogPage = () => {
                         w-12
                         h-12
                         rounded-full
-                        shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
-                      shadow-grey-dark/10
-                      hover:shadow-grey-dark/20
+                        shadow-[0px_0px_5px_1px]
+                        shadow-grey-dark/10
+                        hover:shadow-grey-dark/20
                         hover:opacity-80
                         transition
                       "

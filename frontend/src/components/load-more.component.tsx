@@ -12,15 +12,9 @@ interface LoadMoreBtnProps {
   authorId?: string;
   filter?: string;
   draft?: boolean;
-  loadFunction: ({
-    category,
-    query,
-    authorId,
-    filter,
-    page,
-    state,
-    draft,
-  }: LoadFunctionPropsType) => void;
+  authorUsername?: string;
+  fetchFor?: string;
+  loadFunction: (props: LoadFunctionPropsType) => void;
 }
 
 const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
@@ -29,6 +23,8 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
   authorId,
   filter,
   draft,
+  authorUsername,
+  fetchFor = "following",
   state = "loadmore",
   loadFunction: LoadMoreFunction,
 }) => {
@@ -46,6 +42,8 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
             page: data.page + 1,
             state,
             draft,
+            authorUsername,
+            fetchFor,
           })
         }
         className="

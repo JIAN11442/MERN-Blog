@@ -22,7 +22,7 @@ const NotificationOptionsPanel = () => {
         top-0
         right-5
         z-20
-        shadow-[0px_0px_5px_1px_rgba(0,0,0,0)]
+        shadow-[0px_0px_5px_1px]
         shadow-grey-dark/15
         rounded-md
       "

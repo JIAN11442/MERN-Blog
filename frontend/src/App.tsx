@@ -16,6 +16,7 @@ import EditProfilePage from "./pages/edit-profile.page";
 import NotificationPage from "./pages/notification.page";
 import OfflinePage from "./pages/offline.page";
 import BlogManagementPage from "./pages/blog-management.page";
+import AuthorManagementPage from "./pages/author-management.page";
 
 import useProviderStore from "./states/provider.state";
 
@@ -44,6 +45,7 @@ function App() {
             <Route path="dashboard" element={<SideNavbar />}>
               <Route path="notifications" element={<NotificationPage />} />
               <Route path="blogs" element={<BlogManagementPage />} />
+              <Route path="friends" element={<AuthorManagementPage />} />
             </Route>
 
             {/* Settings route */}

@@ -13,25 +13,21 @@ interface LoadLessBtnProps {
   filter?: string;
   loadLimit: number;
   draft?: boolean;
-  loadFunction: ({
-    category,
-    query,
-    authorId,
-    filter,
-    page,
-    state,
-    draft,
-  }: LoadFunctionPropsType) => void;
+  authorUsername?: string;
+  fetchFor?: string;
+  loadFunction: (props: LoadFunctionPropsType) => void;
 }
 
 const LoadLessBtn: React.FC<LoadLessBtnProps> = ({
   data,
-  state = "loadless",
   query,
   authorId,
   filter,
   loadLimit,
   draft,
+  authorUsername,
+  fetchFor = "following",
+  state = "loadless",
   loadFunction: LoadLessFunction,
 }) => {
   const { inPageNavState: category } = useHomeBlogStore();
@@ -48,6 +44,8 @@ const LoadLessBtn: React.FC<LoadLessBtnProps> = ({
             page: data.page,
             state,
             draft,
+            authorUsername,
+            fetchFor,
           })
         }
         className="

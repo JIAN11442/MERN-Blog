@@ -54,9 +54,13 @@ export const userSchema = new Schema(
     account_info: {
       total_posts: { type: Number, default: 0 },
       total_reads: { type: Number, default: 0 },
+      total_followers: { type: Number, default: 0 },
+      total_following: { type: Number, default: 0 },
     },
     google_auth: { type: Boolean, default: false },
     blogs: { type: [Schema.Types.ObjectId], ref: 'blogs', default: [] },
+    followers: { type: [Schema.Types.ObjectId], ref: 'users', default: [] },
+    following: { type: [Schema.Types.ObjectId], ref: 'users', default: [] },
   },
   { timestamps: true },
 );
