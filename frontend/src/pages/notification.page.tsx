@@ -1,21 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { FlatIcons } from "../icons/flaticons";
 
-import NoDataMessage from "../components/blog-nodata.component";
-import Loader from "../components/loader.component";
-import AnimationWrapper from "../components/page-animation.component";
-import NotificationCard from "../components/notification-card.component";
-import LoadOptions from "../components/load-options.components";
 import RemoveNotificationWarningModal from "../components/remove-notification-warning.component";
 import DeleteNotificationCommentWarningModal from "../components/delete-notification-comment-warning.component";
 import NotificationOptionsPanel from "../components/notification-options-panel.component";
+import NotificationCardList from "../components/notification-card-list.component";
 
 import useProviderStore from "../states/provider.state";
 import useAuthStore from "../states/user-auth.state";
 import useDashboardStore from "../states/dashboard.state";
 
 import useDashboardFetch from "../fetchs/dashboard.fetch";
-import { NotificationStructureType } from "../commons/types.common";
+import { GenerateToLoadStructureType } from "../commons/types.common";
 
 const NotificationPage = () => {
   const filters = ["all", "like", "comment", "reply", "follow"];
@@ -337,7 +333,13 @@ const NotificationPage = () => {
                     `
                   : "hidden"
               }
-              ${windowInnerWidth > 300 ? "grid-cols-2" : "grid-cols-1"}
+              ${
+                windowInnerWidth < 400
+                  ? "grid-cols-1"
+                  : windowInnerWidth >= 400 && windowInnerWidth < 500
+                  ? "grid-cols-2"
+                  : "grid-cols-3"
+              }
             `}
           >
             {filters.map((item, i) => {
@@ -350,7 +352,7 @@ const NotificationPage = () => {
                   key={i}
                   className="
                     flex
-                    gap-2
+                    gap-3
                     items-center
                     justify-start
                   "
@@ -359,7 +361,6 @@ const NotificationPage = () => {
                     type="radio"
                     name={item}
                     checked={item === filter.type}
-                    className="w-5 h-5"
                     onChange={() => {
                       setFilter({
                         ...filter,
@@ -371,6 +372,11 @@ const NotificationPage = () => {
                       });
                       setActiveFilterPanel(false);
                     }}
+                    className="
+                      w-[14px] 
+                      h-[14px]
+                      cursor-pointer
+                    "
                   />
                   <p>{item}</p>
 
@@ -388,42 +394,13 @@ const NotificationPage = () => {
       </>
 
       {/* Notification Contents */}
-      <>
-        {notificationsInfo === null ? (
-          <Loader />
-        ) : (
-          <>
-            {"results" in notificationsInfo &&
-            notificationsInfo?.results?.length ? (
-              <>
-                {notificationsInfo.results.map(
-                  (item: NotificationStructureType, i) => (
-                    <AnimationWrapper
-                      key={i}
-                      keyValue="notification-card"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: i * 0.1 }}
-                    >
-                      <NotificationCard index={i} data={item} />
-                    </AnimationWrapper>
-                  )
-                )}
-
-                <LoadOptions
-                  id="notification-page"
-                  data={notificationsInfo}
-                  loadLimit={import.meta.env.VITE_NOTIFICATIONS_LIMIT}
-                  loadFunction={GetNotificationByFilter}
-                  filter={filter.type}
-                />
-              </>
-            ) : (
-              <NoDataMessage message="Nothing available" />
-            )}
-          </>
-        )}
-      </>
+      <NotificationCardList
+        id="notification-page"
+        data={notificationsInfo as GenerateToLoadStructureType}
+        loadFunction={(props) =>
+          GetNotificationByFilter({ ...props, filter: filter.type })
+        }
+      />
     </div>
   );
 };

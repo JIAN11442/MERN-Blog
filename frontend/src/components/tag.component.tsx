@@ -62,7 +62,7 @@ const Tag: React.FC<TagProps> = ({ tag, index }) => {
               `
             : `
                 shadow-[0px_0px_10px_2px]
-                shadow-grey-dark/20
+                shadow-grey-dark/10
               `
         }
       `}

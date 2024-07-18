@@ -3,9 +3,11 @@ import type { AuthorProfileStructureType } from "../commons/types.common";
 
 interface AuthorProfileProps {
   authorProfileInfo: AuthorProfileStructureType | null;
+  followState: { active: boolean; state: string };
 
   setAuthorProfileInfo: (profile: AuthorProfileStructureType | null) => void;
   initialAuthorProfileInfo: () => void;
+  setFollowState: (state: { active: boolean; state: string }) => void;
 }
 
 const initialAuthorProfileInfo = {
@@ -35,10 +37,12 @@ const initialAuthorProfileInfo = {
 
 const useAuthorProfileStore = create<AuthorProfileProps>((set) => ({
   authorProfileInfo: initialAuthorProfileInfo,
+  followState: { active: false, state: "Following" },
 
   setAuthorProfileInfo: (profile) => set({ authorProfileInfo: profile }),
   initialAuthorProfileInfo: () =>
     set({ authorProfileInfo: initialAuthorProfileInfo }),
+  setFollowState: (state) => set({ followState: state }),
 }));
 
 export default useAuthorProfileStore;

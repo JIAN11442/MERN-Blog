@@ -13,13 +13,7 @@ interface LoadOptionsProps {
   id: string;
   data: GenerateToLoadStructureType;
   loadLimit: number;
-  query?: string;
-  authorId?: string;
-  authorUsername?: string;
-  filter?: string;
-  draft?: boolean;
-  fetchFor?: string;
-  loadFunction: (props: LoadFunctionPropsType) => Promise<void>;
+  loadFunction: (props: LoadFunctionPropsType) => void;
   className?: string;
 }
 
@@ -27,12 +21,6 @@ const LoadOptions: React.FC<LoadOptionsProps> = ({
   id,
   data,
   loadLimit,
-  query,
-  authorId,
-  authorUsername,
-  filter,
-  draft,
-  fetchFor,
   loadFunction,
   className,
 }) => {
@@ -49,27 +37,12 @@ const LoadOptions: React.FC<LoadOptionsProps> = ({
       )}
     >
       {/* Load more button */}
-      <LoadMoreBtn
-        data={data}
-        query={query}
-        authorId={authorId}
-        filter={filter}
-        draft={draft}
-        authorUsername={authorUsername}
-        fetchFor={fetchFor}
-        loadFunction={loadFunction}
-      />
+      <LoadMoreBtn data={data} loadFunction={loadFunction} />
 
       {/* Load less button */}
       <LoadLessBtn
         data={data}
-        query={query}
-        authorId={authorId}
-        filter={filter}
         loadLimit={loadLimit}
-        draft={draft}
-        authorUsername={authorUsername}
-        fetchFor={fetchFor}
         loadFunction={loadFunction}
       />
 

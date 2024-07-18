@@ -1,22 +1,14 @@
 import { useEffect, useState } from "react";
 
 import InpageNavigation from "../components/inpage-navigation.component";
-import Loader from "../components/loader.component";
-import NoDataMessage from "../components/blog-nodata.component";
-import AnimationWrapper from "../components/page-animation.component";
-import ManagePublishedBlogCard from "../components/manage-published-blog-card.component";
-import LoadOptions from "../components/load-options.components";
-import ManageDraftBlogCard from "../components/manage-draft-blogs-card.component";
 import DeleteBlogWarningModal from "../components/delete-blog-warning.component";
+import BlogCardList from "../components/blog-card-list.component";
 
 import { FlatIcons } from "../icons/flaticons";
 
 import useDashboardStore from "../states/dashboard.state";
 import useDashboardFetch from "../fetchs/dashboard.fetch";
-import {
-  BlogStructureType,
-  GenerateToLoadStructureType,
-} from "../commons/types.common";
+import { GenerateToLoadStructureType } from "../commons/types.common";
 
 const BlogManagementPage = () => {
   const inpageNavOptions = ["Published", "Drafts"];
@@ -196,75 +188,33 @@ const BlogManagementPage = () => {
         "
       >
         {/* Published Blogs */}
-        <div>
-          {publishedBlogs === null ? (
-            <Loader />
-          ) : "results" in publishedBlogs && publishedBlogs.results?.length ? (
-            <>
-              {publishedBlogs.results.map((blog, i) => (
-                <AnimationWrapper
-                  key={`published-blog-${i}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                >
-                  <ManagePublishedBlogCard
-                    index={i}
-                    blog={blog as BlogStructureType}
-                  />
-                </AnimationWrapper>
-              ))}
-            </>
-          ) : (
-            <NoDataMessage message="No published blogs" />
-          )}
-        </div>
+        <BlogCardList
+          id="published-blogs"
+          data={publishedBlogs as GenerateToLoadStructureType}
+          noDataMessage={"No published blogs"}
+          for_type={"published"}
+          loadLimit={import.meta.env.VITE_MANAGE_BLOGS_LIMIT}
+          loadFunction={(props) =>
+            GetUserWrittenBlogsById({
+              ...props,
+              draft: false,
+              query: blogQuery,
+            })
+          }
+        />
 
         {/* Drafts Blogs */}
-        <div>
-          {draftBlogs === null ? (
-            <Loader />
-          ) : "results" in draftBlogs && draftBlogs.results?.length ? (
-            <>
-              {draftBlogs.results.map((blog, i) => (
-                <AnimationWrapper
-                  key={`draft-blog-${i}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                >
-                  <ManageDraftBlogCard
-                    index={i}
-                    blog={blog as BlogStructureType}
-                  />
-                </AnimationWrapper>
-              ))}
-            </>
-          ) : (
-            <NoDataMessage message="No drafts blogs" />
-          )}
-        </div>
+        <BlogCardList
+          id="draft-blogs"
+          data={draftBlogs as GenerateToLoadStructureType}
+          noDataMessage={"No drafts blogs"}
+          for_type="drafts"
+          loadLimit={import.meta.env.VITE_MANAGE_BLOGS_LIMIT}
+          loadFunction={(props) =>
+            GetUserWrittenBlogsById({ ...props, draft: true, query: blogQuery })
+          }
+        />
       </InpageNavigation>
-
-      {/* Load Options */}
-      <>
-        {publishedBlogs !== null && draftBlogs !== null ? (
-          <LoadOptions
-            id={inpageNavOptions[inPageNavIndex]}
-            data={
-              (inPageNavIndex === 0
-                ? publishedBlogs
-                : draftBlogs) as GenerateToLoadStructureType
-            }
-            loadLimit={import.meta.env.VITE_MANAGE_BLOGS_LIMIT}
-            loadFunction={GetUserWrittenBlogsById}
-            draft={inPageNavIndex === 0 ? false : true}
-            query={blogQuery}
-          />
-        ) : (
-          ""
-        )}
-      </>
     </div>
   );
 };

@@ -47,9 +47,9 @@ export interface FindQueryProps {
   seen?: boolean;
   removed?: boolean;
   type?: string;
-  $or?: Array<{ [key: string]: RegExp }>;
   following?: Types.ObjectId;
   followers?: Types.ObjectId;
+  $or?: Array<{ [key: string]: RegExp }>;
 }
 
 export interface GetUserBlogsQueryProps {

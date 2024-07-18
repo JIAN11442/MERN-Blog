@@ -1,32 +1,40 @@
 import { Link } from "react-router-dom";
 import {
   FollowAuthorsPropsType,
-  GenerateToLoadStructureType,
   PersonalInfoStructureType,
 } from "../commons/types.common";
 import useProviderStore from "../states/provider.state";
 import useUserFetch from "../fetchs/user.fetch";
-import useDashboardStore from "../states/dashboard.state";
+import useAuthStore from "../states/user-auth.state";
+import { twMerge } from "tailwind-merge";
 
-interface ManageFollowAuthorProps {
+interface ManageFollowAuthorCardProps {
   index: number;
   data: FollowAuthorsPropsType;
   state: string;
   for_profile?: boolean;
+  for_page?: boolean;
+  totalLoadNum?: number;
+  btnStyle?: string;
 }
 
-const ManageFollowAuthorCard: React.FC<ManageFollowAuthorProps> = ({
+const ManageFollowAuthorCard: React.FC<ManageFollowAuthorCardProps> = ({
   index,
   data,
   state,
   for_profile = false,
+  for_page = true,
+  totalLoadNum = 0,
+  btnStyle,
 }) => {
   const { personal_info, isFollowing } = data;
   const { fullname, username, profile_img } =
     (personal_info as PersonalInfoStructureType) ?? {};
+  const { authUser } = useAuthStore();
+  const { username: authUsername } =
+    (authUser as PersonalInfoStructureType) ?? {};
 
   const { theme } = useProviderStore();
-  const { followingAuthor } = useDashboardStore();
 
   const { FollowAuthorByUsername, UnfollowAuthorByUsername } = useUserFetch();
 
@@ -40,12 +48,14 @@ const ManageFollowAuthorCard: React.FC<ManageFollowAuthorProps> = ({
         authorUsername: username,
         submitBtn_e: e,
         followAuthorCardIndex: index,
+        for_page,
       });
     } else {
       FollowAuthorByUsername({
         authorUsername: username,
         submitBtn_e: e,
         followAuthorCardIndex: index,
+        for_page,
       });
     }
   };
@@ -60,22 +70,14 @@ const ManageFollowAuthorCard: React.FC<ManageFollowAuthorProps> = ({
                 p-3 
                 pl-0
               `
-            : "p-6"
+            : "p-5"
         }
         gap-5
         items-center
         justify-start
-        ${
-          for_profile &&
-          index !==
-            ((followingAuthor as GenerateToLoadStructureType).results?.length ??
-              0) -
-              1
-            ? "border-none"
-            : ""
-        }
         border-b
         border-grey-custom
+        ${for_profile && index !== totalLoadNum ? "border-none" : ""}
         
         `}
     >
@@ -99,8 +101,8 @@ const ManageFollowAuthorCard: React.FC<ManageFollowAuthorProps> = ({
                     h-10
                   `
                 : `
-                    w-14
-                    h-14
+                    w-12
+                    h-12
                   `
             }
             rounded-full
@@ -125,7 +127,7 @@ const ManageFollowAuthorCard: React.FC<ManageFollowAuthorProps> = ({
         </Link>
         <p
           className={`
-            text-grey-dark/50 
+            ${theme === "dark" ? "text-grey-dark/50" : "text-grey-dark/60"}
             truncate
             ${for_profile ? "text-[13px]" : ""}
           `}
@@ -135,39 +137,48 @@ const ManageFollowAuthorCard: React.FC<ManageFollowAuthorProps> = ({
       </div>
 
       {/* Button */}
-      <button
-        onClick={(e) => handleFollowOrUnfollow(e)}
-        className={`
-          ${for_profile ? "hidden" : "flex"}
-          ml-auto
-          btn-dark
-          max-md:rounded-md
-          text-black-custom
-          ${
-            state === "followers" && isFollowing
-              ? `
-                  cursor-not-allowed
-                  hover:opacity-100
-                `
-              : ""
-          }
-          ${
-            isFollowing
-              ? `
-                  bg-grey-custom 
-                `
-              : theme === "dark"
-              ? `
-                  bg-[#1DA1F2]
-                  transition
-                `
-              : "text-white-custom"
-          }
-          
-        `}
-      >
-        {isFollowing ? "Following" : "Follow"}
-      </button>
+      <>
+        {username !== authUsername ? (
+          <button
+            onClick={(e) => handleFollowOrUnfollow(e)}
+            className={twMerge(
+              `
+              ${for_profile ? "hidden" : "flex"}
+              ml-auto
+              btn-dark
+              text-[13px]
+              text-black-custom
+              ${
+                state === "followers" && isFollowing
+                  ? `
+                      cursor-not-allowed
+                      hover:opacity-100
+                    `
+                  : ""
+              }
+              ${
+                isFollowing
+                  ? `
+                      bg-grey-custom 
+                    `
+                  : theme === "dark"
+                  ? `
+                      bg-[#1DA1F2]
+                      transition
+                    `
+                  : "text-white-custom"
+              }
+              
+            `,
+              btnStyle
+            )}
+          >
+            {isFollowing ? "Following" : "Follow"}
+          </button>
+        ) : (
+          ""
+        )}
+      </>
     </div>
   );
 };

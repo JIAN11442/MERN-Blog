@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable consistent-return */
 /* eslint-disable import/prefer-default-export */
@@ -382,11 +383,11 @@ export const deleteBlogById: RequestHandler = async (req, res, next) => {
   }
 };
 
-// 取得用戶關注的作者
+// 取得用戶關注的作者(可以選擇要限制取得量或全區)
 export const getFollowAuthors: RequestHandler = async (req, res, next) => {
   try {
     const { userId } = req;
-    const { page, authorUsername, query, fetchFor } = req.body;
+    const { page, authorUsername, query, fetchFor, sortByUpdated } = req.body;
 
     const userObjId = new Types.ObjectId(userId);
     const maxLimit = env.LOAD_AUTHOR_LIMIT;
@@ -402,10 +403,6 @@ export const getFollowAuthors: RequestHandler = async (req, res, next) => {
 
     if (!fetchFor) {
       throw createHttpError(400, 'Please provide a state');
-    }
-
-    if (page === undefined || page < 1) {
-      throw createHttpError(400, 'Please provide a page number from 1');
     }
 
     // 先根據提供的 author username 找到對應的 user
@@ -425,8 +422,6 @@ export const getFollowAuthors: RequestHandler = async (req, res, next) => {
       findQuery.following = targetUser._id;
     }
 
-    console.log({ $in: [userObjId, `${fetchFor === 'following' ? '$followers' : '$following'}`] });
-
     // 這裡並不像以往的概念，直接查詢目標用戶的 following 有哪些，或考慮 query 篩選
     // 原因是因為 following 是一個 objectId array，且 query 是針對其對應的 user 中的 username 或 fullname 進行篩選
     // 整個過程會變得非常複雜，因此這裡偷換了一個思路
@@ -435,7 +430,7 @@ export const getFollowAuthors: RequestHandler = async (req, res, next) => {
     // 如果某個用戶的 followers 中有目標用戶，那麼這個用戶就是目標用戶的 following
     // 另外，我們還需要判斷當前用戶是否已經關注了這個用戶，並添加一個 isFollowing 欄位
     // 因此只能透過 aggregate 來進行查詢
-    const getAuthorsById = await UserSchema.aggregate([
+    const aggregateQuery = [
       // 先過濾出符合條件的用戶
       {
         $match: findQuery,
@@ -451,6 +446,8 @@ export const getFollowAuthors: RequestHandler = async (req, res, next) => {
         },
       },
 
+      { $sort: sortByUpdated ? { updatedAt: -1 } : { createdAt: -1 } },
+
       // 最後只輸出需要的欄位
       {
         $project: {
@@ -461,9 +458,16 @@ export const getFollowAuthors: RequestHandler = async (req, res, next) => {
           _id: 0,
         },
       },
-      { $skip: skipDocs },
-      { $limit: maxLimit },
-    ]);
+    ] as unknown as any[];
+
+    // 如果有提供 page，且是大於 0 的，那代表需要分頁
+    // 否則直接輸出所有符合條件的用戶
+    if (page !== undefined && page > 0) {
+      aggregateQuery.push({ $skip: skipDocs });
+      aggregateQuery.push({ $limit: maxLimit });
+    }
+
+    const getAuthorsById = await UserSchema.aggregate(aggregateQuery);
 
     if (!getAuthorsById) {
       throw createHttpError(500, `No ${fetchFor} found with this filter`);

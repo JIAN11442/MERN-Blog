@@ -2,20 +2,13 @@ import { useEffect, useState } from "react";
 import { FlatIcons } from "../icons/flaticons";
 
 import InpageNavigation from "../components/inpage-navigation.component";
-import Loader from "../components/loader.component";
-import AnimationWrapper from "../components/page-animation.component";
-import NoDataMessage from "../components/blog-nodata.component";
-import ManageFollowAuthorCard from "../components/manage-follow-authors-cad.component";
+import ManageFollowAuthorCardList from "../components/manage-follow-author-card-list.component";
 
 import useDashboardStore from "../states/dashboard.state";
 import useAuthStore from "../states/user-auth.state";
 
 import useDashboardFetch from "../fetchs/dashboard.fetch";
-import {
-  FollowAuthorsPropsType,
-  GenerateToLoadStructureType,
-} from "../commons/types.common";
-import LoadOptions from "../components/load-options.components";
+import { GenerateToLoadStructureType } from "../commons/types.common";
 
 const AuthorManagementPage = () => {
   const inpageNavOptions = ["Following", "Followers"];
@@ -25,11 +18,11 @@ const AuthorManagementPage = () => {
   const { authUser } = useAuthStore();
   const {
     authorQuery,
-    followingAuthor,
-    followersAuthor,
+    followingAuthorByLimit,
+    followersAuthorByLimit,
     setAuthorQuery,
-    setFollowingAuthor,
-    setFollowersAuthor,
+    setFollowingAuthorByLimit,
+    setFollowersAuthorByLimit,
   } = useDashboardStore();
 
   const { GetFollowAuthors, ClearAllFollowAuthors } = useDashboardFetch();
@@ -39,8 +32,8 @@ const AuthorManagementPage = () => {
     const value = (e.target as HTMLInputElement).value;
 
     if (e.key === "Enter" && value.length > 0 && value !== authorQuery) {
-      setFollowingAuthor(null);
-      setFollowersAuthor(null);
+      setFollowingAuthorByLimit(null);
+      setFollowersAuthorByLimit(null);
 
       setAuthorQuery(value);
     }
@@ -53,8 +46,8 @@ const AuthorManagementPage = () => {
     const value = e.target.value;
 
     if (authorQuery.length > 0 && value.length === 0) {
-      setFollowingAuthor(null);
-      setFollowersAuthor(null);
+      setFollowingAuthorByLimit(null);
+      setFollowersAuthorByLimit(null);
 
       setAuthorQuery(value);
     }
@@ -75,6 +68,7 @@ const AuthorManagementPage = () => {
       authorUsername: authUser?.username,
       query: authorQuery,
       fetchFor: "following",
+      sortByUpdated: true,
     });
 
     GetFollowAuthors({
@@ -203,80 +197,24 @@ const AuthorManagementPage = () => {
         "
       >
         {/* Following */}
-        <div>
-          {followingAuthor === null ? (
-            <Loader />
-          ) : "results" in followingAuthor &&
-            followingAuthor.results?.length ? (
-            <>
-              {followingAuthor.results.map((author, i) => (
-                <AnimationWrapper
-                  key={`following-${i}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                >
-                  <ManageFollowAuthorCard
-                    index={i}
-                    state="following"
-                    data={author as FollowAuthorsPropsType}
-                  />
-                </AnimationWrapper>
-              ))}
-            </>
-          ) : (
-            <NoDataMessage message="No following" />
-          )}
-        </div>
+        <ManageFollowAuthorCardList
+          data={followingAuthorByLimit as GenerateToLoadStructureType}
+          for_fetch="following"
+          for_page={true}
+          query={authorQuery}
+          btnStyle="max-md:rounded-md"
+          sortByUpdated={true}
+        />
 
         {/* Followers */}
-        <div>
-          {followersAuthor === null ? (
-            <Loader />
-          ) : "results" in followersAuthor &&
-            followersAuthor.results?.length ? (
-            <>
-              {followersAuthor.results.map((author, i) => (
-                <AnimationWrapper
-                  key={`followers-${i}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                >
-                  <ManageFollowAuthorCard
-                    index={i}
-                    state="followers"
-                    data={author as FollowAuthorsPropsType}
-                  />
-                </AnimationWrapper>
-              ))}
-            </>
-          ) : (
-            <NoDataMessage message="No followers" />
-          )}
-        </div>
+        <ManageFollowAuthorCardList
+          data={followersAuthorByLimit as GenerateToLoadStructureType}
+          for_fetch="followers"
+          for_page={true}
+          query={authorQuery}
+          btnStyle="max-md:rounded-md"
+        />
       </InpageNavigation>
-
-      {/* Load Options */}
-      <>
-        {followingAuthor !== null && followersAuthor !== null ? (
-          <LoadOptions
-            id={inpageNavOptions[inPageNavIndex]}
-            data={
-              (inPageNavIndex === 0
-                ? followingAuthor
-                : followersAuthor) as GenerateToLoadStructureType
-            }
-            loadLimit={import.meta.env.VITE_MANAGE_AUTHORS_LIMIT}
-            loadFunction={GetFollowAuthors}
-            query={authorQuery}
-            authorUsername={authUser?.username}
-            fetchFor={"following"}
-          />
-        ) : (
-          ""
-        )}
-      </>
     </div>
   );
 };

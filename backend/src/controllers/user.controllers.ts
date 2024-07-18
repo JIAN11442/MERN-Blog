@@ -129,7 +129,9 @@ export const followAuthor: RequestHandler = async (req, res, next) => {
     }
 
     // 根據提供的 username 找到對應的作者 ID
-    const authorInfo = await UserSchema.findOne({ 'personal_info.username': authorUsername }).select('_id');
+    const authorInfo = await UserSchema.findOne({ 'personal_info.username': authorUsername }).select(
+      'personal_info.fullname personal_info.username personal_info.profile_img _id',
+    );
 
     if (!authorInfo) {
       throw createHttpError(404, 'No user found with this username.');
@@ -199,7 +201,7 @@ export const followAuthor: RequestHandler = async (req, res, next) => {
       throw createHttpError(500, 'Failed to create new notification.');
     }
 
-    res.status(200).json({ message: 'Followed this author successfully.', authorId: authorInfo._id, userId });
+    res.status(200).json({ message: 'Followed this author successfully.', targetAuthor: authorInfo, userId });
   } catch (error) {
     console.log(error);
     next(error);
@@ -262,9 +264,12 @@ export const unfollowAuthor: RequestHandler = async (req, res, next) => {
 
     const parentNotification = await NotificationSchema.findOne(notificationQuery);
 
+    // 如果找得到 parentNotification，代表對方已經追蹤過自己
+    // 那麼我們既然要退追蹤對方，就需要把對方的通知狀態也更新
+    // 這樣對方發給我的通知中的 follow 就還是未追踪狀態
     if (parentNotification) {
       const updateParentNotification = await NotificationSchema.findOneAndUpdate(notificationQuery, {
-        follow: undefined,
+        $unset: { follow: '' },
       });
 
       if (!updateParentNotification) {

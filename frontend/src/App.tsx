@@ -30,6 +30,8 @@ function App() {
   useEffect(() => {
     // 每一次刷新都會重新檢查使用者的登入狀態
     GetAuthUserWithToken();
+
+    // document.body.style.zoom = "95%";
   }, []);
 
   return (

@@ -1,20 +1,17 @@
 import { Link } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 
-import Loader from "./loader.component";
-import AnimationWrapper from "./page-animation.component";
-import ManageFollowAuthorCard from "./manage-follow-authors-cad.component";
-import NoDataMessage from "./blog-nodata.component";
+import ManageFollowAuthorCardList from "./manage-follow-author-card-list.component";
 
 import { FlatIcons } from "../icons/flaticons";
 
 import useProviderStore from "../states/provider.state";
 import useDashboardStore from "../states/dashboard.state";
+import useAuthorProfileStore from "../states/author-profile.state";
 
 import { getFullDay } from "../commons/date.common";
 import type {
   AuthorProfileStructureType,
-  FollowAuthorsPropsType,
   GenerateToLoadStructureType,
 } from "../commons/types.common";
 
@@ -34,7 +31,28 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
   className,
 }) => {
   const { theme } = useProviderStore();
-  const { followingAuthor } = useDashboardStore();
+  const { followState, setFollowState } = useAuthorProfileStore();
+  const {
+    followingAuthorByLimit,
+    setFollowingAuthorByLimit,
+    setAllFollowingAuthor,
+  } = useDashboardStore();
+
+  const showSeeAllButton =
+    followingAuthorByLimit &&
+    "results" in followingAuthorByLimit &&
+    followingAuthorByLimit.results &&
+    followingAuthorByLimit.results.length < followingAuthorByLimit.totalDocs;
+
+  // 呼叫 following tab
+  const handleActiveFollowingTab = () => {
+    if (followState && setFollowState) {
+      setFollowState({ ...followState, active: true, state: "Following" });
+    }
+
+    setFollowingAuthorByLimit(null);
+    setAllFollowingAuthor(null);
+  };
 
   return (
     <div
@@ -42,7 +60,6 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
         `
           max-md:w-[95%] 
           h-full
-          -mb-10
           flex
           flex-col
           justify-between
@@ -64,55 +81,36 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
           {/* Title */}
           <h1 className="text-xl font-medium pb-2">Following</h1>
 
-          {/* Following Content */}
-          <>
-            {followingAuthor === null ? (
-              <Loader />
-            ) : followingAuthor &&
-              "results" in followingAuthor &&
-              followingAuthor.results &&
-              (followingAuthor.results?.length ?? 0) > 0 ? (
-              <div>
-                {/* Following Card */}
-                <>
-                  {followingAuthor.results.map((author, i) => (
-                    <AnimationWrapper
-                      key={i}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: i * 0.1 }}
-                    >
-                      <ManageFollowAuthorCard
-                        index={i}
-                        data={author as FollowAuthorsPropsType}
-                        state="following"
-                        for_profile={true}
-                      />
-                    </AnimationWrapper>
-                  ))}
-                </>
+          {/* Following Card */}
+          <ManageFollowAuthorCardList
+            data={followingAuthorByLimit as GenerateToLoadStructureType}
+            for_fetch="following"
+            for_page={false}
+            for_profile={true}
+          />
 
-                {/* Load Options */}
-                {import.meta.env.VITE_MANAGE_AUTHORS_LIMIT <
-                  followingAuthor.totalDocs && (
-                  <button
-                    className="
-                      flex
-                      py-2
-                      text-[13px]
-                      text-grey-dark/60
-                      hover:text-grey-dark/80
-                      transition
-                    "
-                  >
-                    See all (
-                    {(followingAuthor as GenerateToLoadStructureType).totalDocs}
-                    )
-                  </button>
-                )}
-              </div>
-            ) : (
-              <NoDataMessage message="No following" />
+          {/* See all button */}
+          <>
+            {showSeeAllButton && (
+              <button
+                onClick={handleActiveFollowingTab}
+                className="
+                  flex
+                  pt-2
+                  pb-5
+                  text-[13px]
+                  text-grey-dark/60
+                  hover:text-grey-dark/80
+                  transition
+                "
+              >
+                See all (
+                {
+                  (followingAuthorByLimit as GenerateToLoadStructureType)
+                    .totalDocs
+                }
+                )
+              </button>
             )}
           </>
         </div>
@@ -158,6 +156,7 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
             ${
               for_profile
                 ? `
+                    mt-16
                     border-t
                     border-grey-custom
                   `
@@ -197,7 +196,6 @@ const AuthProfileInfo: React.FC<AuthorProfileInfoProps> = ({
                           key !== "website" ? `fi-brands-${key}` : "fi-rr-globe"
                         }`}
                         className={`
-                          text-xl
                           text-grey-dark
                           opacity-60
                           hover:opacity-100

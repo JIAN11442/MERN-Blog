@@ -20,12 +20,22 @@ interface DashboardProps {
   publishedBlogs: BlogStructureType[] | GenerateToLoadStructureType | null;
   draftBlogs: BlogStructureType[] | GenerateToLoadStructureType | null;
   refreshBlogs: boolean;
+  refreshFollowAuthor: boolean;
   authorQuery: string;
-  followingAuthor:
+
+  followingAuthorByLimit:
     | AuthorProfileStructureType[]
     | GenerateToLoadStructureType
     | null;
-  followersAuthor:
+  followersAuthorByLimit:
+    | AuthorProfileStructureType[]
+    | GenerateToLoadStructureType
+    | null;
+  allFollowingAuthor:
+    | AuthorProfileStructureType[]
+    | GenerateToLoadStructureType
+    | null;
+  allFollowersAuthor:
     | AuthorProfileStructureType[]
     | GenerateToLoadStructureType
     | null;
@@ -67,11 +77,19 @@ interface DashboardProps {
     blogs: BlogStructureType[] | GenerateToLoadStructureType | null
   ) => void;
   setRefreshBlogs: (status: boolean) => void;
+  setRefreshFollowAuthor: (status: boolean) => void;
   setAuthorQuery: (query: string) => void;
-  setFollowingAuthor: (
+
+  setFollowingAuthorByLimit: (
     author: AuthorProfileStructureType[] | GenerateToLoadStructureType | null
   ) => void;
-  setFollowersAuthor: (
+  setFollowersAuthorByLimit: (
+    author: AuthorProfileStructureType[] | GenerateToLoadStructureType | null
+  ) => void;
+  setAllFollowingAuthor: (
+    author: AuthorProfileStructureType[] | GenerateToLoadStructureType | null
+  ) => void;
+  setAllFollowersAuthor: (
     author: AuthorProfileStructureType[] | GenerateToLoadStructureType | null
   ) => void;
 
@@ -116,9 +134,12 @@ const useDashboardStore = create<DashboardProps>((set) => ({
   publishedBlogs: null,
   draftBlogs: null,
   refreshBlogs: false,
+  refreshFollowAuthor: false,
   authorQuery: "",
-  followingAuthor: null,
-  followersAuthor: null,
+  followingAuthorByLimit: null,
+  followersAuthorByLimit: null,
+  allFollowingAuthor: null,
+  allFollowersAuthor: null,
 
   activeRemoveNtfWarningModal: { state: false, index: 0, data: null },
   activeDeleteNtfWarningModal: { state: false, index: 0, data: null },
@@ -143,9 +164,14 @@ const useDashboardStore = create<DashboardProps>((set) => ({
   setPublishedBlogs: (blogs) => set({ publishedBlogs: blogs }),
   setDraftBlogs: (blogs) => set({ draftBlogs: blogs }),
   setRefreshBlogs: (status) => set({ refreshBlogs: status }),
+  setRefreshFollowAuthor: (status) => set({ refreshFollowAuthor: status }),
   setAuthorQuery: (query) => set({ authorQuery: query }),
-  setFollowingAuthor: (author) => set({ followingAuthor: author }),
-  setFollowersAuthor: (author) => set({ followersAuthor: author }),
+  setFollowingAuthorByLimit: (author) =>
+    set({ followingAuthorByLimit: author }),
+  setFollowersAuthorByLimit: (author) =>
+    set({ followersAuthorByLimit: author }),
+  setAllFollowingAuthor: (author) => set({ allFollowingAuthor: author }),
+  setAllFollowersAuthor: (author) => set({ allFollowersAuthor: author }),
 
   setActiveRemoveNtfWarningModal: (active) =>
     set({ activeRemoveNtfWarningModal: active }),

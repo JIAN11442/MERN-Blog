@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
 import type { AuthorStructureType } from "../commons/types.common";
+import useProviderStore from "../states/provider.state";
 
 interface UserCardProps {
   user: AuthorStructureType;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ user }) => {
+const AuthorCard: React.FC<UserCardProps> = ({ user }) => {
   const { username, fullname, profile_img } = user.personal_info;
+
+  const { theme } = useProviderStore();
 
   return (
     <Link
@@ -27,10 +30,16 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
       {/* Fullname && Username */}
       <div>
         <h1 className="font-medium text-xl line-clamp-2">{fullname}</h1>
-        <p className="text-grey-dark">@{username}</p>
+        <p
+          className={`
+            ${theme === "dark" ? "text-grey-dark/50" : "text-grey-dark/60"}
+            `}
+        >
+          @{username}
+        </p>
       </div>
     </Link>
   );
 };
 
-export default UserCard;
+export default AuthorCard;

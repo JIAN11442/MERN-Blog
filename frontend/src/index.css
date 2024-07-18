@@ -38,6 +38,24 @@
     @apply w-full h-full object-cover;
   }
 
+  /* radio 類型的 input (bg-clip-content 相當與 css 的 background-clip: content-box)，
+     即指定背景仅延伸至元素的内容框内 */
+  input[type="radio"] {
+    @apply appearance-none
+      p-[2.5px]
+      border
+      border-grey-dark/30
+      bg-clip-content
+      bg-white-custom/20
+      rounded-full
+      shadow-[0px_0px_2px_1px]
+      shadow-grey-dark/10;
+  }
+
+  input[type="radio"]:checked {
+    @apply bg-purple-custom/50 border-purple-custom;
+  }
+
   body[class="dark"] input,
   .input-box {
     @apply outline-none focus:outline-purple-400/40;

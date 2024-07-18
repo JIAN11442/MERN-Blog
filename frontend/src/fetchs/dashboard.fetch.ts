@@ -30,16 +30,18 @@ const useDashboardFetch = () => {
     activeDeletePblogWarningModal,
     activeDeleteDfblogWarningModal,
     refreshBlogs,
-    followingAuthor,
-    followersAuthor,
+    followingAuthorByLimit,
+    followersAuthorByLimit,
     setNotificationsInfo,
     setPublishedBlogs,
     setDraftBlogs,
     setActiveDeletePblogWarningModal,
     setActiveDeleteDfblogWarningModal,
     setRefreshBlogs,
-    setFollowingAuthor,
-    setFollowersAuthor,
+    setFollowingAuthorByLimit,
+    setFollowersAuthorByLimit,
+    setAllFollowingAuthor,
+    setAllFollowersAuthor,
   } = useDashboardStore();
 
   // 根據用戶 ID 取得通知情況
@@ -279,23 +281,32 @@ const useDashboardFetch = () => {
       });
   };
 
-  // 取得追蹤作者
+  // 取得追蹤作者(可以選擇分頁或全取，以是否提供 page 為准)
   const GetFollowAuthors = async ({
-    page = 1,
+    page = 0,
     authorUsername = "",
     query = "",
     fetchFor = "following",
     state = "initial",
+    sortByUpdated = false,
   }: FetchDashboardPropsType) => {
     const requestUrl = DASHBOARD_SERVER_ROUTE + "/get-follow-authors-info";
 
     await axios
-      .post(requestUrl, { page, authorUsername, query, fetchFor })
+      .post(requestUrl, {
+        page,
+        authorUsername,
+        query,
+        fetchFor,
+        sortByUpdated,
+      })
       .then(async ({ data }) => {
         if (data) {
           const formattedData = (await FormatDataForLoadMoreOrLess({
             prevArr:
-              fetchFor === "following" ? followingAuthor : followersAuthor,
+              fetchFor === "following"
+                ? followingAuthorByLimit
+                : followersAuthorByLimit,
             fetchData: data.result,
             page,
             fetchRoute: "dashboard",
@@ -305,9 +316,13 @@ const useDashboardFetch = () => {
           })) as GenerateToLoadStructureType;
 
           if (fetchFor === "following") {
-            setFollowingAuthor(formattedData);
+            page > 0
+              ? setFollowingAuthorByLimit(formattedData)
+              : setAllFollowingAuthor(formattedData);
           } else {
-            setFollowersAuthor(formattedData);
+            page > 0
+              ? setFollowersAuthorByLimit(formattedData)
+              : setAllFollowersAuthor(formattedData);
           }
         }
       })
@@ -330,8 +345,10 @@ const useDashboardFetch = () => {
           toast.dismiss(loadingToast);
           setToastLoading(false);
 
-          setFollowingAuthor([]);
-          setFollowersAuthor([]);
+          setFollowingAuthorByLimit([]);
+          setFollowersAuthorByLimit([]);
+          setAllFollowingAuthor([]);
+          setAllFollowersAuthor([]);
 
           toast.success(data.message);
         }

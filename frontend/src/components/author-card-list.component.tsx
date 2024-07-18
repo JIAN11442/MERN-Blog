@@ -1,23 +1,27 @@
 import NoDataMessage from "./blog-nodata.component";
 import Loader from "./loader.component";
 import AnimationWrapper from "./page-animation.component";
-import UserCard from "./user-card.component";
-import LoadOptions from "./load-options.components";
+import UserCard from "./author-card.component";
+import LoadOptions from "./load-options.component";
 
 import useHomeBlogStore from "../states/home-blog.state";
+import useUserFetch from "../fetchs/user.fetch";
 
 import type {
   AuthorStructureType,
   GenerateToLoadStructureType,
 } from "../commons/types.common";
-import useUserFetch from "../fetchs/user.fetch";
 
-interface UserCardWrapperProps {
+interface AuthorCardListProps {
   query: string;
+  className?: string;
 }
 
-const UserCardWrapper: React.FC<UserCardWrapperProps> = ({ query }) => {
-  const { queryUsers, loadUsersLimit } = useHomeBlogStore();
+const AuthorCardList: React.FC<AuthorCardListProps> = ({
+  query,
+  className,
+}) => {
+  const { queryUsers } = useHomeBlogStore();
   const { GetRelatedBlogsAuthorByQuery } = useUserFetch();
 
   return (
@@ -41,9 +45,11 @@ const UserCardWrapper: React.FC<UserCardWrapperProps> = ({ query }) => {
           <LoadOptions
             id="queryUsers"
             data={queryUsers as GenerateToLoadStructureType}
-            loadLimit={loadUsersLimit}
-            loadFunction={GetRelatedBlogsAuthorByQuery}
-            query={query}
+            loadLimit={import.meta.env.VITE_USERS_LIMIT}
+            loadFunction={(props) =>
+              GetRelatedBlogsAuthorByQuery({ ...props, query })
+            }
+            className={className}
           />
         </div>
       ) : (
@@ -53,4 +59,4 @@ const UserCardWrapper: React.FC<UserCardWrapperProps> = ({ query }) => {
   );
 };
 
-export default UserCardWrapper;
+export default AuthorCardList;

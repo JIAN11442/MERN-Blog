@@ -7,25 +7,11 @@ import type {
 
 interface LoadMoreBtnProps {
   data: GenerateToLoadStructureType;
-  state?: string;
-  query?: string;
-  authorId?: string;
-  filter?: string;
-  draft?: boolean;
-  authorUsername?: string;
-  fetchFor?: string;
   loadFunction: (props: LoadFunctionPropsType) => void;
 }
 
 const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
   data,
-  query,
-  authorId,
-  filter,
-  draft,
-  authorUsername,
-  fetchFor = "following",
-  state = "loadmore",
   loadFunction: LoadMoreFunction,
 }) => {
   const { inPageNavState: category } = useHomeBlogStore();
@@ -36,14 +22,8 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
         onClick={() =>
           LoadMoreFunction({
             category,
-            query,
-            authorId,
-            filter,
             page: data.page + 1,
-            state,
-            draft,
-            authorUsername,
-            fetchFor,
+            state: "loadmore",
           })
         }
         className="
@@ -59,7 +39,6 @@ const LoadMoreBtn: React.FC<LoadMoreBtnProps> = ({
         "
       >
         {/* <p>· Load more ·</p> */}
-
         <p className="text-nowrap">Load more</p>
       </div>
     );

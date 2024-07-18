@@ -6,34 +6,28 @@ import InpageNavigation, {
   activeButtonRef,
 } from "../components/inpage-navigation.component";
 import AnimationWrapper from "../components/page-animation.component";
-import Loader from "../components/loader.component";
-import BlogPostCard from "../components/blog-card-banner.component";
-import MinimalBlogPostCard from "../components/blog-card-nobanner.component";
-import NoDataMessage from "../components/blog-nodata.component";
-import LoadOptions from "../components/load-options.components";
+import BlogCardList from "../components/blog-card-list.component";
+
+import { FlatIcons } from "../icons/flaticons";
 
 import useNavbarStore from "../states/navbar.state";
 import useHomeBlogStore from "../states/home-blog.state";
 import useProviderStore from "../states/provider.state";
 
-import { FlatIcons } from "../icons/flaticons";
 import useBlogFetch from "../fetchs/blog.fetch";
-import type {
-  AuthorStructureType,
-  BlogStructureType,
-} from "../commons/types.common";
+
+import type { GenerateToLoadStructureType } from "../commons/types.common";
 
 const Homepage = () => {
   const [inpageNavIndex, setInPageNavIndex] = useState(0);
 
-  const { searchBarVisibility } = useNavbarStore();
   const { theme } = useProviderStore();
+  const { searchBarVisibility } = useNavbarStore();
   const {
     latestBlogs,
     trendingBlogs,
     inPageNavState,
     allCategories,
-    loadBlogsLimit,
     setLatestBlogs,
     setInPageNavState,
   } = useHomeBlogStore();
@@ -96,7 +90,7 @@ const Homepage = () => {
     if (!allCategories || !allCategories.length) {
       GetTrendingTags();
     }
-  }, [inPageNavState, latestBlogs, trendingBlogs]);
+  }, [inPageNavState, latestBlogs]);
 
   return (
     <AnimationWrapper
@@ -114,7 +108,7 @@ const Homepage = () => {
           ${searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""}
         `}
       >
-        {/* latest blogs(md-screen) and trending blogs(min-screen) */}
+        {/* latest blogs(md-screen) && trending blogs(min-screen) */}
         <div className="w-full">
           <InpageNavigation
             routes={[inPageNavState, "trending blogs"]}
@@ -124,87 +118,32 @@ const Homepage = () => {
             adaptiveAdjustment={{ initialToFirstTab: true }}
           >
             {/* Latest blogs */}
-            <>
-              {latestBlogs === null ? (
-                // 如果 latestBlogs 為 null，顯示 loader
-                <Loader />
-              ) : "results" in latestBlogs && latestBlogs?.results?.length ? (
-                // 如果 latestBlogs 不為 null 且有長度，則顯示 blog card
-                <div>
-                  {latestBlogs?.results?.map((blog: BlogStructureType, i) => {
-                    const { author } = blog;
-                    const { personal_info } = author as AuthorStructureType;
-
-                    return (
-                      // delay: i * 0.1 可以讓每個 blog card 依次延遲出現
-                      <AnimationWrapper
-                        key={blog.title}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: i * 0.1 }}
-                      >
-                        <BlogPostCard author={personal_info} content={blog} />
-                      </AnimationWrapper>
-                    );
-                  })}
-
-                  {/* Load Operation */}
-                  <LoadOptions
-                    id="latestBlogs"
-                    data={latestBlogs}
-                    loadLimit={loadBlogsLimit}
-                    loadFunction={
-                      inPageNavState === "home"
-                        ? GetLatestBlogs
-                        : GetLatestBlogsByCategory
-                    }
-                  />
-                </div>
-              ) : (
-                // 如果 latestBlogs 不為 null 且沒有值，顯示 NoDataMessage
-                <NoDataMessage message="No blogs published" />
-              )}
-            </>
+            <BlogCardList
+              id="latestBlogs"
+              data={latestBlogs as GenerateToLoadStructureType}
+              noDataMessage={"No blogs published"}
+              loadLimit={import.meta.env.VITE_BLOGS_LIMIT}
+              loadFunction={(props) =>
+                inPageNavState === "home"
+                  ? GetLatestBlogs({ ...props })
+                  : GetLatestBlogsByCategory({ ...props })
+              }
+              className="-mt-4"
+            />
 
             {/* Trending blogs - min screen */}
-            <>
-              {trendingBlogs === null ? (
-                <Loader />
-              ) : "results" in trendingBlogs &&
-                trendingBlogs?.results?.length ? (
-                <div>
-                  {trendingBlogs?.results?.map((blog: BlogStructureType, i) => (
-                    <AnimationWrapper
-                      key={blog.title}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: i * 0.1 }}
-                    >
-                      <MinimalBlogPostCard blog={blog} index={i} />
-                    </AnimationWrapper>
-                  ))}
-
-                  {/* Load Operation */}
-                  <LoadOptions
-                    id="trendingMinScreen"
-                    data={trendingBlogs}
-                    loadLimit={loadBlogsLimit}
-                    loadFunction={GetTrendingBlogs}
-                    className="
-                      pt-4
-                      border-t
-                      border-grey-custom
-                    "
-                  />
-                </div>
-              ) : (
-                <NoDataMessage message="No trending blogs" />
-              )}
-            </>
+            <BlogCardList
+              id="trending-min-screen"
+              data={trendingBlogs as GenerateToLoadStructureType}
+              noDataMessage={"No trending blogs"}
+              for_type="no-banner"
+              loadLimit={import.meta.env.VITE_BLOGS_LIMIT}
+              loadFunction={(props) => GetTrendingBlogs({ ...props })}
+            />
           </InpageNavigation>
         </div>
 
-        {/* tags filters and minimal trending blogs(md-screen) */}
+        {/* tags filters && minimal trending blogs(md-screen) */}
         <div
           className="
             min-w-[40%]
@@ -224,6 +163,7 @@ const Homepage = () => {
               <h1 className="text-xl font-medium mb-8">
                 Stories from all interests
               </h1>
+
               {/* Tags */}
               <div className="flex flex-wrap gap-3">
                 {allCategories !== null &&
@@ -267,43 +207,16 @@ const Homepage = () => {
                 <h1 className="text-xl font-medium">Trending</h1>
                 <FlatIcons name="fi fi-br-arrow-trend-up" />
               </div>
-              {/* Blogs */}
-              <div>
-                {trendingBlogs === null ? (
-                  <Loader />
-                ) : "results" in trendingBlogs &&
-                  trendingBlogs?.results?.length ? (
-                  <div>
-                    {trendingBlogs?.results?.map(
-                      (blog: BlogStructureType, i) => (
-                        <AnimationWrapper
-                          key={blog.title}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.5, delay: i * 0.1 }}
-                        >
-                          <MinimalBlogPostCard blog={blog} index={i} />
-                        </AnimationWrapper>
-                      )
-                    )}
 
-                    {/* Load Operation */}
-                    <LoadOptions
-                      id="trendingMiddleScreen"
-                      data={trendingBlogs}
-                      loadLimit={loadBlogsLimit}
-                      loadFunction={GetTrendingBlogs}
-                      className="
-                        pt-4
-                        border-t
-                        border-grey-custom
-                      "
-                    />
-                  </div>
-                ) : (
-                  <NoDataMessage message="No trending blogs" />
-                )}
-              </div>
+              {/* Blogs */}
+              <BlogCardList
+                id="trending-md-screen"
+                data={trendingBlogs as GenerateToLoadStructureType}
+                noDataMessage={"No trending blogs"}
+                for_type="no-banner"
+                loadLimit={import.meta.env.VITE_BLOGS_LIMIT}
+                loadFunction={(props) => GetTrendingBlogs({ ...props })}
+              />
             </div>
           </div>
         </div>

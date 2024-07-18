@@ -11,9 +11,7 @@ interface HomeBlogProps {
   trendingBlogs: BlogStructureType[] | GenerateToLoadStructureType | null;
   queryBlogs: BlogStructureType[] | GenerateToLoadStructureType | null;
   allCategories: string[] | null;
-  loadBlogsLimit: number;
   queryUsers: PersonalInfoStructureType[] | GenerateToLoadStructureType | null;
-  loadUsersLimit: number;
 
   setInPageNavState: (state: string) => void;
   setLatestBlogs: (
@@ -39,9 +37,7 @@ const useHomeBlogStore = create<HomeBlogProps>((set) => ({
   trendingBlogs: null,
   queryBlogs: null,
   allCategories: [],
-  loadBlogsLimit: import.meta.env.VITE_BLOGS_LIMIT,
   queryUsers: null,
-  loadUsersLimit: import.meta.env.VITE_USERS_LIMIT,
 
   setInPageNavState: (state) => set({ inPageNavState: state }),
   setLatestBlogs: (blogs) => set({ latestBlogs: blogs }),

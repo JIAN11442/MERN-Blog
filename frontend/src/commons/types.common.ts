@@ -100,9 +100,9 @@ export interface LoadFunctionPropsType extends FetchLoadPropsType {
   authorId?: string;
   filter?: string;
   draft?: boolean;
-  query?: string;
   authorUsername?: string;
   fetchFor?: string;
+  sortByUpdated?: boolean;
 }
 
 export interface AuthorProfileStructureType {
@@ -262,6 +262,7 @@ export interface FetchDashboardPropsType {
   index?: number;
   authorUsername?: string;
   fetchFor?: string;
+  sortByUpdated?: boolean;
 }
 
 export interface FetchUserPropsType {
@@ -269,6 +270,7 @@ export interface FetchUserPropsType {
   submitBtn_e?: React.MouseEvent<HTMLButtonElement>;
   notificationIndex?: number;
   followAuthorCardIndex?: number;
+  for_page?: boolean;
 }
 
 export interface FollowAuthorsPropsType {

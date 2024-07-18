@@ -30,9 +30,14 @@ const useUserFetch = () => {
   const { setToastLoading } = useProviderStore();
   const {
     notificationsInfo,
-    followersAuthor,
-    followingAuthor,
-    setFollowingAuthor,
+    followersAuthorByLimit,
+    followingAuthorByLimit,
+    allFollowingAuthor,
+    allFollowersAuthor,
+    refreshFollowAuthor,
+    setFollowingAuthorByLimit,
+    setAllFollowingAuthor,
+    setRefreshFollowAuthor,
   } = useDashboardStore();
 
   // Get related blogs author
@@ -103,6 +108,7 @@ const useUserFetch = () => {
     submitBtn_e,
     notificationIndex,
     followAuthorCardIndex,
+    for_page,
   }: FetchUserPropsType) => {
     const requestUrl = USER_SERVER_ROUTE + "/follow-author";
     const target = submitBtn_e?.currentTarget as HTMLButtonElement;
@@ -137,20 +143,21 @@ const useUserFetch = () => {
             ).follow = data.userId;
           }
 
+          const followersAuthor = (
+            for_page ? followersAuthorByLimit : allFollowersAuthor
+          ) as GenerateToLoadStructureType;
+
           // 如果有提供 followAuthorCardIndex，代表是從追蹤作者卡片進行追蹤
           // 那就需要更新 zustand 中的追蹤作者數據
-          if (
-            followAuthorCardIndex !== undefined &&
-            followersAuthor &&
-            "results" in followersAuthor &&
-            followersAuthor.results
-          ) {
+          if (followAuthorCardIndex !== undefined && followersAuthor.results) {
             (
               followersAuthor.results[
                 followAuthorCardIndex
               ] as FollowAuthorsPropsType
             ).isFollowing = true;
           }
+
+          setRefreshFollowAuthor(!refreshFollowAuthor);
 
           toast.dismiss(toastLoading);
           toast.success(data.message);
@@ -173,35 +180,52 @@ const useUserFetch = () => {
     authorUsername,
     submitBtn_e,
     followAuthorCardIndex,
+    for_page,
   }: FetchUserPropsType) => {
     const requestUrl = USER_SERVER_ROUTE + "/unfollow-author";
     const target = submitBtn_e?.currentTarget as HTMLButtonElement;
+
     // 顯示 Loading
     const toastLoading = toast.loading("Unfollowing...");
     setToastLoading(true);
+
     // 禁用追蹤按鈕
     target.disabled = true;
+
     await axios
       .post(requestUrl, { authorUsername })
       .then(({ data }) => {
         if (data) {
+          // 如果有提供 for_page，那就是有要分頁，所以要更新的是 followingAuthorByLimit
+          // 反之，就是沒有分頁(取全部)，所以要更新的是 allFollowingAuthor
+          const followingAuthor = (
+            for_page ? followingAuthorByLimit : allFollowingAuthor
+          ) as GenerateToLoadStructureType;
+
+          const setFollowingAuthor = for_page
+            ? setFollowingAuthorByLimit
+            : setAllFollowingAuthor;
+
           // 更新 zustand 中用戶的總追蹤數量
           account_info.total_following -= 1;
-          setIsFollowing(false);
-          target.disabled = false;
-          if (
-            followAuthorCardIndex !== undefined &&
-            followingAuthor &&
-            "results" in followingAuthor &&
-            followingAuthor.results
-          ) {
+
+          // 更新 zustand 中的追蹤作者數據
+          if (followAuthorCardIndex !== undefined && followingAuthor.results) {
             followingAuthor.results.splice(followAuthorCardIndex, 1);
             followingAuthor.totalDocs -= 1;
+
             setFollowingAuthor(followingAuthor);
           }
+
+          setRefreshFollowAuthor(!refreshFollowAuthor);
+
+          // 停止 loading 並顯示成功訊息
           toast.dismiss(toastLoading);
           setIsFollowing(false);
           toast.success(data.message);
+
+          // 恢復追蹤按鈕
+          target.disabled = false;
         }
       })
       .catch((error) => {

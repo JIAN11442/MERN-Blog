@@ -201,9 +201,8 @@ const PublishEditor = () => {
               className="
                 relative
                 input-box
-                py-2
-                pl-2
-                pb-4
+                py-4
+                px-4
             "
             >
               <input
@@ -227,7 +226,15 @@ const PublishEditor = () => {
             </div>
 
             {/* Tags Limit */}
-            <p className="mt-1 mb-4 text-grey-dark text-sm text-right">
+            <p
+              className="
+                mt-1 
+                mb-4
+                text-grey-dark
+                text-sm
+                text-right
+               "
+            >
               {tagsLimit - (editorBlog.tags?.length ?? 0)} Tags left
             </p>
           </div>
