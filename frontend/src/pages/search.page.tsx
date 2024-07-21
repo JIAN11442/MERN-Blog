@@ -72,7 +72,6 @@ const SearchPage = () => {
               loadFunction={(props) =>
                 GetLatestBlogsByQuery({ ...props, query })
               }
-              className="-mt-4"
             />
 
             {/* Search result of related Authors */}

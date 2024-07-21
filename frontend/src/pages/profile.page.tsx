@@ -268,7 +268,7 @@ const ProfilePage = () => {
             flex-row-reverse
             items-start
             gap-5
-            min-[1100px]:gap-12
+            min-[1100px]:gap-8
             ${searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""}
           `}
         >
@@ -435,6 +435,7 @@ const ProfilePage = () => {
                     onClick={(e) => handleFollow(e)}
                     className={`
                       btn-light
+                      text-[13px]
                       md:rounded-md
                       animate-bounce
                       shadow-[0px_1px_5px_0px]
@@ -515,7 +516,6 @@ const ProfilePage = () => {
                         authorId: authorProfileInfo?._id,
                       })
                     }
-                    className="-mt-4"
                   />
                 )}
               </>

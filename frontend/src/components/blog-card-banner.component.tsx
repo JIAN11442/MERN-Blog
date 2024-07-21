@@ -1,12 +1,13 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+import { FlatIcons } from "../icons/flaticons";
+import useProviderStore from "../states/provider.state";
 
 import type {
   BlogStructureType,
   PersonalInfoStructureType,
 } from "../commons/types.common";
 import { getTimeAgo } from "../commons/date.common";
-
-import { FlatIcons } from "../icons/flaticons";
 
 interface BlogPostCardProps {
   author: PersonalInfoStructureType;
@@ -21,16 +22,6 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleNavigateToProfile = () => {
-    const timeout = setTimeout(() => {
-      navigate(`/user/${username}`);
-    }, 0);
-
-    return () => {
-      clearInterval(timeout);
-    };
-  };
-
   const { fullname, username, profile_img } = author;
   const {
     publishedAt,
@@ -42,9 +33,24 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
     blog_id: id,
   } = content;
 
+  const { theme } = useProviderStore();
+
+  // 移動到目標作者頁面
+  const handleNavigateToProfile = (e: React.MouseEvent<HTMLSpanElement>) => {
+    // 阻止事件冒泡，即同時觸發父元素的 onClick 事件
+    e.stopPropagation();
+
+    navigate(`/user/${username}`);
+  };
+
+  // 移動到目標文章頁面
+  const handleNavigateToTargetBlog = () => {
+    navigate(`/blog/${id}`);
+  };
+
   return (
-    <Link
-      to={`/blog/${id}`}
+    <div
+      onClick={handleNavigateToTargetBlog}
       className={`
         ${
           position === "vertical"
@@ -62,10 +68,18 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
                 gap-10
               `
         }
+        p-5
+        pl-0
         border-b
         border-grey-custom
-        pb-5
-        mb-4
+        ${
+          theme === "light"
+            ? "hover:bg-grey-custom/40"
+            : "hover:bg-grey-custom/80"
+        }
+        hover:rounded-md
+        hover:pl-5
+        cursor-pointer
       `}
     >
       {/* Left side blog information */}
@@ -92,6 +106,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
         >
           {/* author image */}
           <img
+            onClick={handleNavigateToProfile}
             src={profile_img}
             className="
               w-10
@@ -100,6 +115,8 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
               shadow-[0px_0px_5px_1px]
               shadow-grey-dark/10
               hover:shadow-grey-dark/20
+              hover:opacity-80
+              transition
             "
           />
           {/* author fullname && username*/}
@@ -133,6 +150,9 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
           {/* blog post date */}
           <p
             className="
+              max-md:flex
+              md:hidden
+              xl:flex
               min-w-fit 
               text-grey-dark/60
             "
@@ -177,12 +197,13 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
         >
           {/* Tag */}
           <span
-            className="
+            className={`
               btn-light
               py-1.5 
               px-4
               truncate
-            "
+              ${theme === "dark" && "bg-grey-dark/10"}
+            `}
           >
             {tags && tags[0]}
           </span>
@@ -227,8 +248,9 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
                   overflow-hidden
                 `
               : `
-                  h-[8rem] 
+                  h-[10rem] 
                   aspect-square 
+                  ml-10
                 `
           }
           bg-grey-custom
@@ -237,14 +259,14 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
         <img
           src={banner}
           className="
-            w-full 
+            w-full
             h-full 
             object-cover
             rounded-md
           "
         />
       </div>
-    </Link>
+    </div>
   );
 };
 

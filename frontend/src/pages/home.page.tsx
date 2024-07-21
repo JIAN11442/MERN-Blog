@@ -103,7 +103,7 @@ const Homepage = () => {
         className={`
           flex
           h-cover
-          gap-10
+          gap-8
           justify-center
           ${searchBarVisibility ? "translate-y-[80px] md:translate-y-0" : ""}
         `}
@@ -128,7 +128,6 @@ const Homepage = () => {
                   ? GetLatestBlogs({ ...props })
                   : GetLatestBlogsByCategory({ ...props })
               }
-              className="-mt-4"
             />
 
             {/* Trending blogs - min screen */}
@@ -147,7 +146,7 @@ const Homepage = () => {
         <div
           className="
             min-w-[40%]
-            lg:min-w-[400px]
+            lg:min-w-[450px]
             max-w-min
             border-l
             border-grey-custom
@@ -171,20 +170,27 @@ const Homepage = () => {
                     <button
                       key={i}
                       className={`
-                      text-nowrap
-                      ${
-                        category === inPageNavState
-                          ? theme === "light"
-                            ? `
-                              btn-dark 
-                              text-white-custom
-                            `
-                            : ` btn-dark
-                                bg-[#1DA1F2]
-                                text-white
+                        text-nowrap
+                        ${
+                          category === inPageNavState
+                            ? theme === "light"
+                              ? `
+                                btn-dark
+                                text-white-custom
+                                hover:opacity-90
                               `
-                          : "tag"
-                      }`}
+                              : ` btn-dark
+                                  bg-[#1DA1F2]
+                                  text-white
+                                  hover:opacity-90
+                                `
+                            : `
+                                tag
+                                hover:bg-grey-dark/10
+                              `
+                        }
+                          transition
+                        `}
                       onClick={(e) => loadBlogByCategory(e)}
                     >
                       {category}
@@ -201,7 +207,7 @@ const Homepage = () => {
                   flex
                   gap-x-2
                   items-center
-                  mb-8
+                  mb-2
               "
               >
                 <h1 className="text-xl font-medium">Trending</h1>

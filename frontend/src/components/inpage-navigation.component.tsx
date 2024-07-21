@@ -115,7 +115,7 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
               className="
                 max-md:hidden
                 flex
-                -mt-8
+                -mt-2
                 mx-2
                 items-center
                 text-black-custom
@@ -134,7 +134,7 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
             relative
             flex
             flex-nowrap
-            mb-8
+            mb-2
             border-b
             border-grey-custom
             bg-white-custom

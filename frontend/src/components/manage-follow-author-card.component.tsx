@@ -164,6 +164,7 @@ const ManageFollowAuthorCard: React.FC<ManageFollowAuthorCardProps> = ({
                   : theme === "dark"
                   ? `
                       bg-[#1DA1F2]
+                      animate-bounce
                       transition
                     `
                   : "text-white-custom"

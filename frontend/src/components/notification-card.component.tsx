@@ -187,18 +187,27 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         `}
       >
         {/* Avatar */}
-        <img
-          src={profile_img}
+        <Link
+          to={`/user/${username}`}
           className="
             w-14
             h-14
-            rounded-full
             flex-none
-            object-cover
-            shadow-[0px_0px_5px_1px]
-            shadow-grey-dark/20
+            hover:opacity-80
+            cursor-pointer
+            transition
           "
-        />
+        >
+          <img
+            src={profile_img}
+            className="
+              rounded-full  
+              object-cover 
+              shadow-[0px_0px_5px_1px]
+              shadow-grey-dark/20
+            "
+          />
+        </Link>
         {/* Notification content */}
         <div
           className="
@@ -275,10 +284,11 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               {/* blog title */}
               <Link
                 to={`/blog/${blog_id}`}
-                className="
+                className={`
                   font-semibold
                   hover:underline
-                "
+                  ${theme == "light" ? "text-black-custom" : "text-orange-300"}
+                `}
               >
                 {title}
               </Link>
@@ -295,14 +305,17 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                     that you commented:
                   </span>
                 ) : type === "comment" ? (
-                  <span
-                    className="
-                      font-normal
-                      text-green-600
-                    "
-                  >
-                    : "{replyContent}"
-                  </span>
+                  <>
+                    <span className="font-normal"> : </span>
+                    <span
+                      className="
+                        font-normal
+                        text-green-600
+                      "
+                    >
+                      "{replyContent}"
+                    </span>
+                  </>
                 ) : (
                   ""
                 )}
