@@ -3,13 +3,14 @@ import useDashboardStore from "../states/dashboard.state";
 import useDashboardFetch from "../fetchs/dashboard.fetch";
 
 const NotificationOptionsPanel = () => {
-  const { setIsMarked } = useDashboardStore();
+  const { setIsMarked, setActiveNotificationPanel } = useDashboardStore();
   const { UpdateNotificationSeenStateByUser } = useDashboardFetch();
 
   const handleMarkSeen = (markAsRead: boolean) => {
     UpdateNotificationSeenStateByUser({ seen: markAsRead });
 
     setIsMarked(true);
+    setActiveNotificationPanel(false);
   };
 
   return (

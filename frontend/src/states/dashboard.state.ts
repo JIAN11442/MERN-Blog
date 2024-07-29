@@ -22,6 +22,7 @@ interface DashboardProps {
   refreshBlogs: boolean;
   refreshFollowAuthor: boolean;
   authorQuery: string;
+  activeNotificationPanel:boolean
 
   followingAuthorByLimit:
     | AuthorProfileStructureType[]
@@ -79,6 +80,7 @@ interface DashboardProps {
   setRefreshBlogs: (status: boolean) => void;
   setRefreshFollowAuthor: (status: boolean) => void;
   setAuthorQuery: (query: string) => void;
+  setActiveNotificationPanel:(status:boolean) => void;
 
   setFollowingAuthorByLimit: (
     author: AuthorProfileStructureType[] | GenerateToLoadStructureType | null
@@ -136,6 +138,7 @@ const useDashboardStore = create<DashboardProps>((set) => ({
   refreshBlogs: false,
   refreshFollowAuthor: false,
   authorQuery: "",
+  activeNotificationPanel:false,
   followingAuthorByLimit: null,
   followersAuthorByLimit: null,
   allFollowingAuthor: null,
@@ -166,6 +169,7 @@ const useDashboardStore = create<DashboardProps>((set) => ({
   setRefreshBlogs: (status) => set({ refreshBlogs: status }),
   setRefreshFollowAuthor: (status) => set({ refreshFollowAuthor: status }),
   setAuthorQuery: (query) => set({ authorQuery: query }),
+  setActiveNotificationPanel:(status)=>set({activeNotificationPanel:status}),
   setFollowingAuthorByLimit: (author) =>
     set({ followingAuthorByLimit: author }),
   setFollowersAuthorByLimit: (author) =>
@@ -183,5 +187,6 @@ const useDashboardStore = create<DashboardProps>((set) => ({
   setActiveDeleteDfblogWarningModal: (isDelete) =>
     set({ activeDeleteDfblogWarningModal: isDelete }),
 }));
+
 
 export default useDashboardStore;

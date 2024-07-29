@@ -17,11 +17,11 @@ const NotificationPage = () => {
   const filters = ["all", "like", "comment", "reply", "follow"];
 
   const filterPanelRef = useRef<HTMLDivElement>(null);
+  const notificationPanelRef = useRef<HTMLDivElement>(null);
 
   const [collapse, setCollapse] = useState(false);
   const [activeFilterPanel, setActiveFilterPanel] = useState(false);
   const [windowInnerWidth, setWindowInnerWidth] = useState(window.innerWidth);
-  const [activeNotificationPanel, setActiveNotificationPanel] = useState(false);
 
   const { authUser } = useAuthStore();
   const { notification } = authUser ?? {};
@@ -29,12 +29,14 @@ const NotificationPage = () => {
   const {
     filter,
     notificationsInfo,
+    activeNotificationPanel,
     activeRemoveNtfWarningModal,
     activeDeleteNtfWarningModal,
     isDeleteReply,
     isMarked,
     setFilter,
     setNotificationsInfo,
+    setActiveNotificationPanel,
     setIsDeleteReply,
     setIsMarked,
   } = useDashboardStore();
@@ -65,17 +67,6 @@ const NotificationPage = () => {
   // 決定 notificationPanel 的開關狀態
   const handleActiveNotificationPanel = () => {
     setActiveNotificationPanel(!activeNotificationPanel);
-  };
-
-  // 當 optionsPanel button blur 時，就關閉 optionsPanel
-  const handleOptionsPanelOnBlur = () => {
-    const timeout = setTimeout(() => {
-      setActiveNotificationPanel(false);
-    }, 100);
-
-    return () => {
-      clearTimeout(timeout);
-    };
   };
 
   // 當 filterPanel 是 active 時，
@@ -172,6 +163,28 @@ const NotificationPage = () => {
       setFilter({ ...filter, count: notification.totalCount });
     }
   }, [notification]);
+
+  // 當 optionsPanel button blur 時，就關閉 optionsPanel
+  useEffect(() => {
+    const handleOnBlur = (e: MouseEvent) => {
+      if (
+        activeNotificationPanel &&
+        notificationPanelRef.current &&
+        !notificationPanelRef.current.contains(e.target as Node)
+      ) {
+        setActiveNotificationPanel(false);
+      }
+    };
+
+    const timeout = setTimeout(() => {
+      document.addEventListener("click", handleOnBlur);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener("click", handleOnBlur);
+    };
+  }, [activeNotificationPanel, notificationPanelRef]);
 
   return (
     <div>
@@ -298,7 +311,7 @@ const NotificationPage = () => {
         {/* Other Options */}
         <div className="relative">
           <button
-            onBlur={handleOptionsPanelOnBlur}
+            // onBlur={handleOptionsPanelOnBlur}
             onClick={handleActiveNotificationPanel}
             className="
               mt-1
@@ -309,7 +322,11 @@ const NotificationPage = () => {
             <FlatIcons name="fi fi-rr-menu-dots-vertical" />
           </button>
 
-          {activeNotificationPanel && <NotificationOptionsPanel />}
+          {activeNotificationPanel && (
+            <div ref={notificationPanelRef}>
+              <NotificationOptionsPanel />
+            </div>
+          )}
         </div>
       </div>
 
