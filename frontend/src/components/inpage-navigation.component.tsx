@@ -102,10 +102,11 @@ const InpageNavigation: React.FC<InpageNavigationProps> = ({
   return (
     <>
       <div
-        className="
+        className={`
           flex
           gap-2
-        "
+          ${navigatePrevTab.active && "md:-ml-10"}
+        `}
       >
         {/* 回到前一個 tab */}
         <>

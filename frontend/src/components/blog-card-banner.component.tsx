@@ -69,7 +69,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
               `
         }
         p-5
-        pl-0
+        pl-5
         border-b
         border-grey-custom
         ${
@@ -78,7 +78,6 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
             : "hover:bg-grey-custom/80"
         }
         hover:rounded-md
-        hover:pl-5
         cursor-pointer
       `}
     >

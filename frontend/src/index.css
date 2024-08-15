@@ -56,7 +56,8 @@
     @apply bg-purple-custom/50 border-purple-custom;
   }
 
-  body[class="dark"] input,
+  /* 除了 class 為 “cdx-search-field__input” 的 input 外，theme 為 dark 時都需要設定為這個 css */
+  body[class="dark"] input:not(.cdx-search-field__input),
   .input-box {
     @apply outline-none focus:outline-purple-400/40;
   }
@@ -388,7 +389,7 @@ body[class="dark"] .ce-toolbar__settings-btn {
 
 /* 選項卡 */
 body[class="dark"] .ce-popover-item {
-  @apply flex py-0 pl-2 hover:bg-gray-600/20 transition;
+  @apply pl-2 hover:bg-gray-600/20 transition;
 }
 
 /* 選項列表中的選項 Icon */

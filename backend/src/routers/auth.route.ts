@@ -4,6 +4,7 @@ import { jwtVerify, jwtAuthentication, signin, signup, googleAuth } from '../con
 
 const authRoute = express.Router();
 
+// prefix: /auth
 authRoute.get('/authentication', jwtVerify, jwtAuthentication);
 authRoute.post('/signup', signup);
 authRoute.post('/signin', signin);

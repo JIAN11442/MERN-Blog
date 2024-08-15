@@ -40,10 +40,11 @@ function App() {
         <>
           <Route path="editor" element={<BlogEditorPage />} />
           <Route path="editor/:blogId" element={<BlogEditorPage />} />
+
           <Route path="/" element={<Navbar />}>
-            {/* index 為 true 的路由 route 將預設為父路由下的子路由，建議只指定一個*/}
             <Route index element={<Homepage />} />
 
+            {/* Dashboard */}
             <Route path="dashboard" element={<SideNavbar />}>
               <Route path="notifications" element={<NotificationPage />} />
               <Route path="blogs" element={<BlogManagementPage />} />
@@ -56,6 +57,7 @@ function App() {
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
+            {/* Auth route */}
             <Route path="signin" element={<UserAuthPage type="sign-in" />} />
             <Route path="signup" element={<UserAuthPage type="sign-up" />} />
             <Route path="search/:query" element={<SearchPage />} />

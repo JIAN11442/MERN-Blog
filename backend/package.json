@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon src/server.ts",
+    "dev": "ts-node-dev src/server.ts",
+    "node": "nodemon src/server.ts",
     "lint": "eslint --ext .ts src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -32,7 +33,7 @@
     "nodemon": "^3.0.2",
     "prettier": "^3.1.1",
     "prettier-eslint-cli": "^8.0.1",
-    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
@@ -48,6 +49,7 @@
     "firebase-admin": "^11.10.1",
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
+    "log-box": "^0.4.3",
     "mongoose": "^8.0.3",
     "morgan": "^1.10.0",
     "nanoid": "^3.3.6",

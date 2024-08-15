@@ -29,9 +29,7 @@ admin.initializeApp({ credential: admin.credential.cert(serviceAccount as admin.
 const app = express();
 
 app.use(morgan('dev'));
-
 app.use(express.json());
-
 app.use(cors({ origin: true, credentials: true }));
 
 // Session Configuration

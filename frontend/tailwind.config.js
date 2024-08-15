@@ -68,6 +68,9 @@ export default {
           yellow: {
             mark: "#FFD700",
           },
+          blue: {
+            custom: "#62b3ed",
+          },
         },
         dark: {
           white: {
@@ -87,6 +90,9 @@ export default {
           },
           purple: {
             custom: "#c084fc",
+          },
+          blue: {
+            custom: "#62b3ed",
           },
         },
       },

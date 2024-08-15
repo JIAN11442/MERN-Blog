@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 
-import googleIcon from '../imgs/google.png';
+import googleIcon from "../imgs/google.png";
 
-import InputBox from '../components/input-box.component';
+import InputBox from "../components/input-box.component";
 
-import useAuthStore from '../states/user-auth.state';
-import useAuthFetch from '../fetchs/auth.fetch';
+import useAuthStore from "../states/user-auth.state";
+import useAuthFetch from "../fetchs/auth.fetch";
 
-import AnimationWrapper from '../components/page-animation.component';
+import AnimationWrapper from "../components/page-animation.component";
 
 interface UserAuthFormProps {
   type: string;
@@ -16,9 +16,9 @@ interface UserAuthFormProps {
 
 const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
   const [formData, setFormData] = useState({
-    fullname: '',
-    email: '',
-    password: '',
+    fullname: "",
+    email: "",
+    password: "",
   });
 
   const { authUser } = useAuthStore();
@@ -69,10 +69,10 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
               font-semibold
               capitalize
               text-center
-              mb-24
+              py-5
             "
           >
-            {type === 'sign-in' ? 'Welcome back' : 'Join us today'}
+            {type === "sign-in" ? "Welcome back" : "Join us today"}
           </h1>
 
           {/* Username InputBox */}
@@ -83,7 +83,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
             placeholder="Fullname"
             onChange={(e) => handleInput(e)}
             icon="fi fi-rr-user"
-            className={`${type !== 'sign-in' ? 'flex' : 'hidden'}`}
+            className={`${type !== "sign-in" ? "flex" : "hidden"}`}
           />
 
           {/* Email InputBox */}
@@ -112,10 +112,10 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
             className="
               btn-dark
               center
-              mt-14
+              mt-10
             "
           >
-            {type.replace('-', ' ')}
+            {type.replace("-", " ")}
           </button>
 
           {/* Separate Line */}
@@ -134,7 +134,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
             "
           >
             <hr className="w-1/2 border-black-custom" />
-            <p>or</p>
+            <p className="text-black-custom">or</p>
             <hr className="w-1/2 border-black-custom" />
           </div>
 
@@ -157,12 +157,11 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
 
           {/* Navigation */}
           <div>
-            {type === 'sign-in' ? (
+            {type === "sign-in" ? (
               <p
                 className="
                   mt-10
-                  text-lg
-                  text-grey-dark
+                  text-grey-dark/50
                   text-center
                 "
               >
@@ -171,8 +170,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
                   to="/signup"
                   className="
                     underline
-                    text-grey-dark
-                    text-lg
+                    text-blue-custom
                     ml-2
                   "
                 >
@@ -183,8 +181,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
               <p
                 className="
                   mt-10
-                  text-lg
-                  text-grey-dark
+                  text-grey-dark/50
                   text-center
                 "
               >
@@ -193,8 +190,7 @@ const UserAuthPage: React.FC<UserAuthFormProps> = ({ type }) => {
                   to="/signin"
                   className="
                     underline
-                    text-grey-dark
-                    text-lg
+                    text-blue-custom
                     ml-2
                   "
                 >
